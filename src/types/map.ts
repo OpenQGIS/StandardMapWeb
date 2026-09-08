@@ -52,3 +52,9 @@ export interface ViewportState {
   x: number;
   y: number;
 }
+
+/** Normalized horizontal window [0..1] of the view container that is actually visible */
+export interface TileClipWindow {
+  minX: number;
+  maxX: number;
+}

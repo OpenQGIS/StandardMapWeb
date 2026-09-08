@@ -1,5 +1,5 @@
 import React from 'react';
-import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
+import type { MapLayer, MapOrientation, ViewportState, TileClipWindow } from '../types/map';
 import { TileMapLayer } from './TileMapLayer';
 import { LottieLoader } from './LottieLoader';
 
@@ -11,6 +11,7 @@ interface MapSvgProps {
   onLoadingChange?: (isLoading: boolean) => void;
   onBaseLoaded?: () => void;
   hideLoader?: boolean;
+  clipWindow?: TileClipWindow;
 }
 
 export const MapSvg: React.FC<MapSvgProps> = ({
@@ -21,6 +22,7 @@ export const MapSvg: React.FC<MapSvgProps> = ({
   onLoadingChange,
   onBaseLoaded,
   hideLoader = false,
+  clipWindow,
 }) => {
   // If QuadTree tiling is available, render TileMapLayer for instant load and progressive zoom
   if (item.tilePath) {
@@ -35,6 +37,7 @@ export const MapSvg: React.FC<MapSvgProps> = ({
         onLoadingChange={onLoadingChange}
         onBaseLoaded={onBaseLoaded}
         hideLoader={hideLoader}
+        clipWindow={clipWindow}
       />
     );
   }

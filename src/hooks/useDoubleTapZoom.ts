@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import type { ViewportState } from '../types/map';
 
 interface DoubleTapZoomConfig {
-  /** Zoom-in target of a double tap (3 reaches crisp tile levels on retina phones) */
+  /** Zoom-in target of a double tap (4 crosses the L2 threshold on retina phones) */
   targetScale?: number;
   /** Scale the second double tap returns to (1 = fit) */
   minScale?: number;
@@ -46,7 +46,7 @@ export function useDoubleTapZoom(
     let lastTouchTime = 0;
 
     const zoomAt = (clientX: number, clientY: number, target: EventTarget | null) => {
-      const { targetScale = 3, minScale = 1, maxScale = 16, getAnchorEl } = configRef.current;
+      const { targetScale = 4, minScale = 1, maxScale = 16, getAnchorEl } = configRef.current;
       const current = configRef.current.getViewport();
       if (current.scale >= targetScale / 2) {
         setViewport({ scale: minScale, x: 0, y: 0 });

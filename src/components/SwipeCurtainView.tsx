@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
 import { MapSvg } from './MapSvg';
 import { useCardDimensions } from '../hooks/useCardDimensions';
@@ -35,6 +35,16 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
 
   // Screen-locked curtain position in percentage (0% to 100% of viewport width)
   const [curtainPercent, setCurtainPercent] = useState<number>(50);
+
+  // Each layer only needs the tiles on its own side of the curtain
+  const bottomClipWindow = useMemo(
+    () => ({ minX: 0, maxX: curtainPercent / 100 }),
+    [curtainPercent]
+  );
+  const topClipWindow = useMemo(
+    () => ({ minX: curtainPercent / 100, maxX: 1 }),
+    [curtainPercent]
+  );
 
   // Track whether base overview layers (Level 0) are ready
   const [baseLoaded, setBaseLoaded] = useState<boolean>(false);
@@ -423,18 +433,19 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
             aspectRatio,
           }}
         >
-          <MapSvg
-            key={bottomMap.tilePath || bottomMap.imageUrl || bottomMap.id}
-            item={bottomMap}
-            orientation={orientation}
-            viewport={viewport}
-            onLoadingChange={setBottomLoading}
-            onBaseLoaded={() => {
-              if (bottomMap.type === 'base') setBaseLoaded(true);
-              else setReproductionLoaded(true);
-            }}
-            hideLoader
-          />
+            <MapSvg
+              key={bottomMap.tilePath || bottomMap.imageUrl || bottomMap.id}
+              item={bottomMap}
+              orientation={orientation}
+              viewport={viewport}
+              onLoadingChange={setBottomLoading}
+              onBaseLoaded={() => {
+                if (bottomMap.type === 'base') setBaseLoaded(true);
+                else setReproductionLoaded(true);
+              }}
+              hideLoader
+              clipWindow={bottomClipWindow}
+            />
         </div>
       </div>
 
@@ -471,6 +482,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
                 else setReproductionLoaded(true);
               }}
               hideLoader
+              clipWindow={topClipWindow}
             />
           </div>
         </div>

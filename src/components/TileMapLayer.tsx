@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import type { MapOrientation, ViewportState } from '../types/map';
+import type { MapOrientation, ViewportState, TileClipWindow } from '../types/map';
 import { LottieLoader } from './LottieLoader';
 
 interface TileMapLayerProps {
@@ -11,6 +11,8 @@ interface TileMapLayerProps {
   onLoadingChange?: (isLoading: boolean) => void;
   onBaseLoaded?: () => void;
   hideLoader?: boolean;
+  /** Horizontal window of the view actually visible (curtain clipping); omit for full width */
+  clipWindow?: TileClipWindow;
 }
 
 interface TileInfo {
@@ -63,20 +65,32 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   onLoadingChange,
   onBaseLoaded,
   hideLoader = false,
+  clipWindow,
 }) => {
   const scale = viewport?.scale ?? 1;
+  const panX = viewport?.x ?? 0;
+  const panY = viewport?.y ?? 0;
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Untransformed layout width of the map card: offsetWidth ignores the ancestor
-  // zoom transform, unlike getBoundingClientRect used for screen-space culling
-  const [containerWidth, setContainerWidth] = useState(0);
+  // Stable layout geometry: the transform wrapper (view/pane box) and the card.
+  // offsetWidth/offsetHeight ignore ancestor transforms, so re-measuring on
+  // layout changes is enough — during gestures visibility stays pure math.
+  const [layout, setLayout] = useState({ viewW: 0, viewH: 0, cardW: 0, cardH: 0 });
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const update = () => setContainerWidth(el.offsetWidth);
+    const wrapper = el.offsetParent instanceof HTMLElement ? el.offsetParent : el;
+    const update = () =>
+      setLayout({
+        viewW: wrapper.offsetWidth,
+        viewH: wrapper.offsetHeight,
+        cardW: el.offsetWidth,
+        cardH: el.offsetHeight,
+      });
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
+    ro.observe(wrapper);
     return () => ro.disconnect();
   }, []);
 
@@ -95,7 +109,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   // fit view already warrants L1, while a small desktop window stays on L0.
   const currentLevel = useMemo(() => {
     const widths = LEVEL_SOURCE_WIDTH[orientation || 'horizontal'];
-    const neededPx = containerWidth * devicePixelRatio * scale * QUALITY_FACTOR;
+    const neededPx = layout.cardW * devicePixelRatio * scale * QUALITY_FACTOR;
     let target = widths.length - 1;
     for (let level = 0; level < widths.length; level++) {
       if (widths[level] >= neededPx) {
@@ -109,7 +123,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
       if (neededPx > demotionFloor) return previous;
     }
     return target;
-  }, [containerWidth, devicePixelRatio, scale, orientation]);
+  }, [layout.cardW, devicePixelRatio, scale, orientation]);
 
   useEffect(() => {
     previousLevelRef.current = currentLevel;
@@ -148,6 +162,58 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
 
     return tiles;
   }, [currentLevel, tilePath, orientation]);
+
+  // Pure synchronous viewport culling: derive the on-screen row/col ranges from
+  // the gesture state itself. The transform wrapper centers the card, so the
+  // card's rendered rect is viewW/2 - cardW*scale/2 + x (same for Y). Tiles
+  // outside the visible span never mount and never fetch — including the very
+  // first frame after a level change, which kills the full-level fetch storm.
+  const visibleKeys = useMemo(() => {
+    const keys = new Set<string>();
+    if (currentLevel === 0) return keys;
+    const { viewW, viewH, cardW, cardH } = layout;
+    if (!viewW || !viewH || !cardW || !cardH) return keys;
+
+    const effectiveOrientation: MapOrientation = orientation || 'horizontal';
+    const config = GRID_CONFIGS[effectiveOrientation][currentLevel as 1 | 2];
+    if (!config) return keys;
+    const { cols, rows } = config;
+
+    const SCREEN_MARGIN = 120; // px prefetch buffer around the visible box
+    const CLIP_BUFFER = 64; // px slack on each side of a curtain clip window
+
+    const left = viewW / 2 - (cardW * scale) / 2 + panX;
+    const top = viewH / 2 - (cardH * scale) / 2 + panY;
+
+    let x0 = Math.max(0, left - SCREEN_MARGIN);
+    let x1 = Math.min(viewW, left + cardW * scale + SCREEN_MARGIN);
+    if (clipWindow) {
+      x0 = Math.max(x0, clipWindow.minX * viewW - CLIP_BUFFER);
+      x1 = Math.min(x1, clipWindow.maxX * viewW + CLIP_BUFFER);
+    }
+    const y0 = Math.max(0, top - SCREEN_MARGIN);
+    const y1 = Math.min(viewH, top + cardH * scale + SCREEN_MARGIN);
+
+    const spanW = cardW * scale;
+    const spanH = cardH * scale;
+    const fX0 = spanW > 0 ? Math.min(1, Math.max(0, (x0 - left) / spanW)) : 0;
+    const fX1 = spanW > 0 ? Math.min(1, Math.max(0, (x1 - left) / spanW)) : 0;
+    const fY0 = spanH > 0 ? Math.min(1, Math.max(0, (y0 - top) / spanH)) : 0;
+    const fY1 = spanH > 0 ? Math.min(1, Math.max(0, (y1 - top) / spanH)) : 0;
+    if (fX1 <= fX0 || fY1 <= fY0) return keys;
+
+    const cMin = Math.max(0, Math.floor(fX0 * cols + 1e-9));
+    const cMax = Math.min(cols - 1, Math.ceil(fX1 * cols - 1e-9) - 1);
+    const rMin = Math.max(0, Math.floor(fY0 * rows + 1e-9));
+    const rMax = Math.min(rows - 1, Math.ceil(fY1 * rows - 1e-9) - 1);
+
+    for (let r = rMin; r <= rMax; r++) {
+      for (let c = cMin; c <= cMax; c++) {
+        keys.add(`${tilePath}_${currentLevel}_${r}_${c}`);
+      }
+    }
+    return keys;
+  }, [currentLevel, layout, scale, panX, panY, orientation, tilePath, clipWindow]);
 
   const level0Url = `${tilePath}/0/0_0.webp`;
 
@@ -191,55 +257,8 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     }, minDelay);
   };
 
-  const [visibleKeys, setVisibleKeys] = useState<Set<string>>(() => new Set());
-
-  // Viewport Culling: calculate which tiles intersect the visible screen area
-  useEffect(() => {
-    if (currentLevel === 0) {
-      setVisibleKeys(new Set());
-      return;
-    }
-
-    const updateVisibility = () => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) return;
-
-      const screenW = window.innerWidth;
-      const screenH = window.innerHeight;
-      const margin = 120; // 120px prefetch buffer around screen boundaries
-
-      const effectiveOrientation: MapOrientation = orientation || 'horizontal';
-      const config = GRID_CONFIGS[effectiveOrientation][currentLevel as 1 | 2];
-      if (!config) return;
-      const { cols, rows } = config;
-
-      const nextVisible = new Set<string>();
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const tileLeft = rect.left + (c / cols) * rect.width;
-          const tileRight = rect.left + ((c + 1) / cols) * rect.width;
-          const tileTop = rect.top + (r / rows) * rect.height;
-          const tileBottom = rect.top + ((r + 1) / rows) * rect.height;
-
-          if (
-            tileRight >= -margin &&
-            tileLeft <= screenW + margin &&
-            tileBottom >= -margin &&
-            tileTop <= screenH + margin
-          ) {
-            nextVisible.add(`${tilePath}_${currentLevel}_${r}_${c}`);
-          }
-        }
-      }
-
-      setVisibleKeys(nextVisible);
-    };
-
-    updateVisibility();
-    window.addEventListener('resize', updateVisibility);
-    return () => window.removeEventListener('resize', updateVisibility);
-  }, [viewport?.scale, viewport?.x, viewport?.y, currentLevel, orientation, tilePath]);
+  // Viewport culling now happens synchronously in render (visibleKeys useMemo
+  // above); only the stable layout geometry is measured in the layout effect.
 
   // Monitor Level 0 loading
   useEffect(() => {
@@ -271,9 +290,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   const pendingTiles = useMemo(() => {
     if (currentLevel === 0) return [];
     return activeTiles.filter(
-      (tile) =>
-        (visibleKeys.size === 0 || visibleKeys.has(tile.key)) &&
-        !GLOBAL_LOADED_TILES.has(tile.url)
+      (tile) => visibleKeys.has(tile.key) && !GLOBAL_LOADED_TILES.has(tile.url)
     );
   }, [currentLevel, activeTiles, visibleKeys]);
 
@@ -382,7 +399,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
       {/* 2. Higher Level QuadTree Tiles (Rendered directly on top, instant paint as soon as decoded) */}
       {currentLevel > 0 &&
         activeTiles.map((tile) => {
-          const isVisible = visibleKeys.size === 0 || visibleKeys.has(tile.key);
+          const isVisible = visibleKeys.has(tile.key);
           const isLoaded = GLOBAL_LOADED_TILES.has(tile.url);
           if (!isVisible && !isLoaded) return null;
 
