@@ -128,7 +128,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
 
   // Handle wheel zoom strictly centered on mouse cursor with rAF
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     const container = containerRef.current;
     if (!container) return;
 
@@ -254,6 +254,21 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
       window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDraggingHandle, isPanning]);
+ 
+  // Suppress browser native pinch-to-zoom on iOS/Safari with a non-passive listener
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const preventNativePinch = (e: TouchEvent) => {
+      if (e.touches.length >= 2 && e.cancelable) {
+        e.preventDefault();
+      }
+    };
+    el.addEventListener('touchmove', preventNativePinch, { passive: false });
+    return () => {
+      el.removeEventListener('touchmove', preventNativePinch);
+    };
+  }, []);
 
   // Touch handling (Single finger pan/divider, Two finger pinch-to-zoom)
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
@@ -288,9 +303,6 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length >= 2 && e.cancelable) {
-      e.preventDefault();
-    }
     if (isDraggingHandle && e.touches.length === 1) {
       const touch = e.touches[0];
       if (containerRef.current) {

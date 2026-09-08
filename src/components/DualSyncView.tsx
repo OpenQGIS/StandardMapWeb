@@ -91,7 +91,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
 
   // Handle synchronized wheel zoom strictly centered on mouse cursor with rAF
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>, paneEl: HTMLDivElement | null) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     if (!paneEl) return;
 
     const rect = paneEl.getBoundingClientRect();
@@ -170,6 +170,21 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
       window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isPanning]);
+ 
+  // Suppress browser native pinch-to-zoom on iOS/Safari with a non-passive listener
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const preventNativePinch = (e: TouchEvent) => {
+      if (e.touches.length >= 2 && e.cancelable) {
+        e.preventDefault();
+      }
+    };
+    el.addEventListener('touchmove', preventNativePinch, { passive: false });
+    return () => {
+      el.removeEventListener('touchmove', preventNativePinch);
+    };
+  }, []);
 
   // Touch support for synchronized drag & two-finger pinch-to-zoom
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
@@ -199,9 +214,6 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length >= 2 && e.cancelable) {
-      e.preventDefault();
-    }
     if (isPanning && e.touches.length === 1) {
       const touch = e.touches[0];
       const dx = touch.clientX - panStartRef.current.x;

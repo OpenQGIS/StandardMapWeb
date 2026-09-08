@@ -77,7 +77,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
   }, []);
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     const container = containerRef.current;
     if (!container) return;
 

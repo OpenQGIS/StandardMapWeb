@@ -14,10 +14,10 @@ interface DoubleTapZoomConfig {
   getAnchorEl?: (target: HTMLElement) => HTMLElement | null;
 }
 
-const DOUBLE_TAP_INTERVAL_MS = 300;
-const TAP_MAX_MOVE_PX = 10;
-const TAP_MAX_DURATION_MS = 300;
-const DOUBLE_TAP_MAX_DISTANCE_PX = 50;
+const DOUBLE_TAP_INTERVAL_MS = 380;
+const TAP_MAX_MOVE_PX = 24;
+const TAP_MAX_DURATION_MS = 350;
+const DOUBLE_TAP_MAX_DISTANCE_PX = 60;
 
 const INTERACTIVE_SELECTOR =
   'button, a, input, .swipe-divider-handle, .swipe-control-panel, .overlay-control-panel, .overlay-zoom-controls';
@@ -96,7 +96,7 @@ export function useDoubleTapZoom(
         Math.hypot(t.clientX - lastTap.x, t.clientY - lastTap.y) < DOUBLE_TAP_MAX_DISTANCE_PX
       ) {
         lastTap = null;
-        e.preventDefault(); // suppress the synthesized dblclick after a touch double tap
+        if (e.cancelable) e.preventDefault(); // suppress the synthesized dblclick after a touch double tap
         zoomAt(t.clientX, t.clientY, e.target);
       } else {
         lastTap = { x: t.clientX, y: t.clientY, time: Date.now() };
