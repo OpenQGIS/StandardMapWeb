@@ -38,6 +38,19 @@ const GRID_CONFIGS: Record<MapOrientation, Record<1 | 2, GridLevelConfig>> = {
   },
 };
 
+// Full composite pixel width of each tile level (L0 overview, L1 50%, L2 source),
+// matching scripts/generate_square_tiles.py output
+const LEVEL_SOURCE_WIDTH: Record<MapOrientation, readonly [number, number, number]> = {
+  horizontal: [1600, 4956, 9912],
+  vertical: [1357, 3424, 6848],
+};
+
+// Pre-downsampled overviews lose thin-line detail long before pixel counts match,
+// so the chosen level must oversample the rendered viewport by this factor
+const QUALITY_FACTOR = 1.5;
+// Demote a level only clearly below its promote threshold to avoid flicker while zooming
+const DEMOTION_HYSTERESIS = 1.25;
+
 // Persistent session cache of loaded tile URLs
 const GLOBAL_LOADED_TILES = new Set<string>();
 
@@ -52,16 +65,55 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   hideLoader = false,
 }) => {
   const scale = viewport?.scale ?? 1;
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Level determination:
-  // Level 0: scale < 1.15 (Instant overview, 1 tile)
-  // Level 1: 1.15 <= scale < 2.0 (Regional near-square tiles, 4~6 tiles)
-  // Level 2: scale >= 2.0 (Ultra-high-res near-square tiles, 20~24 tiles)
+  // Untransformed layout width of the map card: offsetWidth ignores the ancestor
+  // zoom transform, unlike getBoundingClientRect used for screen-space culling
+  const [containerWidth, setContainerWidth] = useState(0);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => setContainerWidth(el.offsetWidth);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const [devicePixelRatio, setDevicePixelRatio] = useState(() => window.devicePixelRatio || 1);
+  useEffect(() => {
+    const update = () => setDevicePixelRatio(window.devicePixelRatio || 1);
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  const previousLevelRef = useRef(0);
+
+  // Level determination by the device pixels the card actually has to fill:
+  // neededPx = card CSS width * devicePixelRatio * scale * quality headroom,
+  // then the smallest level whose source width covers it. On retina phones the
+  // fit view already warrants L1, while a small desktop window stays on L0.
   const currentLevel = useMemo(() => {
-    if (scale < 1.15) return 0;
-    if (scale < 2.0) return 1;
-    return 2;
-  }, [scale]);
+    const widths = LEVEL_SOURCE_WIDTH[orientation || 'horizontal'];
+    const neededPx = containerWidth * devicePixelRatio * scale * QUALITY_FACTOR;
+    let target = widths.length - 1;
+    for (let level = 0; level < widths.length; level++) {
+      if (widths[level] >= neededPx) {
+        target = level;
+        break;
+      }
+    }
+    const previous = previousLevelRef.current;
+    if (target < previous) {
+      const demotionFloor = previous > 0 ? widths[previous - 1] / DEMOTION_HYSTERESIS : 0;
+      if (neededPx > demotionFloor) return previous;
+    }
+    return target;
+  }, [containerWidth, devicePixelRatio, scale, orientation]);
+
+  useEffect(() => {
+    previousLevelRef.current = currentLevel;
+  }, [currentLevel]);
 
   // Compute tiles for the active level
   const activeTiles = useMemo(() => {
@@ -139,7 +191,6 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     }, minDelay);
   };
 
-  const containerRef = useRef<HTMLDivElement>(null);
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(() => new Set());
 
   // Viewport Culling: calculate which tiles intersect the visible screen area

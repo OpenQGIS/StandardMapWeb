@@ -46,7 +46,6 @@ html, body, #root {
 
 /* High-fidelity rendering for cartographic maps */
 .map-image-layer {
-  image-rendering: -webkit-optimize-contrast;
   image-rendering: high-quality;
 }
 

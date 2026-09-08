@@ -4,6 +4,7 @@ import { MapSvg } from './MapSvg';
 import { useCardDimensions } from '../hooks/useCardDimensions';
 import { ZoomIn, ZoomOut, Maximize2, MoveHorizontal } from 'lucide-react';
 import { LottieLoader } from './LottieLoader';
+import { useDoubleTapZoom } from '../hooks/useDoubleTapZoom';
 
 interface SwipeCurtainViewProps {
   baseMap: MapLayer;
@@ -84,6 +85,11 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
   useEffect(() => {
     viewportRef.current = viewport;
   }, [viewport]);
+
+  // Double tap on the map jumps straight to high-res tiles and back to fit
+  useDoubleTapZoom(containerRef, setViewport, {
+    getViewport: () => viewportRef.current,
+  });
 
   const rafIdRef = useRef<number | null>(null);
   const pendingViewportRef = useRef<ViewportState | null>(null);
@@ -626,7 +632,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
 
       {/* Unified Initial Loading Overlay: completely unobstructed, no clip seam, perfectly centered */}
       {!isCurtainReady && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#0d0e12]/60 backdrop-blur-xs select-none pointer-events-none transition-opacity duration-300">
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#0d0e12]/60 select-none pointer-events-none transition-opacity duration-300">
           <LottieLoader size={60} text="载入高精度地图中..." />
         </div>
       )}

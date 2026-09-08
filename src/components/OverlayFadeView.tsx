@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
 import { MapSvg } from './MapSvg';
 import { useCardDimensions } from '../hooks/useCardDimensions';
+import { useDoubleTapZoom } from '../hooks/useDoubleTapZoom';
 import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { LayerOverlayIcon } from './CustomIcons';
 
@@ -44,6 +45,11 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
   useEffect(() => {
     viewportRef.current = viewport;
   }, [viewport]);
+
+  // Double tap on the stack jumps straight to high-res tiles and back to fit
+  useDoubleTapZoom(containerRef, setViewport, {
+    getViewport: () => viewportRef.current,
+  });
 
   const rafIdRef = useRef<number | null>(null);
   const pendingViewportRef = useRef<ViewportState | null>(null);

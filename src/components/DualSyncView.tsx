@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
 import { MapSvg } from './MapSvg';
 import { useCardDimensions } from '../hooks/useCardDimensions';
+import { useDoubleTapZoom } from '../hooks/useDoubleTapZoom';
 import { ZoomIn, ZoomOut, Maximize2, Crosshair } from 'lucide-react';
 
 interface DualSyncViewProps {
@@ -49,6 +50,13 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
   useEffect(() => {
     viewportRef.current = viewport;
   }, [viewport]);
+
+  // Double tap on either pane jumps straight to high-res tiles and back to fit,
+  // anchored on the tapped pane so the point stays under the finger in both panes
+  useDoubleTapZoom(containerRef, setViewport, {
+    getViewport: () => viewportRef.current,
+    getAnchorEl: (target) => target.closest('.dual-pane'),
+  });
 
   const rafIdRef = useRef<number | null>(null);
   const pendingViewportRef = useRef<ViewportState | null>(null);
@@ -302,7 +310,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMovePane}
         onMouseLeave={handleMouseLeavePane}
-        className="relative w-full h-full bg-[#13151c] rounded-xl border border-zinc-700/60 overflow-hidden cursor-grab active:cursor-grabbing shadow-inner touch-none"
+        className="dual-pane relative w-full h-full bg-[#13151c] rounded-xl border border-zinc-700/60 overflow-hidden cursor-grab active:cursor-grabbing shadow-inner touch-none"
       >
         {/* Background Grid Pattern inside Pane */}
         <div
@@ -404,7 +412,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMovePane}
         onMouseLeave={handleMouseLeavePane}
-        className="relative w-full h-full bg-[#13151c] rounded-xl border border-zinc-700/60 overflow-hidden cursor-grab active:cursor-grabbing shadow-inner touch-none"
+        className="dual-pane relative w-full h-full bg-[#13151c] rounded-xl border border-zinc-700/60 overflow-hidden cursor-grab active:cursor-grabbing shadow-inner touch-none"
       >
         {/* Background Grid Pattern inside Pane */}
         <div
