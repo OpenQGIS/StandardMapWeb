@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
 import { MapSvg } from './MapSvg';
-import { LottieLoader } from './LottieLoader';
 import { useCardDimensions } from '../hooks/useCardDimensions';
 import { ZoomIn, ZoomOut, Maximize2, Crosshair } from 'lucide-react';
 
@@ -321,25 +320,16 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
                   isLeftBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
-                {/* Row 1: Status indicator + Title (truncated at 30vw on mobile) */}
+                {/* Row 1: Status LED dot + Title (truncated at 30vw on mobile) */}
                 <div className="flex items-center gap-1.5 min-w-0 max-w-full">
-                  {leftLoading ? (
-                    <div className="w-2.5 h-2.5 flex items-center justify-center shrink-0">
-                      <LottieLoader
-                        size={15}
-                        colorTheme={isLeftBase ? 'emerald' : 'amber'}
-                      />
-                    </div>
-                  ) : (
-                    <span
-                      className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
-                        isLeftBase
-                          ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
-                          : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
-                      }`}
-                      title="高清切片已就绪"
-                    />
-                  )}
+                  <span
+                    className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
+                      isLeftBase
+                        ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                        : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
+                    } ${leftLoading ? 'animate-pulse scale-110' : ''}`}
+                    title={leftLoading ? '正在加载高清切片...' : '高清切片已就绪'}
+                  />
                   <span
                     className="text-[11px] sm:text-xs font-semibold text-zinc-100 truncate max-w-[30vw] lg:max-w-none"
                     title={leftMap.title}
@@ -436,25 +426,16 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
                   isRightBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
-                {/* Row 1: Status indicator + Title (truncated at 30vw on mobile) */}
+                {/* Row 1: Status LED dot + Title (truncated at 30vw on mobile) */}
                 <div className="flex items-center gap-1.5 min-w-0 max-w-full">
-                  {rightLoading ? (
-                    <div className="w-2.5 h-2.5 flex items-center justify-center shrink-0">
-                      <LottieLoader
-                        size={15}
-                        colorTheme={isRightBase ? 'emerald' : 'amber'}
-                      />
-                    </div>
-                  ) : (
-                    <span
-                      className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
-                        isRightBase
-                          ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
-                          : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
-                      }`}
-                      title="高清切片已就绪"
-                    />
-                  )}
+                  <span
+                    className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
+                      isRightBase
+                        ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                        : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
+                    } ${rightLoading ? 'animate-pulse scale-110' : ''}`}
+                    title={rightLoading ? '正在加载高清切片...' : '高清切片已就绪'}
+                  />
                   <span
                     className="text-[11px] sm:text-xs font-semibold text-zinc-100 truncate max-w-[30vw] lg:max-w-none"
                     title={rightMap.title}
