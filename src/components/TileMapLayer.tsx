@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import type { MapOrientation, ViewportState } from '../types/map';
 import { LottieLoader } from './LottieLoader';
 
@@ -102,6 +102,43 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   const [isLevel0Loaded, setIsLevel0Loaded] = useState(() => GLOBAL_LOADED_TILES.has(level0Url));
   const [isTilesLoading, setIsTilesLoading] = useState(false);
 
+  // Track the timestamp when tile loading initiated to ensure at least 1.5s of smooth breathing
+  const loadStartTimeRef = useRef<number | null>(null);
+  const finishTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Reset loading timer on map change or unmount
+  useEffect(() => {
+    loadStartTimeRef.current = null;
+    if (finishTimeoutRef.current) {
+      clearTimeout(finishTimeoutRef.current);
+      finishTimeoutRef.current = null;
+    }
+  }, [tilePath]);
+
+  useEffect(() => {
+    return () => {
+      if (finishTimeoutRef.current) {
+        clearTimeout(finishTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Helper to gracefully transition breathing light to steady with a 1.5s minimum window
+  const scheduleFinishLoading = (isCancelledCheck: () => boolean) => {
+    if (finishTimeoutRef.current) {
+      clearTimeout(finishTimeoutRef.current);
+    }
+    const elapsed = loadStartTimeRef.current ? Date.now() - loadStartTimeRef.current : 1500;
+    const minDelay = Math.max(0, 1500 - elapsed);
+
+    finishTimeoutRef.current = setTimeout(() => {
+      if (!isCancelledCheck()) {
+        setIsTilesLoading(false);
+        loadStartTimeRef.current = null;
+      }
+    }, minDelay);
+  };
+
   // Monitor Level 0 loading
   useEffect(() => {
     if (GLOBAL_LOADED_TILES.has(level0Url)) {
@@ -126,7 +163,14 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
 
   // Monitor Higher-Level (L1/L2) Tiles loading
   useEffect(() => {
+    let isCancelled = false;
+
     if (currentLevel === 0) {
+      if (finishTimeoutRef.current) {
+        clearTimeout(finishTimeoutRef.current);
+        finishTimeoutRef.current = null;
+      }
+      loadStartTimeRef.current = null;
       setIsTilesLoading(false);
       return;
     }
@@ -134,13 +178,26 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     const pendingTiles = activeTiles.filter((tile) => !GLOBAL_LOADED_TILES.has(tile.url));
 
     if (pendingTiles.length === 0) {
-      setIsTilesLoading(false);
+      // If a loading sequence was underway, complete it smoothly rather than abruptly cutting off
+      if (loadStartTimeRef.current !== null) {
+        scheduleFinishLoading(() => isCancelled);
+      } else {
+        setIsTilesLoading(false);
+      }
       return;
     }
 
+    // New or continuing loading sequence: record start time if not already set
+    if (loadStartTimeRef.current === null) {
+      loadStartTimeRef.current = Date.now();
+    }
+    if (finishTimeoutRef.current) {
+      clearTimeout(finishTimeoutRef.current);
+      finishTimeoutRef.current = null;
+    }
     setIsTilesLoading(true);
+
     let remaining = pendingTiles.length;
-    let isCancelled = false;
 
     pendingTiles.forEach((tile) => {
       const img = new Image();
@@ -148,7 +205,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
         GLOBAL_LOADED_TILES.add(tile.url);
         remaining--;
         if (remaining <= 0 && !isCancelled) {
-          setIsTilesLoading(false);
+          scheduleFinishLoading(() => isCancelled);
         }
       };
       img.onload = done;
@@ -159,12 +216,13 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
       }
     });
 
-    // Safety fallback timeout: max 1200ms after zooming so breathing light never hangs indefinitely
+    // Generous safety fallback timeout (5000ms) to guard against network dropouts without cutting real loads short
     const timeoutId = setTimeout(() => {
       if (!isCancelled) {
         setIsTilesLoading(false);
+        loadStartTimeRef.current = null;
       }
-    }, 1200);
+    }, 5000);
 
     return () => {
       isCancelled = true;
