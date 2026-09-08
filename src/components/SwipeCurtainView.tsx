@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
 import { MapSvg } from './MapSvg';
+import { LottieLoader } from './LottieLoader';
 import { useCardDimensions } from '../hooks/useCardDimensions';
 import { ZoomIn, ZoomOut, Maximize2, MoveHorizontal } from 'lucide-react';
 
@@ -472,16 +473,25 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
                   isBottomBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
-                {/* Row 1: Status LED dot + Title (truncated at 30vw on mobile) */}
+                {/* Row 1: Status indicator + Title (truncated at 30vw on mobile) */}
                 <div className="flex items-center gap-1.5 min-w-0 max-w-full">
-                  <span
-                    className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
-                      isBottomBase
-                        ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
-                        : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
-                    } ${bottomLoading ? 'animate-pulse scale-110' : ''}`}
-                    title={bottomLoading ? '正在加载高清切片...' : '高清切片已就绪'}
-                  />
+                  {bottomLoading ? (
+                    <div className="w-2.5 h-2.5 flex items-center justify-center shrink-0">
+                      <LottieLoader
+                        size={15}
+                        colorTheme={isBottomBase ? 'emerald' : 'amber'}
+                      />
+                    </div>
+                  ) : (
+                    <span
+                      className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
+                        isBottomBase
+                          ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                          : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
+                      }`}
+                      title="高清切片已就绪"
+                    />
+                  )}
                   <span
                     className="text-zinc-100 font-medium text-[11px] sm:text-xs truncate max-w-[30vw] lg:max-w-none"
                     title={bottomMap.title}
@@ -509,16 +519,25 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
                   isTopBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
-                {/* Row 1: Status LED dot + Title (truncated at 30vw on mobile) */}
+                {/* Row 1: Status indicator + Title (truncated at 30vw on mobile) */}
                 <div className="flex items-center gap-1.5 min-w-0 max-w-full">
-                  <span
-                    className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
-                      isTopBase
-                        ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
-                        : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
-                    } ${topLoading ? 'animate-pulse scale-110' : ''}`}
-                    title={topLoading ? '正在加载高清切片...' : '高清切片已就绪'}
-                  />
+                  {topLoading ? (
+                    <div className="w-2.5 h-2.5 flex items-center justify-center shrink-0">
+                      <LottieLoader
+                        size={15}
+                        colorTheme={isTopBase ? 'emerald' : 'amber'}
+                      />
+                    </div>
+                  ) : (
+                    <span
+                      className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
+                        isTopBase
+                          ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                          : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
+                      }`}
+                      title="高清切片已就绪"
+                    />
+                  )}
                   <span
                     className="text-zinc-100 font-medium text-[11px] sm:text-xs truncate max-w-[30vw] lg:max-w-none"
                     title={topMap.title}
