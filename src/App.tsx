@@ -1,0 +1,124 @@
+import { useState, useEffect } from 'react';
+import type { ComparisonMode, MapThemeGroup, ViewportState } from './types/map';
+import { MAP_THEMES } from './data/maps';
+import { Header } from './components/Header';
+import { SwipeCurtainView } from './components/SwipeCurtainView';
+import { DualSyncView } from './components/DualSyncView';
+import { OverlayFadeView } from './components/OverlayFadeView';
+import { GalleryCarousel } from './components/GalleryCarousel';
+import './App.css';
+
+export function App() {
+  const [mode, setMode] = useState<ComparisonMode>('swipe');
+
+  // Active theme group (selected from the 11 themes)
+  const [selectedTheme, setSelectedTheme] = useState<MapThemeGroup>(MAP_THEMES[0]);
+
+  // Order swap state (false: Map A is Left/Bottom, true: Map B is Left/Bottom)
+  const [isSwapped, setIsSwapped] = useState<boolean>(false);
+
+  // Synchronized viewport pan & zoom state
+  const [viewport, setViewport] = useState<ViewportState>({
+    scale: 1,
+    x: 0,
+    y: 0,
+  });
+
+  // Floating gallery drawer open/collapsed state (defaults to false for maximized map workspace!)
+  const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
+
+  // Keyboard shortcut listener: 'G' toggles gallery, 'Esc' closes it
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === 'Escape') {
+        if (isGalleryOpen) setIsGalleryOpen(false);
+      } else if (e.key === 'g' || e.key === 'G') {
+        setIsGalleryOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isGalleryOpen]);
+
+  // Select a whole theme group (all 2 paired maps load together)
+  const handleSelectTheme = (theme: MapThemeGroup) => {
+    setSelectedTheme(theme);
+    setIsSwapped(false);
+    setViewport({ scale: 1, x: 0, y: 0 });
+  };
+
+  // Toggle order of Left vs Right / Bottom vs Top
+  const handleSwapOrder = () => {
+    setIsSwapped((prev) => !prev);
+  };
+
+  const zoomPercent = Math.round(viewport.scale * 100);
+
+  return (
+    <div className="w-screen h-screen flex flex-col bg-[#0c0d10] text-zinc-100 overflow-hidden select-none">
+      {/* 1. Header Toolbar */}
+      <Header
+        mode={mode}
+        onModeChange={setMode}
+        zoomPercent={zoomPercent}
+        onSwapOrder={handleSwapOrder}
+        isSwapped={isSwapped}
+        isGalleryOpen={isGalleryOpen}
+        onToggleGallery={() => setIsGalleryOpen((prev) => !prev)}
+      />
+
+      {/* 2. Main Comparison Viewport (Takes up flexible height) */}
+      <main className="flex-1 relative w-full h-full min-h-0 overflow-hidden">
+        {mode === 'swipe' && (
+          <SwipeCurtainView
+            baseMap={selectedTheme.baseMap}
+            reproductionMap={selectedTheme.reproductionMap}
+            orientation={selectedTheme.orientation}
+            aspectRatio={selectedTheme.aspectRatio}
+            viewport={viewport}
+            setViewport={setViewport}
+            isSwapped={isSwapped}
+          />
+        )}
+
+        {mode === 'sync' && (
+          <DualSyncView
+            baseMap={selectedTheme.baseMap}
+            reproductionMap={selectedTheme.reproductionMap}
+            orientation={selectedTheme.orientation}
+            aspectRatio={selectedTheme.aspectRatio}
+            viewport={viewport}
+            setViewport={setViewport}
+            isSwapped={isSwapped}
+          />
+        )}
+
+        {mode === 'overlay' && (
+          <OverlayFadeView
+            baseMap={selectedTheme.baseMap}
+            reproductionMap={selectedTheme.reproductionMap}
+            orientation={selectedTheme.orientation}
+            aspectRatio={selectedTheme.aspectRatio}
+            viewport={viewport}
+            setViewport={setViewport}
+            isSwapped={isSwapped}
+          />
+        )}
+      </main>
+
+      {/* 3. Floating Collapsible Themes Gallery (22 maps in pairs) */}
+      <GalleryCarousel
+        themes={MAP_THEMES}
+        selectedTheme={selectedTheme}
+        onSelectTheme={handleSelectTheme}
+        isSwapped={isSwapped}
+        isOpen={isGalleryOpen}
+        onToggleOpen={() => setIsGalleryOpen((prev) => !prev)}
+        onClose={() => setIsGalleryOpen(false)}
+      />
+    </div>
+  );
+}
+
+export default App;

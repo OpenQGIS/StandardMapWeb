@@ -1,0 +1,5 @@
+/* App-specific custom utilities */
+.clip-path-curtain {
+  clip-path: inset(0 calc(100% - var(--swipe-pos, 50%)) 0 0);
+}
+

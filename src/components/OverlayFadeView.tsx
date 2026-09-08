@@ -1,0 +1,340 @@
+import React, { useRef, useState, useEffect } from 'react';
+import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
+import { MapSvg } from './MapSvg';
+import { useCardDimensions } from '../hooks/useCardDimensions';
+import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { LayerOverlayIcon } from './CustomIcons';
+
+interface OverlayFadeViewProps {
+  baseMap: MapLayer;
+  reproductionMap: MapLayer;
+  orientation: MapOrientation;
+  aspectRatio: string;
+  viewport: ViewportState;
+  setViewport: React.Dispatch<React.SetStateAction<ViewportState>>;
+  isSwapped: boolean;
+}
+
+export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
+  baseMap,
+  reproductionMap,
+  orientation,
+  aspectRatio,
+  viewport,
+  setViewport,
+  isSwapped,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardDimensions = useCardDimensions(containerRef, aspectRatio, orientation, 0.94);
+  const [opacity, setOpacity] = useState<number>(0.65);
+  const [mixBlendMode, setMixBlendMode] = useState<'normal' | 'multiply' | 'difference'>('normal');
+  const [isPanning, setIsPanning] = useState(false);
+  const panStartRef = useRef<{ x: number; y: number; startX: number; startY: number }>({
+    x: 0,
+    y: 0,
+    startX: 0,
+    startY: 0,
+  });
+
+  const bottomMap = isSwapped ? reproductionMap : baseMap;
+  const topMap = isSwapped ? baseMap : reproductionMap;
+
+  // Ref-based viewport cache to avoid stale state and enable rAF batching
+  const viewportRef = useRef<ViewportState>(viewport);
+  useEffect(() => {
+    viewportRef.current = viewport;
+  }, [viewport]);
+
+  const rafIdRef = useRef<number | null>(null);
+  const pendingViewportRef = useRef<ViewportState | null>(null);
+
+  const scheduleViewportUpdate = (nextViewport: ViewportState) => {
+    pendingViewportRef.current = nextViewport;
+    viewportRef.current = nextViewport;
+    if (rafIdRef.current === null) {
+      rafIdRef.current = requestAnimationFrame(() => {
+        if (pendingViewportRef.current) {
+          setViewport(pendingViewportRef.current);
+          pendingViewportRef.current = null;
+        }
+        rafIdRef.current = null;
+      });
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
+  }, []);
+
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const container = containerRef.current;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const dx = mouseX - centerX;
+    const dy = mouseY - centerY;
+
+    let zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
+    if (Math.abs(e.deltaY) < 50) {
+      zoomFactor = 1 - e.deltaY * 0.003;
+    }
+
+    const current = viewportRef.current;
+    const newScale = Math.min(Math.max(current.scale * zoomFactor, 0.4), 16);
+    const scaleRatio = newScale / current.scale;
+
+    const newX = dx - (dx - current.x) * scaleRatio;
+    const newY = dy - (dy - current.y) * scaleRatio;
+
+    scheduleViewportUpdate({
+      scale: newScale,
+      x: newX,
+      y: newY,
+    });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('.overlay-control-panel') || (e.target as HTMLElement).closest('.overlay-zoom-controls')) return;
+    setIsPanning(true);
+    panStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      startX: viewportRef.current.x,
+      startY: viewportRef.current.y,
+    };
+  };
+
+  const touchStartDistRef = useRef<number | null>(null);
+  const touchStartScaleRef = useRef<number>(1);
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('.overlay-control-panel') || (e.target as HTMLElement).closest('.overlay-zoom-controls')) return;
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      setIsPanning(true);
+      panStartRef.current = {
+        x: touch.clientX,
+        y: touch.clientY,
+        startX: viewportRef.current.x,
+        startY: viewportRef.current.y,
+      };
+      touchStartDistRef.current = null;
+    } else if (e.touches.length === 2) {
+      setIsPanning(false);
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+      touchStartDistRef.current = dist;
+      touchStartScaleRef.current = viewportRef.current.scale;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('.overlay-control-panel') || (e.target as HTMLElement).closest('.overlay-zoom-controls')) return;
+    if (isPanning && e.touches.length === 1) {
+      const touch = e.touches[0];
+      const dx = touch.clientX - panStartRef.current.x;
+      const dy = touch.clientY - panStartRef.current.y;
+      scheduleViewportUpdate({
+        ...viewportRef.current,
+        x: panStartRef.current.startX + dx,
+        y: panStartRef.current.startY + dy,
+      });
+    } else if (e.touches.length === 2 && touchStartDistRef.current) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+      const factor = dist / touchStartDistRef.current;
+      const newScale = Math.min(Math.max(touchStartScaleRef.current * factor, 0.4), 16);
+      scheduleViewportUpdate({
+        ...viewportRef.current,
+        scale: newScale,
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsPanning(false);
+    touchStartDistRef.current = null;
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isPanning) return;
+      const dx = e.clientX - panStartRef.current.x;
+      const dy = e.clientY - panStartRef.current.y;
+      scheduleViewportUpdate({
+        ...viewportRef.current,
+        x: panStartRef.current.startX + dx,
+        y: panStartRef.current.startY + dy,
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsPanning(false);
+    };
+
+    if (isPanning) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isPanning]);
+
+  return (
+    <div
+      ref={containerRef}
+      onWheel={handleWheel}
+      onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
+      className="relative w-full h-full bg-[#0d0e12] overflow-hidden cursor-grab active:cursor-grabbing select-none touch-none"
+    >
+      {/* Layer 1: Bottom Map */}
+      <div
+        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        style={{
+          transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0) scale(${viewport.scale})`,
+          transformOrigin: 'center center',
+        }}
+      >
+        <div
+          className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15"
+          style={{
+            width: cardDimensions.width ? `${cardDimensions.width}px` : 'auto',
+            height: cardDimensions.height ? `${cardDimensions.height}px` : 'auto',
+            maxWidth: '94%',
+            maxHeight: '94%',
+            aspectRatio,
+          }}
+        >
+          <MapSvg item={bottomMap} orientation={orientation} />
+        </div>
+      </div>
+
+      {/* Layer 2: Top Map with variable Opacity & Blend Mode */}
+      <div
+        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        style={{
+          opacity,
+          mixBlendMode,
+          transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0) scale(${viewport.scale})`,
+          transformOrigin: 'center center',
+        }}
+      >
+        <div
+          className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15"
+          style={{
+            width: cardDimensions.width ? `${cardDimensions.width}px` : 'auto',
+            height: cardDimensions.height ? `${cardDimensions.height}px` : 'auto',
+            maxWidth: '94%',
+            maxHeight: '94%',
+            aspectRatio,
+          }}
+        >
+          <MapSvg item={topMap} orientation={orientation} />
+        </div>
+      </div>
+
+      {/* Opacity & Blend Controls Panel */}
+      <div className="absolute top-2.5 sm:top-4 left-1/2 -translate-x-1/2 z-30 overlay-control-panel bg-panelSub/60 hover:bg-panelSub/80 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl border border-white/10 hover:border-zinc-700/80 flex flex-col gap-1.5 sm:gap-2 shadow-2xl w-auto max-w-[calc(100vw-16px)] sm:max-w-[270px] transition-colors overflow-hidden">
+        {/* Row 1: Opacity Slider */}
+        <div className="w-full flex items-center justify-between gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1.5 shrink-0" title="图层透明度">
+            <LayerOverlayIcon className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span className="text-xs font-medium text-zinc-300 shrink-0 hidden min-[360px]:inline">
+              透明度
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0 justify-end">
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={opacity}
+              onChange={(e) => setOpacity(parseFloat(e.target.value))}
+              className="flex-1 min-w-[36px] sm:min-w-[60px] max-w-[130px] accent-amber-400 cursor-pointer h-1.5 bg-zinc-700 rounded-lg"
+              title={`透明度: ${Math.round(opacity * 100)}%`}
+            />
+            <span className="text-xs font-mono text-amber-400 w-8 sm:w-9 text-right font-semibold shrink-0 select-none">
+              {Math.round(opacity * 100)}%
+            </span>
+          </div>
+        </div>
+
+        {/* Row 2: Blend Modes (No redundant label text, directly display the 3 modes) */}
+        <div className="w-full grid grid-cols-3 gap-1 pt-1.5 border-t border-zinc-800/80">
+          {(['normal', 'multiply', 'difference'] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMixBlendMode(m)}
+              className={`py-0.5 sm:py-1 px-1 rounded text-[10px] sm:text-[11px] font-medium text-center transition-colors truncate ${
+                mixBlendMode === m
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
+                  : 'text-zinc-400 hover:text-zinc-200 bg-zinc-800/90 border border-zinc-700/80 hover:bg-zinc-750'
+              }`}
+              title={`混合模式: ${m === 'normal' ? '正常' : m === 'multiply' ? '正片叠底' : '差值比对'}`}
+            >
+              {m === 'normal' ? '正常' : m === 'multiply' ? '正片叠底' : '差值比对'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Floating Zoom Controls */}
+      <div className="absolute bottom-3 right-2.5 min-[500px]:bottom-4 min-[500px]:right-4 z-20 flex flex-col gap-1 min-[500px]:gap-1.5 bg-panelSub/60 hover:bg-panelSub/80 p-1 min-[500px]:p-1.5 rounded-lg border border-white/10 hover:border-zinc-600 shadow-md hover:shadow-xl overlay-zoom-controls transition-all duration-200">
+        <button
+          onClick={() =>
+            setViewport((prev) => {
+              const newScale = Math.min(prev.scale * 1.25, 16);
+              const ratio = newScale / prev.scale;
+              return { scale: newScale, x: prev.x * ratio, y: prev.y * ratio };
+            })
+          }
+          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors"
+          title="放大 (+)"
+        >
+          <ZoomIn className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+        </button>
+        <button
+          onClick={() =>
+            setViewport((prev) => {
+              const newScale = Math.max(prev.scale / 1.25, 0.4);
+              const ratio = newScale / prev.scale;
+              return { scale: newScale, x: prev.x * ratio, y: prev.y * ratio };
+            })
+          }
+          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors"
+          title="缩小 (-)"
+        >
+          <ZoomOut className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+        </button>
+        <div className="h-[1px] bg-white/10 my-0.5" />
+        <button
+          onClick={() => setViewport({ scale: 1, x: 0, y: 0 })}
+          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors"
+          title="自适应居中"
+        >
+          <Maximize2 className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+        </button>
+      </div>
+    </div>
+  );
+};

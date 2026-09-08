@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --gallery-img-h: 76px;
+  --gallery-card-pad: 12px;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --gallery-img-h: 92px;
+    --gallery-card-pad: 16px;
+  }
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #0c0d10;
+  color: #e2e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #121418;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2d35;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3e424c;
+}
+
+/* High-fidelity rendering for cartographic maps */
+.map-image-layer {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+}
+
