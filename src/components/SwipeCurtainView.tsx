@@ -465,23 +465,33 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
         const isTopBase = topMap.type === 'base';
         return (
           <>
-            <div className="absolute top-4 left-4 z-20 pointer-events-none hidden lg:flex items-center gap-2">
+            {/* Bottom/Left Layer Label */}
+            <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-20 pointer-events-none flex items-center gap-2">
               <div
-                className={`bg-panelSub/90 backdrop-blur-md px-3 py-1.5 rounded-lg border text-xs flex items-center gap-2 shadow-lg transition-colors ${
+                className={`bg-panelSub/90 backdrop-blur-md px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-lg border text-xs flex flex-col items-start gap-1 lg:flex-row lg:items-center lg:gap-2 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
                   isBottomBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
+                {/* Row 1: Status LED dot + Title (truncated at 30vw on mobile) */}
+                <div className="flex items-center gap-1.5 min-w-0 max-w-full">
+                  <span
+                    className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
+                      isBottomBase
+                        ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                        : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
+                    } ${bottomLoading ? 'animate-pulse scale-110' : ''}`}
+                    title={bottomLoading ? '正在加载高清切片...' : '高清切片已就绪'}
+                  />
+                  <span
+                    className="text-zinc-100 font-medium text-[11px] sm:text-xs truncate max-w-[30vw] lg:max-w-none"
+                    title={bottomMap.title}
+                  >
+                    {bottomMap.title}
+                  </span>
+                </div>
+                {/* Row 2: Subtitle / approval badge */}
                 <span
-                  className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
-                    isBottomBase
-                      ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
-                      : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
-                  } ${bottomLoading ? 'animate-pulse scale-110' : ''}`}
-                  title={bottomLoading ? '正在加载高清切片...' : '高清切片已就绪'}
-                />
-                <span className="text-zinc-100 font-medium">{bottomMap.title}</span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.5 rounded font-medium border shadow-sm ${
+                  className={`text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded font-medium border shadow-sm shrink-0 ${
                     isBottomBase
                       ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600/70'
                       : 'bg-amber-950/80 text-amber-300 border-amber-600/70'
@@ -492,23 +502,33 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
               </div>
             </div>
 
-            <div className="absolute top-4 right-4 z-20 pointer-events-none hidden lg:flex items-center gap-2">
+            {/* Top/Right Layer Label */}
+            <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 pointer-events-none flex items-center gap-2">
               <div
-                className={`bg-panelSub/90 backdrop-blur-md px-3 py-1.5 rounded-lg border text-xs flex items-center gap-2 shadow-lg transition-colors ${
+                className={`bg-panelSub/90 backdrop-blur-md px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-lg border text-xs flex flex-col items-start gap-1 lg:flex-row lg:items-center lg:gap-2 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
                   isTopBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
+                {/* Row 1: Status LED dot + Title (truncated at 30vw on mobile) */}
+                <div className="flex items-center gap-1.5 min-w-0 max-w-full">
+                  <span
+                    className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
+                      isTopBase
+                        ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                        : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
+                    } ${topLoading ? 'animate-pulse scale-110' : ''}`}
+                    title={topLoading ? '正在加载高清切片...' : '高清切片已就绪'}
+                  />
+                  <span
+                    className="text-zinc-100 font-medium text-[11px] sm:text-xs truncate max-w-[30vw] lg:max-w-none"
+                    title={topMap.title}
+                  >
+                    {topMap.title}
+                  </span>
+                </div>
+                {/* Row 2: Subtitle / approval badge */}
                 <span
-                  className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
-                    isTopBase
-                      ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
-                      : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
-                  } ${topLoading ? 'animate-pulse scale-110' : ''}`}
-                  title={topLoading ? '正在加载高清切片...' : '高清切片已就绪'}
-                />
-                <span className="text-zinc-100 font-medium">{topMap.title}</span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.5 rounded font-medium border shadow-sm ${
+                  className={`text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded font-medium border shadow-sm shrink-0 ${
                     isTopBase
                       ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600/70'
                       : 'bg-amber-950/80 text-amber-300 border-amber-600/70'
