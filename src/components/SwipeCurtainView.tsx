@@ -446,7 +446,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
       {/* Floating Labels indicating layers - Hidden on narrow screens / mobile, pure map title on large screens */}
       <div className="absolute top-4 left-4 z-20 pointer-events-none hidden lg:flex items-center gap-2">
         <div className="bg-panelSub/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-border text-xs flex items-center gap-2 shadow-lg">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="w-2 h-2 rounded-full bg-emerald-400" />
           <span className="text-zinc-100 font-medium">{bottomMap.title}</span>
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
             {bottomMap.approvalCode || bottomMap.categoryLabel}
