@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import type { MapOrientation, ViewportState } from '../types/map';
 
 interface TileMapLayerProps {
@@ -7,6 +7,7 @@ interface TileMapLayerProps {
   orientation?: MapOrientation;
   viewport?: ViewportState;
   className?: string;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
 interface TileInfo {
@@ -40,6 +41,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   orientation = 'horizontal',
   viewport,
   className = '',
+  onLoadingChange,
 }) => {
   const scale = viewport?.scale ?? 1;
 
@@ -89,15 +91,51 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
 
   const level0Url = `${tilePath}/0/0_0.webp`;
 
+  // Track loaded tiles to accurately signal loading status to parent indicators
+  const [isLevel0Loaded, setIsLevel0Loaded] = useState(false);
+  const [loadedKeys, setLoadedKeys] = useState<Set<string>>(() => new Set());
+
+  // Reset when tilePath changes to another map
+  useEffect(() => {
+    setIsLevel0Loaded(false);
+    setLoadedKeys(new Set());
+  }, [tilePath]);
+
+  const handleTileLoad = useCallback((key: string) => {
+    setLoadedKeys((prev) => {
+      if (prev.has(key)) return prev;
+      const next = new Set(prev);
+      next.add(key);
+      return next;
+    });
+  }, []);
+
+  const isLoading = useMemo(() => {
+    if (!isLevel0Loaded) return true;
+    if (currentLevel === 0) return false;
+    return activeTiles.some((tile) => !loadedKeys.has(tile.key));
+  }, [isLevel0Loaded, currentLevel, activeTiles, loadedKeys]);
+
+  useEffect(() => {
+    onLoadingChange?.(isLoading);
+  }, [isLoading, onLoadingChange]);
+
   return (
     <div
       className={`w-full h-full relative overflow-hidden bg-[#1a1d26] select-none ${className}`}
     >
       {/* 1. Level 0 Base Overview Layer (Loaded in ~50ms, permanently visible underneath) */}
       <img
+        ref={(el) => {
+          if (el && el.complete && el.naturalWidth > 0 && !isLevel0Loaded) {
+            setIsLevel0Loaded(true);
+          }
+        }}
         key={level0Url}
         src={level0Url}
         alt={title}
+        onLoad={() => setIsLevel0Loaded(true)}
+        onError={() => setIsLevel0Loaded(true)}
         className="w-full h-full object-fill pointer-events-none select-none block map-image-layer"
         loading="eager"
         decoding="async"
@@ -112,8 +150,15 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
             className="overflow-hidden pointer-events-none select-none"
           >
             <img
+              ref={(el) => {
+                if (el && el.complete && el.naturalWidth > 0) {
+                  handleTileLoad(tile.key);
+                }
+              }}
               src={tile.url}
               alt={`${title} - Tile L${tile.level} (${tile.row},${tile.col})`}
+              onLoad={() => handleTileLoad(tile.key)}
+              onError={() => handleTileLoad(tile.key)}
               className="w-full h-full object-fill pointer-events-none select-none block"
               loading="eager"
               decoding="async"

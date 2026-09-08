@@ -7,9 +7,10 @@ interface MapSvgProps {
   orientation: MapOrientation;
   viewport?: ViewportState;
   className?: string;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
-export const MapSvg: React.FC<MapSvgProps> = ({ item, orientation, viewport, className = '' }) => {
+export const MapSvg: React.FC<MapSvgProps> = ({ item, orientation, viewport, className = '', onLoadingChange }) => {
   // If QuadTree tiling is available, render TileMapLayer for instant load and progressive zoom
   if (item.tilePath) {
     return (
@@ -20,6 +21,7 @@ export const MapSvg: React.FC<MapSvgProps> = ({ item, orientation, viewport, cla
         orientation={orientation}
         viewport={viewport}
         className={className}
+        onLoadingChange={onLoadingChange}
       />
     );
   }
@@ -30,10 +32,12 @@ export const MapSvg: React.FC<MapSvgProps> = ({ item, orientation, viewport, cla
   React.useEffect(() => {
     if (imgRef.current && imgRef.current.complete && imgRef.current.naturalWidth > 0) {
       setIsLoaded(true);
+      onLoadingChange?.(false);
     } else {
       setIsLoaded(false);
+      onLoadingChange?.(true);
     }
-  }, [item.imageUrl]);
+  }, [item.imageUrl, onLoadingChange]);
 
   if (item.imageUrl) {
     return (
@@ -65,6 +69,12 @@ export const MapSvg: React.FC<MapSvgProps> = ({ item, orientation, viewport, cla
   const width = isHorizontal ? 1200 : 900;
   const height = isHorizontal ? 900 : 1200;
   const viewBox = `0 0 ${width} ${height}`;
+
+  React.useEffect(() => {
+    if (!item.tilePath && !item.imageUrl) {
+      onLoadingChange?.(false);
+    }
+  }, [item.tilePath, item.imageUrl, onLoadingChange]);
 
 
   // Theme palettes based on category

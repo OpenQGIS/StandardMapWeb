@@ -40,6 +40,10 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
   const leftMap = isSwapped ? reproductionMap : baseMap;
   const rightMap = isSwapped ? baseMap : reproductionMap;
 
+  // Independent loading states for left and right maps (drives status LED indicators)
+  const [leftLoading, setLeftLoading] = useState<boolean>(true);
+  const [rightLoading, setRightLoading] = useState<boolean>(true);
+
   // Ref-based viewport cache to avoid stale state and enable rAF batching
   const viewportRef = useRef<ViewportState>(viewport);
   useEffect(() => {
@@ -316,6 +320,14 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
                   isLeftBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
+                <span
+                  className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
+                    isLeftBase
+                      ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                      : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
+                  } ${leftLoading ? 'animate-pulse scale-110' : ''}`}
+                  title={leftLoading ? '正在加载高清切片...' : '高清切片已就绪'}
+                />
                 <span className="text-xs font-semibold text-zinc-100">
                   {leftMap.title}
                 </span>
@@ -351,7 +363,13 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
               aspectRatio,
             }}
           >
-            <MapSvg key={leftMap.tilePath || leftMap.imageUrl || leftMap.id} item={leftMap} orientation={orientation} viewport={viewport} />
+            <MapSvg
+              key={leftMap.tilePath || leftMap.imageUrl || leftMap.id}
+              item={leftMap}
+              orientation={orientation}
+              viewport={viewport}
+              onLoadingChange={setLeftLoading}
+            />
           </div>
         </div>
 
@@ -401,6 +419,14 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
                   isRightBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
+                <span
+                  className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
+                    isRightBase
+                      ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                      : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
+                  } ${rightLoading ? 'animate-pulse scale-110' : ''}`}
+                  title={rightLoading ? '正在加载高清切片...' : '高清切片已就绪'}
+                />
                 <span className="text-xs font-semibold text-zinc-100">
                   {rightMap.title}
                 </span>
@@ -436,7 +462,13 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
               aspectRatio,
             }}
           >
-            <MapSvg key={rightMap.tilePath || rightMap.imageUrl || rightMap.id} item={rightMap} orientation={orientation} viewport={viewport} />
+            <MapSvg
+              key={rightMap.tilePath || rightMap.imageUrl || rightMap.id}
+              item={rightMap}
+              orientation={orientation}
+              viewport={viewport}
+              onLoadingChange={setRightLoading}
+            />
           </div>
         </div>
 

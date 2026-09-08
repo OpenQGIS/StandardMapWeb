@@ -34,6 +34,10 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
   // Screen-locked curtain position in percentage (0% to 100% of viewport width)
   const [curtainPercent, setCurtainPercent] = useState<number>(50);
 
+  // Independent loading states for bottom and top maps (drives status LED indicators)
+  const [bottomLoading, setBottomLoading] = useState<boolean>(true);
+  const [topLoading, setTopLoading] = useState<boolean>(true);
+
   const [isDraggingHandle, setIsDraggingHandle] = useState<boolean>(false);
   const [isPanning, setIsPanning] = useState<boolean>(false);
   const panStartRef = useRef<{ x: number; y: number; startX: number; startY: number }>({
@@ -389,7 +393,13 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
             aspectRatio,
           }}
         >
-          <MapSvg key={bottomMap.tilePath || bottomMap.imageUrl || bottomMap.id} item={bottomMap} orientation={orientation} viewport={viewport} />
+          <MapSvg
+            key={bottomMap.tilePath || bottomMap.imageUrl || bottomMap.id}
+            item={bottomMap}
+            orientation={orientation}
+            viewport={viewport}
+            onLoadingChange={setBottomLoading}
+          />
         </div>
       </div>
 
@@ -415,7 +425,13 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
               aspectRatio,
             }}
           >
-            <MapSvg key={topMap.tilePath || topMap.imageUrl || topMap.id} item={topMap} orientation={orientation} viewport={viewport} />
+            <MapSvg
+              key={topMap.tilePath || topMap.imageUrl || topMap.id}
+              item={topMap}
+              orientation={orientation}
+              viewport={viewport}
+              onLoadingChange={setTopLoading}
+            />
           </div>
         </div>
       </div>
@@ -455,6 +471,14 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
                   isBottomBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
+                <span
+                  className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
+                    isBottomBase
+                      ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                      : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
+                  } ${bottomLoading ? 'animate-pulse scale-110' : ''}`}
+                  title={bottomLoading ? '正在加载高清切片...' : '高清切片已就绪'}
+                />
                 <span className="text-zinc-100 font-medium">{bottomMap.title}</span>
                 <span
                   className={`text-[10px] px-1.5 py-0.5 rounded font-medium border shadow-sm ${
@@ -474,6 +498,14 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
                   isTopBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
+                <span
+                  className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
+                    isTopBase
+                      ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                      : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
+                  } ${topLoading ? 'animate-pulse scale-110' : ''}`}
+                  title={topLoading ? '正在加载高清切片...' : '高清切片已就绪'}
+                />
                 <span className="text-zinc-100 font-medium">{topMap.title}</span>
                 <span
                   className={`text-[10px] px-1.5 py-0.5 rounded font-medium border shadow-sm ${
