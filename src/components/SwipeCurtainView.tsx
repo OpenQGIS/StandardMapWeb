@@ -110,7 +110,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
     }
 
     const current = viewportRef.current;
-    const newScale = Math.min(Math.max(current.scale * zoomFactor, 0.4), 16);
+    const newScale = Math.min(Math.max(current.scale * zoomFactor, 0.1), 16);
     const scaleRatio = newScale / current.scale;
 
     const newX = dx - (dx - current.x) * scaleRatio;
@@ -285,7 +285,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
 
       const factor = dist / touchPinchDistRef.current;
       const startScale = touchPinchStartScaleRef.current;
-      const newScale = Math.min(Math.max(startScale * factor, 0.4), 16);
+      const newScale = Math.min(Math.max(startScale * factor, 0.1), 16);
 
       const container = containerRef.current;
       if (container) {
@@ -345,7 +345,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
   };
   const zoomOut = () => {
     setViewport((prev) => {
-      const newScale = Math.max(prev.scale / 1.25, 0.4);
+      const newScale = Math.max(prev.scale / 1.25, 0.1);
       const ratio = newScale / prev.scale;
       return { scale: newScale, x: prev.x * ratio, y: prev.y * ratio };
     });
