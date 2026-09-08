@@ -41,6 +41,23 @@ export function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isGalleryOpen]);
 
+  // Preload other map images in background so switching between horizontal & vertical is instantaneous!
+  useEffect(() => {
+    const preloadTimer = setTimeout(() => {
+      MAP_THEMES.forEach((theme) => {
+        if (theme.baseMap.imageUrl) {
+          const img1 = new Image();
+          img1.src = theme.baseMap.imageUrl;
+        }
+        if (theme.reproductionMap.imageUrl) {
+          const img2 = new Image();
+          img2.src = theme.reproductionMap.imageUrl;
+        }
+      });
+    }, 1000);
+    return () => clearTimeout(preloadTimer);
+  }, []);
+
   // Select a whole theme group (all 2 paired maps load together)
   const handleSelectTheme = (theme: MapThemeGroup) => {
     setSelectedTheme(theme);

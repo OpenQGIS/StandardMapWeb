@@ -258,7 +258,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
               aspectRatio,
             }}
           >
-            <MapSvg item={leftMap} orientation={orientation} />
+            <MapSvg key={leftMap.imageUrl || leftMap.id} item={leftMap} orientation={orientation} />
           </div>
         </div>
 
@@ -326,7 +326,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
               aspectRatio,
             }}
           >
-            <MapSvg item={rightMap} orientation={orientation} />
+            <MapSvg key={rightMap.imageUrl || rightMap.id} item={rightMap} orientation={orientation} />
           </div>
         </div>
 

@@ -8,13 +8,36 @@ interface MapSvgProps {
 }
 
 export const MapSvg: React.FC<MapSvgProps> = ({ item, orientation, className = '' }) => {
+  const [isLoaded, setIsLoaded] = React.useState(false);
+  const imgRef = React.useRef<HTMLImageElement>(null);
+
+  React.useEffect(() => {
+    if (imgRef.current && imgRef.current.complete && imgRef.current.naturalWidth > 0) {
+      setIsLoaded(true);
+    } else {
+      setIsLoaded(false);
+    }
+  }, [item.imageUrl]);
+
   if (item.imageUrl) {
     return (
-      <div className={`w-full h-full relative overflow-hidden bg-[#232733] select-none flex items-center justify-center ${className}`}>
+      <div className={`w-full h-full relative overflow-hidden bg-[#1a1d26] select-none flex items-center justify-center ${className}`}>
+        {/* Loading placeholder spinner so user never sees a stale previous map */}
+        {!isLoaded && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#161822]/90 z-10 text-amber-400 gap-2 select-none pointer-events-none">
+            <div className="w-8 h-8 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
+            <span className="text-[11px] text-zinc-300 font-medium tracking-wide">载入高精度地图中...</span>
+          </div>
+        )}
         <img
+          ref={imgRef}
+          key={item.imageUrl}
           src={item.imageUrl}
           alt={item.title}
-          className="w-full h-full object-contain pointer-events-none select-none block map-image-layer"
+          onLoad={() => setIsLoaded(true)}
+          className={`w-full h-full object-contain pointer-events-none select-none block map-image-layer transition-opacity duration-200 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
           style={{
             imageRendering: '-webkit-optimize-contrast',
           }}

@@ -224,7 +224,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
             aspectRatio,
           }}
         >
-          <MapSvg item={bottomMap} orientation={orientation} />
+          <MapSvg key={bottomMap.imageUrl || bottomMap.id} item={bottomMap} orientation={orientation} />
         </div>
       </div>
 
@@ -248,7 +248,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
             aspectRatio,
           }}
         >
-          <MapSvg item={topMap} orientation={orientation} />
+          <MapSvg key={topMap.imageUrl || topMap.id} item={topMap} orientation={orientation} />
         </div>
       </div>
 
