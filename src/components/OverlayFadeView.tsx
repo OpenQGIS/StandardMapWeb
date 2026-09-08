@@ -114,12 +114,15 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
     };
   };
 
-  const touchStartDistRef = useRef<number | null>(null);
-  const touchStartScaleRef = useRef<number>(1);
+  const touchPinchDistRef = useRef<number | null>(null);
+  const touchPinchCenterRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const touchPinchStartScaleRef = useRef<number>(1);
+  const touchPinchStartViewportRef = useRef<ViewportState>({ scale: 1, x: 0, y: 0 });
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest('.overlay-control-panel') || (e.target as HTMLElement).closest('.overlay-zoom-controls')) return;
     if (e.touches.length === 1) {
+      touchPinchDistRef.current = null;
       const touch = e.touches[0];
       setIsPanning(true);
       panStartRef.current = {
@@ -128,14 +131,18 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
         startX: viewportRef.current.x,
         startY: viewportRef.current.y,
       };
-      touchStartDistRef.current = null;
     } else if (e.touches.length === 2) {
       setIsPanning(false);
       const t1 = e.touches[0];
       const t2 = e.touches[1];
       const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
-      touchStartDistRef.current = dist;
-      touchStartScaleRef.current = viewportRef.current.scale;
+      const midX = (t1.clientX + t2.clientX) / 2;
+      const midY = (t1.clientY + t2.clientY) / 2;
+
+      touchPinchDistRef.current = dist;
+      touchPinchCenterRef.current = { x: midX, y: midY };
+      touchPinchStartScaleRef.current = viewportRef.current.scale;
+      touchPinchStartViewportRef.current = { ...viewportRef.current };
     }
   };
 
@@ -150,22 +157,69 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
         x: panStartRef.current.startX + dx,
         y: panStartRef.current.startY + dy,
       });
-    } else if (e.touches.length === 2 && touchStartDistRef.current) {
+    } else if (e.touches.length === 2) {
       const t1 = e.touches[0];
       const t2 = e.touches[1];
       const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
-      const factor = dist / touchStartDistRef.current;
-      const newScale = Math.min(Math.max(touchStartScaleRef.current * factor, 0.4), 16);
-      scheduleViewportUpdate({
-        ...viewportRef.current,
-        scale: newScale,
-      });
+      const midX = (t1.clientX + t2.clientX) / 2;
+      const midY = (t1.clientY + t2.clientY) / 2;
+
+      if (!touchPinchDistRef.current || touchPinchDistRef.current <= 0) {
+        touchPinchDistRef.current = dist;
+        touchPinchCenterRef.current = { x: midX, y: midY };
+        touchPinchStartScaleRef.current = viewportRef.current.scale;
+        touchPinchStartViewportRef.current = { ...viewportRef.current };
+        return;
+      }
+
+      const factor = dist / touchPinchDistRef.current;
+      const startScale = touchPinchStartScaleRef.current;
+      const newScale = Math.min(Math.max(startScale * factor, 0.4), 16);
+
+      const container = containerRef.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        const mouseX = touchPinchCenterRef.current.x - rect.left;
+        const mouseY = touchPinchCenterRef.current.y - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const dx = mouseX - centerX;
+        const dy = mouseY - centerY;
+
+        const scaleRatio = newScale / startScale;
+        const panDeltaX = midX - touchPinchCenterRef.current.x;
+        const panDeltaY = midY - touchPinchCenterRef.current.y;
+
+        const startVp = touchPinchStartViewportRef.current;
+        const newX = dx - (dx - startVp.x) * scaleRatio + panDeltaX;
+        const newY = dy - (dy - startVp.y) * scaleRatio + panDeltaY;
+
+        scheduleViewportUpdate({
+          scale: newScale,
+          x: newX,
+          y: newY,
+        });
+      }
     }
   };
 
-  const handleTouchEnd = () => {
-    setIsPanning(false);
-    touchStartDistRef.current = null;
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 0) {
+      setIsPanning(false);
+      touchPinchDistRef.current = null;
+    } else if (e.touches.length === 1) {
+      touchPinchDistRef.current = null;
+      const touch = e.touches[0];
+      if (!(e.target as HTMLElement).closest('.overlay-control-panel') && !(e.target as HTMLElement).closest('.overlay-zoom-controls')) {
+        setIsPanning(true);
+        panStartRef.current = {
+          x: touch.clientX,
+          y: touch.clientY,
+          startX: viewportRef.current.x,
+          startY: viewportRef.current.y,
+        };
+      }
+    }
   };
 
   useEffect(() => {

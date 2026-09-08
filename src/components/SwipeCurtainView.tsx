@@ -48,6 +48,12 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
   const dragThresholdPassedRef = useRef<boolean>(false);
   const lastDividerTouchTimeRef = useRef<number>(0);
 
+  // Multi-touch pinch-to-zoom references for mobile
+  const touchPinchDistRef = useRef<number | null>(null);
+  const touchPinchCenterRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const touchPinchStartScaleRef = useRef<number>(1);
+  const touchPinchStartViewportRef = useRef<ViewportState>({ scale: 1, x: 0, y: 0 });
+
   // Ref-based viewport cache to avoid stale state and enable rAF batching
   const viewportRef = useRef<ViewportState>(viewport);
   useEffect(() => {
@@ -208,9 +214,10 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
     };
   }, [isDraggingHandle, isPanning]);
 
-  // Touch handling
+  // Touch handling (Single finger pan/divider, Two finger pinch-to-zoom)
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if (e.touches.length === 1) {
+      touchPinchDistRef.current = null;
       const touch = e.touches[0];
       if ((e.target as HTMLElement).closest('.swipe-divider-handle')) {
         setIsDraggingHandle(true);
@@ -219,15 +226,28 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
         panStartRef.current = {
           x: touch.clientX,
           y: touch.clientY,
-          startX: viewport.x,
-          startY: viewport.y,
+          startX: viewportRef.current.x,
+          startY: viewportRef.current.y,
         };
       }
+    } else if (e.touches.length === 2) {
+      setIsDraggingHandle(false);
+      setIsPanning(false);
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+      const midX = (t1.clientX + t2.clientX) / 2;
+      const midY = (t1.clientY + t2.clientY) / 2;
+
+      touchPinchDistRef.current = dist;
+      touchPinchCenterRef.current = { x: midX, y: midY };
+      touchPinchStartScaleRef.current = viewportRef.current.scale;
+      touchPinchStartViewportRef.current = { ...viewportRef.current };
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (isDraggingHandle && e.touches.length > 0) {
+    if (isDraggingHandle && e.touches.length === 1) {
       const touch = e.touches[0];
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
@@ -235,21 +255,80 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
         const newPercent = Math.max(0, Math.min(100, (relativeX / rect.width) * 100));
         setCurtainPercent(newPercent);
       }
-    } else if (isPanning && e.touches.length > 0) {
+    } else if (isPanning && e.touches.length === 1) {
       const touch = e.touches[0];
       const dx = touch.clientX - panStartRef.current.x;
       const dy = touch.clientY - panStartRef.current.y;
-      setViewport((prev) => ({
-        ...prev,
+      scheduleViewportUpdate({
+        ...viewportRef.current,
         x: panStartRef.current.startX + dx,
         y: panStartRef.current.startY + dy,
-      }));
+      });
+    } else if (e.touches.length === 2) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+      const midX = (t1.clientX + t2.clientX) / 2;
+      const midY = (t1.clientY + t2.clientY) / 2;
+
+      if (!touchPinchDistRef.current || touchPinchDistRef.current <= 0) {
+        touchPinchDistRef.current = dist;
+        touchPinchCenterRef.current = { x: midX, y: midY };
+        touchPinchStartScaleRef.current = viewportRef.current.scale;
+        touchPinchStartViewportRef.current = { ...viewportRef.current };
+        return;
+      }
+
+      const factor = dist / touchPinchDistRef.current;
+      const startScale = touchPinchStartScaleRef.current;
+      const newScale = Math.min(Math.max(startScale * factor, 0.4), 16);
+
+      const container = containerRef.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        const mouseX = touchPinchCenterRef.current.x - rect.left;
+        const mouseY = touchPinchCenterRef.current.y - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const dx = mouseX - centerX;
+        const dy = mouseY - centerY;
+
+        const scaleRatio = newScale / startScale;
+        const panDeltaX = midX - touchPinchCenterRef.current.x;
+        const panDeltaY = midY - touchPinchCenterRef.current.y;
+
+        const startVp = touchPinchStartViewportRef.current;
+        const newX = dx - (dx - startVp.x) * scaleRatio + panDeltaX;
+        const newY = dy - (dy - startVp.y) * scaleRatio + panDeltaY;
+
+        scheduleViewportUpdate({
+          scale: newScale,
+          x: newX,
+          y: newY,
+        });
+      }
     }
   };
 
-  const handleTouchEnd = () => {
-    setIsDraggingHandle(false);
-    setIsPanning(false);
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 0) {
+      setIsDraggingHandle(false);
+      setIsPanning(false);
+      touchPinchDistRef.current = null;
+    } else if (e.touches.length === 1) {
+      // Transition from pinch to single-finger pan
+      touchPinchDistRef.current = null;
+      const touch = e.touches[0];
+      if (!(e.target as HTMLElement).closest('.swipe-control-panel')) {
+        setIsPanning(true);
+        panStartRef.current = {
+          x: touch.clientX,
+          y: touch.clientY,
+          startX: viewportRef.current.x,
+          startY: viewportRef.current.y,
+        };
+      }
+    }
   };
 
   // Quick zoom buttons (centered on viewport)
@@ -279,7 +358,8 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className="relative w-full h-full bg-[#0d0e12] overflow-hidden cursor-grab active:cursor-grabbing select-none"
+      onTouchCancel={handleTouchEnd}
+      className="relative w-full h-full bg-[#0d0e12] overflow-hidden cursor-grab active:cursor-grabbing select-none touch-none"
     >
       {/* Background Canvas Grid Pattern */}
       <div

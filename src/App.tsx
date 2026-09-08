@@ -83,6 +83,7 @@ export function App() {
         isSwapped={isSwapped}
         isGalleryOpen={isGalleryOpen}
         onToggleGallery={() => setIsGalleryOpen((prev) => !prev)}
+        themesCount={MAP_THEMES.length}
       />
 
       {/* 2. Main Comparison Viewport (Takes up flexible height) */}

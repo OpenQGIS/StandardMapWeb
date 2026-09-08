@@ -11,6 +11,7 @@ interface HeaderProps {
   isSwapped: boolean;
   isGalleryOpen: boolean;
   onToggleGallery: () => void;
+  themesCount?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,6 +22,7 @@ export const Header: React.FC<HeaderProps> = ({
   isSwapped,
   isGalleryOpen,
   onToggleGallery,
+  themesCount = 2,
 }) => {
   const [showComplianceModal, setShowComplianceModal] = useState(false);
 
@@ -138,7 +140,7 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <GalleryIcon className="w-3.5 h-3.5 text-amber-400" />
           <span className="hidden lg:inline">地图画廊</span>
-          <span className="text-[10px] font-mono text-zinc-400 bg-surface px-1 rounded border border-border">11</span>
+          <span className="text-[10px] font-mono text-zinc-400 bg-surface px-1 rounded border border-border">{themesCount}</span>
         </button>
       </div>
 
