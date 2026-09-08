@@ -1,6 +1,7 @@
 import React from 'react';
 import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
 import { TileMapLayer } from './TileMapLayer';
+import { LottieLoader } from './LottieLoader';
 
 interface MapSvgProps {
   item: MapLayer;
@@ -44,9 +45,8 @@ export const MapSvg: React.FC<MapSvgProps> = ({ item, orientation, viewport, cla
       <div className={`w-full h-full relative overflow-hidden bg-[#1a1d26] select-none flex items-center justify-center ${className}`}>
         {/* Loading placeholder spinner so user never sees a stale previous map */}
         {!isLoaded && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#161822]/90 z-10 text-amber-400 gap-2 select-none pointer-events-none">
-            <div className="w-8 h-8 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
-            <span className="text-[11px] text-zinc-300 font-medium tracking-wide">载入高精度地图中...</span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#161822]/90 z-10 select-none pointer-events-none">
+            <LottieLoader size={60} text="载入高精度地图中..." />
           </div>
         )}
         <img

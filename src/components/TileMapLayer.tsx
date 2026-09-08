@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import type { MapOrientation, ViewportState } from '../types/map';
+import { LottieLoader } from './LottieLoader';
 
 interface TileMapLayerProps {
   tilePath: string;
@@ -124,6 +125,12 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     <div
       className={`w-full h-full relative overflow-hidden bg-[#1a1d26] select-none ${className}`}
     >
+      {/* Loading placeholder spinner so user sees dynamic feedback while level 0 tiles arrive */}
+      {!isLevel0Loaded && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#161822]/90 z-10 select-none pointer-events-none">
+          <LottieLoader size={60} text="载入高精度地图中..." />
+        </div>
+      )}
       {/* 1. Level 0 Base Overview Layer (Loaded in ~50ms, permanently visible underneath) */}
       <img
         ref={(el) => {
