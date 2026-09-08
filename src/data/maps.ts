@@ -19,7 +19,7 @@ export const MAP_THEMES: MapThemeGroup[] = [
       subtitle: '自然资源部标准底图 · 线划(二)',
       type: 'base',
       scaleText: '1:7 400 000',
-      imageUrl: './maps/中国标准地图_横版/中国地图 1∶740万 (界线版 有邻国 无河流 线划(二).webp',
+      tilePath: './maps/tiles/h-china-base',
       year: '标准规范',
       approvalCode: '标准地图',
       category: 'standard',
@@ -32,7 +32,7 @@ export const MAP_THEMES: MapThemeGroup[] = [
       subtitle: '高清主题复刻制图 · 附小地球视角',
       type: 'reproduction',
       scaleText: '1:7 400 000',
-      imageUrl: './maps/中国标准地图_横版/横版+小地球.webp',
+      tilePath: './maps/tiles/h-china-repro',
       year: '主题复刻',
       approvalCode: '复刻地图',
       category: 'standard',
@@ -57,7 +57,7 @@ export const MAP_THEMES: MapThemeGroup[] = [
       subtitle: '自然资源部标准底图 · 竖版线划(二)',
       type: 'base',
       scaleText: '1:10 000 000',
-      imageUrl: './maps/中国标准地图_竖版/中国地图 1∶1000万 (界线版 有邻国 无河流 线划(二).webp',
+      tilePath: './maps/tiles/v-china-base',
       year: '标准规范',
       approvalCode: '标准地图',
       category: 'standard',
@@ -70,7 +70,7 @@ export const MAP_THEMES: MapThemeGroup[] = [
       subtitle: '高清竖版主题复刻制图 · 附小地球',
       type: 'reproduction',
       scaleText: '1:10 000 000',
-      imageUrl: './maps/中国标准地图_竖版/竖版+小地球.webp',
+      tilePath: './maps/tiles/v-china-repro',
       year: '主题复刻',
       approvalCode: '复刻地图',
       category: 'standard',
@@ -78,11 +78,8 @@ export const MAP_THEMES: MapThemeGroup[] = [
       description: '同等纵横比例的高清竖版复刻图，支持无缝卷帘对比与透明叠置校准。',
     },
   },
-];
 
-// ==================== 预留扩展主题 (七大洲与全球系列，按需引入) ====================
-export const EXTENDED_THEMES: MapThemeGroup[] = [
-  // ==================== 2. 七大洲系列 (7组实图配置) ====================
+  // ==================== 2. 七大洲系列 (7组全量实图) ====================
   {
     id: 'continent-asia',
     title: '亚洲地图 · 1∶2500万 标准规范',

@@ -26,6 +26,7 @@ export interface MapLayer {
   categoryLabel: string;
   description: string;
   imageUrl?: string;
+  tilePath?: string;
 }
 
 

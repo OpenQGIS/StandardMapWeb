@@ -1,13 +1,29 @@
 import React from 'react';
-import type { MapLayer, MapOrientation } from '../types/map';
+import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
+import { TileMapLayer } from './TileMapLayer';
 
 interface MapSvgProps {
   item: MapLayer;
   orientation: MapOrientation;
+  viewport?: ViewportState;
   className?: string;
 }
 
-export const MapSvg: React.FC<MapSvgProps> = ({ item, orientation, className = '' }) => {
+export const MapSvg: React.FC<MapSvgProps> = ({ item, orientation, viewport, className = '' }) => {
+  // If QuadTree tiling is available, render TileMapLayer for instant load and progressive zoom
+  if (item.tilePath) {
+    return (
+      <TileMapLayer
+        key={item.tilePath}
+        tilePath={item.tilePath}
+        title={item.title}
+        orientation={orientation}
+        viewport={viewport}
+        className={className}
+      />
+    );
+  }
+
   const [isLoaded, setIsLoaded] = React.useState(false);
   const imgRef = React.useRef<HTMLImageElement>(null);
 
