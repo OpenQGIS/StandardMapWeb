@@ -420,7 +420,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
         {(() => {
           const isRightBase = rightMap.type === 'base';
           return (
-            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-20 pointer-events-none flex items-center gap-2">
+            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 landscape:left-auto landscape:right-2 md:left-auto md:right-3 z-20 pointer-events-none flex items-center gap-2">
               <div
                 className={`bg-panelSub/90 backdrop-blur-md px-2 py-1.5 sm:px-2.5 sm:py-1 rounded-lg border text-xs flex flex-col items-start gap-1 lg:flex-row lg:items-center lg:gap-2 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
                   isRightBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
