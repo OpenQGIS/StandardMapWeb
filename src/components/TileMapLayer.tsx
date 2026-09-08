@@ -54,12 +54,12 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   const scale = viewport?.scale ?? 1;
 
   // Level determination:
-  // Level 0: scale < 1.35 (Instant overview, 1 tile)
-  // Level 1: 1.35 <= scale < 2.8 (Regional near-square tiles, 4~6 tiles)
-  // Level 2: scale >= 2.8 (Ultra-high-res near-square tiles, 20~24 tiles)
+  // Level 0: scale < 1.15 (Instant overview, 1 tile)
+  // Level 1: 1.15 <= scale < 2.0 (Regional near-square tiles, 4~6 tiles)
+  // Level 2: scale >= 2.0 (Ultra-high-res near-square tiles, 20~24 tiles)
   const currentLevel = useMemo(() => {
-    if (scale < 1.35) return 0;
-    if (scale < 2.8) return 1;
+    if (scale < 1.15) return 0;
+    if (scale < 2.0) return 1;
     return 2;
   }, [scale]);
 

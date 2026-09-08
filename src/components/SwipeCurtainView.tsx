@@ -272,6 +272,9 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length >= 2 && e.cancelable) {
+      e.preventDefault();
+    }
     if (isDraggingHandle && e.touches.length === 1) {
       const touch = e.touches[0];
       if (containerRef.current) {

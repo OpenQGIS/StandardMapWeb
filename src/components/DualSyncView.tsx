@@ -191,6 +191,9 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length >= 2 && e.cancelable) {
+      e.preventDefault();
+    }
     if (isPanning && e.touches.length === 1) {
       const touch = e.touches[0];
       const dx = touch.clientX - panStartRef.current.x;
@@ -286,6 +289,10 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
   return (
     <div
       ref={containerRef}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
       className="relative w-full h-full bg-[#0a0c10] grid grid-cols-1 landscape:grid-cols-2 md:grid-cols-2 gap-2 p-2 overflow-hidden select-none touch-none"
     >
       {/* ================= LEFT PANE ================= */}
@@ -295,10 +302,6 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMovePane}
         onMouseLeave={handleMouseLeavePane}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
         className="relative w-full h-full bg-[#13151c] rounded-xl border border-zinc-700/60 overflow-hidden cursor-grab active:cursor-grabbing shadow-inner touch-none"
       >
         {/* Background Grid Pattern inside Pane */}
@@ -401,10 +404,6 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMovePane}
         onMouseLeave={handleMouseLeavePane}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
         className="relative w-full h-full bg-[#13151c] rounded-xl border border-zinc-700/60 overflow-hidden cursor-grab active:cursor-grabbing shadow-inner touch-none"
       >
         {/* Background Grid Pattern inside Pane */}
