@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import type { MapOrientation, ViewportState } from '../types/map';
 import { LottieLoader } from './LottieLoader';
 
@@ -35,6 +35,9 @@ const GRID_CONFIGS: Record<MapOrientation, Record<1 | 2, GridLevelConfig>> = {
     2: { cols: 4, rows: 5 }, // 20 tiles
   },
 };
+
+// Persistent session cache of loaded tile URLs
+const GLOBAL_LOADED_TILES = new Set<string>();
 
 export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   tilePath,
@@ -92,30 +95,78 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
 
   const level0Url = `${tilePath}/0/0_0.webp`;
 
-  // Track loaded tiles to accurately signal loading status to parent indicators
-  const [isLevel0Loaded, setIsLevel0Loaded] = useState(false);
-  const [loadedKeys, setLoadedKeys] = useState<Set<string>>(() => new Set());
+  const [isLevel0Loaded, setIsLevel0Loaded] = useState(() => GLOBAL_LOADED_TILES.has(level0Url));
+  const [isTilesLoading, setIsTilesLoading] = useState(false);
 
-  // Reset when tilePath changes to another map
+  // Monitor Level 0 loading
   useEffect(() => {
+    if (GLOBAL_LOADED_TILES.has(level0Url)) {
+      setIsLevel0Loaded(true);
+      return;
+    }
     setIsLevel0Loaded(false);
-    setLoadedKeys(new Set());
-  }, [tilePath]);
+    const img = new Image();
+    const done = () => {
+      GLOBAL_LOADED_TILES.add(level0Url);
+      setIsLevel0Loaded(true);
+    };
+    img.onload = done;
+    img.onerror = done;
+    img.src = level0Url;
+    if (img.complete) {
+      done();
+    }
+  }, [level0Url]);
 
-  const handleTileLoad = useCallback((key: string) => {
-    setLoadedKeys((prev) => {
-      if (prev.has(key)) return prev;
-      const next = new Set(prev);
-      next.add(key);
-      return next;
+  // Monitor Higher-Level (L1/L2) Tiles loading
+  useEffect(() => {
+    if (currentLevel === 0) {
+      setIsTilesLoading(false);
+      return;
+    }
+
+    const pendingTiles = activeTiles.filter((tile) => !GLOBAL_LOADED_TILES.has(tile.url));
+
+    if (pendingTiles.length === 0) {
+      setIsTilesLoading(false);
+      return;
+    }
+
+    setIsTilesLoading(true);
+    let remaining = pendingTiles.length;
+    let isCancelled = false;
+
+    pendingTiles.forEach((tile) => {
+      const img = new Image();
+      const done = () => {
+        GLOBAL_LOADED_TILES.add(tile.url);
+        remaining--;
+        if (remaining <= 0 && !isCancelled) {
+          setIsTilesLoading(false);
+        }
+      };
+      img.onload = done;
+      img.onerror = done;
+      img.src = tile.url;
+      if (img.complete) {
+        done();
+      }
     });
-  }, []);
 
-  const isLoading = useMemo(() => {
-    if (!isLevel0Loaded) return true;
-    if (currentLevel === 0) return false;
-    return activeTiles.some((tile) => !loadedKeys.has(tile.key));
-  }, [isLevel0Loaded, currentLevel, activeTiles, loadedKeys]);
+    // Safety fallback timeout: max 1200ms after zooming so breathing light never hangs indefinitely
+    const timeoutId = setTimeout(() => {
+      if (!isCancelled) {
+        setIsTilesLoading(false);
+      }
+    }, 1200);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [currentLevel, activeTiles]);
+
+  const isLoading = !isLevel0Loaded || isTilesLoading;
 
   useEffect(() => {
     onLoadingChange?.(isLoading);
@@ -133,16 +184,17 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
       )}
       {/* 1. Level 0 Base Overview Layer (Loaded in ~50ms, permanently visible underneath) */}
       <img
-        ref={(el) => {
-          if (el && el.complete && el.naturalWidth > 0 && !isLevel0Loaded) {
-            setIsLevel0Loaded(true);
-          }
-        }}
         key={level0Url}
         src={level0Url}
         alt={title}
-        onLoad={() => setIsLevel0Loaded(true)}
-        onError={() => setIsLevel0Loaded(true)}
+        onLoad={() => {
+          GLOBAL_LOADED_TILES.add(level0Url);
+          setIsLevel0Loaded(true);
+        }}
+        onError={() => {
+          GLOBAL_LOADED_TILES.add(level0Url);
+          setIsLevel0Loaded(true);
+        }}
         className="w-full h-full object-fill pointer-events-none select-none block map-image-layer"
         loading="eager"
         decoding="async"
@@ -157,15 +209,10 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
             className="overflow-hidden pointer-events-none select-none"
           >
             <img
-              ref={(el) => {
-                if (el && el.complete && el.naturalWidth > 0) {
-                  handleTileLoad(tile.key);
-                }
-              }}
               src={tile.url}
               alt={`${title} - Tile L${tile.level} (${tile.row},${tile.col})`}
-              onLoad={() => handleTileLoad(tile.key)}
-              onError={() => handleTileLoad(tile.key)}
+              onLoad={() => GLOBAL_LOADED_TILES.add(tile.url)}
+              onError={() => GLOBAL_LOADED_TILES.add(tile.url)}
               className="w-full h-full object-fill pointer-events-none select-none block"
               loading="eager"
               decoding="async"
