@@ -34,7 +34,7 @@ export const Header: React.FC<HeaderProps> = ({
           <img
             src="./icons/webicon.svg"
             alt="标准地图/复刻地图"
-            className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-zinc-800 border border-zinc-700 p-0.5 object-contain shrink-0 shadow-sm"
+            className="w-[31px] h-[31px] sm:w-8 sm:h-8 rounded-lg bg-zinc-800 border border-zinc-700 p-0.5 object-contain shrink-0 shadow-sm"
           />
           <div>
             <h1 className="text-xs sm:text-sm font-semibold text-zinc-100 flex items-center gap-2 leading-tight whitespace-nowrap">
@@ -49,10 +49,10 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={() => setShowComplianceModal(true)}
-          className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-zinc-200 p-1.5 sm:px-2 sm:py-1 rounded bg-zinc-800/60 border border-zinc-700/60 transition-colors ml-0.5 sm:ml-1 cursor-pointer"
+          className="flex items-center justify-center gap-1 text-[11px] text-zinc-400 hover:text-zinc-200 p-1.5 sm:px-2 sm:py-1 rounded-lg bg-zinc-800/60 border border-zinc-700/60 transition-colors ml-0.5 sm:ml-1 cursor-pointer min-w-[31px] min-h-[31px]"
           title="查看地图说明（标准地图与复刻地图对比说明）"
         >
-          <Info className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <Info className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-400 shrink-0" />
           <span className="hidden xl:inline">地图说明</span>
         </button>
       </div>
@@ -68,7 +68,7 @@ export const Header: React.FC<HeaderProps> = ({
           }`}
           title="卷帘对比 (单视口拖动中轴卷帘对比)"
         >
-          <RollingShutterIcon className="w-3.5 h-3.5" />
+          <RollingShutterIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4" />
           <span className="hidden lg:inline">卷帘对比</span>
         </button>
 
@@ -81,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
           }`}
           title="双屏联动 (左右双屏同步缩放与移动)"
         >
-          <DualWindowIcon className="w-3.5 h-3.5" />
+          <DualWindowIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4" />
           <span className="hidden lg:inline">双屏联动</span>
         </button>
 
@@ -94,7 +94,7 @@ export const Header: React.FC<HeaderProps> = ({
           }`}
           title="透明叠置 (透明度叠置渐变对比)"
         >
-          <LayerOverlayIcon className="w-3.5 h-3.5" />
+          <LayerOverlayIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4" />
           <span className="hidden lg:inline">透明叠置</span>
         </button>
       </div>
@@ -116,7 +116,7 @@ export const Header: React.FC<HeaderProps> = ({
           }
         >
           <SwapLeftAndRightIcon
-            className={`w-3.5 h-3.5 transition-colors ${
+            className={`w-[18px] h-[18px] sm:w-4 sm:h-4 transition-colors ${
               isSwapped ? 'text-[#fbbf24]' : 'text-zinc-400 group-hover:text-zinc-200'
             }`}
           />
@@ -138,7 +138,7 @@ export const Header: React.FC<HeaderProps> = ({
           }`}
           title="展开或收起底部浮动地图画廊 (快捷键 G)"
         >
-          <GalleryIcon className="w-3.5 h-3.5 text-amber-400" />
+          <GalleryIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-400" />
           <span className="hidden lg:inline">地图画廊</span>
           <span className="text-[10px] font-mono text-zinc-400 bg-surface px-1 rounded border border-border">{themesCount}</span>
         </button>
