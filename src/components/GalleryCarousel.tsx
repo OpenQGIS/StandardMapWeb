@@ -83,7 +83,7 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
     <>
       {/* 1. Floating Capsule Toggle Button at Bottom Center (when drawer is closed) */}
       {!isOpen && (
-        <div className="fixed bottom-3 min-[500px]:bottom-4 left-1/2 -translate-x-1/2 z-20 pointer-events-auto flex items-center justify-center max-w-[calc(100vw-124px)] min-[500px]:max-w-[calc(100vw-160px)] md:max-w-none">
+        <div className="fixed bottom-3 min-[500px]:bottom-4 left-1/2 -translate-x-1/2 z-[35] pointer-events-auto flex items-center justify-center max-w-[calc(100vw-124px)] min-[500px]:max-w-[calc(100vw-160px)] md:max-w-none">
           <button
             onClick={onToggleOpen}
             className="group flex items-center gap-1.5 min-[500px]:gap-2 sm:gap-2.5 px-2.5 min-[500px]:px-3.5 sm:px-4 py-1 min-[500px]:py-1.5 sm:py-2 rounded-full bg-panelSub/60 hover:bg-panelSub/80 text-zinc-200 hover:text-amber-400 border border-zinc-700/50 hover:border-amber-500/60 shadow-lg transition-all duration-200 cursor-pointer hover:shadow-amber-500/10 hover:scale-[1.02] max-w-full"

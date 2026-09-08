@@ -422,7 +422,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
 
       {/* Screen-Locked Vertical Divider Bar (Fixed to screen coordinates, never scales with map!) */}
       <div
-        className="absolute top-0 bottom-0 z-30 cursor-ew-resize swipe-divider-handle flex items-center justify-center group pointer-events-auto"
+        className="absolute top-0 bottom-0 z-20 cursor-ew-resize swipe-divider-handle flex items-center justify-center group pointer-events-auto"
         style={{ left: `${curtainPercent}%`, transform: 'translateX(-50%)', width: '36px' }}
         onMouseDown={handleDividerMouseDown}
         onTouchStart={handleDividerTouchStart}

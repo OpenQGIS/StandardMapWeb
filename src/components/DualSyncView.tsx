@@ -282,7 +282,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full bg-[#0a0c10] grid grid-cols-1 md:grid-cols-2 gap-2 p-2 overflow-hidden select-none touch-none"
+      className="relative w-full h-full bg-[#0a0c10] grid grid-cols-1 landscape:grid-cols-2 md:grid-cols-2 gap-2 p-2 overflow-hidden select-none touch-none"
     >
       {/* ================= LEFT PANE ================= */}
       <div

@@ -99,9 +99,6 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
         src={level0Url}
         alt={title}
         className="w-full h-full object-fill pointer-events-none select-none block map-image-layer"
-        style={{
-          imageRendering: '-webkit-optimize-contrast',
-        }}
         loading="eager"
         decoding="async"
       />
@@ -118,9 +115,6 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
               src={tile.url}
               alt={`${title} - Tile L${tile.level} (${tile.row},${tile.col})`}
               className="w-full h-full object-fill pointer-events-none select-none block"
-              style={{
-                imageRendering: '-webkit-optimize-contrast',
-              }}
               loading="eager"
               decoding="async"
             />

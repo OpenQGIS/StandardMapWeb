@@ -54,9 +54,6 @@ export const MapSvg: React.FC<MapSvgProps> = ({ item, orientation, viewport, cla
           className={`w-full h-full object-contain pointer-events-none select-none block map-image-layer transition-opacity duration-200 ${
             isLoaded ? 'opacity-100' : 'opacity-0'
           }`}
-          style={{
-            imageRendering: '-webkit-optimize-contrast',
-          }}
           loading="eager"
           decoding="async"
         />
