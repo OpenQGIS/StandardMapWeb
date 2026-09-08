@@ -148,16 +148,20 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     }
     setIsLevel0Loaded(false);
     const img = new Image();
-    const done = () => {
-      GLOBAL_LOADED_TILES.add(level0Url);
+    const handleL0Done = (success: boolean) => {
+      if (success) {
+        GLOBAL_LOADED_TILES.add(level0Url);
+      } else {
+        GLOBAL_LOADED_TILES.delete(level0Url);
+      }
       setIsLevel0Loaded(true);
       onBaseLoaded?.();
     };
-    img.onload = done;
-    img.onerror = done;
+    img.onload = () => handleL0Done(true);
+    img.onerror = () => handleL0Done(false);
     img.src = level0Url;
-    if (img.complete) {
-      done();
+    if (img.complete && img.naturalWidth > 0) {
+      handleL0Done(true);
     }
   }, [level0Url, onBaseLoaded]);
 
@@ -201,28 +205,35 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
 
     pendingTiles.forEach((tile) => {
       const img = new Image();
-      const done = () => {
-        GLOBAL_LOADED_TILES.add(tile.url);
+      const handleDone = (success: boolean) => {
+        if (success) {
+          GLOBAL_LOADED_TILES.add(tile.url);
+        } else {
+          GLOBAL_LOADED_TILES.delete(tile.url);
+        }
         remaining--;
         if (remaining <= 0 && !isCancelled) {
           scheduleFinishLoading(() => isCancelled);
         }
       };
-      img.onload = done;
-      img.onerror = done;
+
+      img.onload = () => handleDone(true);
+      img.onerror = () => handleDone(false);
       img.src = tile.url;
-      if (img.complete) {
-        done();
+
+      // Only treat as immediately complete if actually decoded with valid dimensions
+      if (img.complete && img.naturalWidth > 0) {
+        handleDone(true);
       }
     });
 
-    // Generous safety fallback timeout (5000ms) to guard against network dropouts without cutting real loads short
+    // 20-second safety fallback timeout: long enough to support slow networks without prematurely extinguishing the indicator
     const timeoutId = setTimeout(() => {
       if (!isCancelled) {
         setIsTilesLoading(false);
         loadStartTimeRef.current = null;
       }
-    }, 5000);
+    }, 20000);
 
     return () => {
       isCancelled = true;
@@ -251,13 +262,15 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
         key={level0Url}
         src={level0Url}
         alt={title}
-        onLoad={() => {
-          GLOBAL_LOADED_TILES.add(level0Url);
+        onLoad={(e) => {
+          if ((e.currentTarget as HTMLImageElement).naturalWidth > 0) {
+            GLOBAL_LOADED_TILES.add(level0Url);
+          }
           setIsLevel0Loaded(true);
           onBaseLoaded?.();
         }}
         onError={() => {
-          GLOBAL_LOADED_TILES.add(level0Url);
+          GLOBAL_LOADED_TILES.delete(level0Url);
           setIsLevel0Loaded(true);
           onBaseLoaded?.();
         }}
@@ -277,8 +290,12 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
             <img
               src={tile.url}
               alt={`${title} - Tile L${tile.level} (${tile.row},${tile.col})`}
-              onLoad={() => GLOBAL_LOADED_TILES.add(tile.url)}
-              onError={() => GLOBAL_LOADED_TILES.add(tile.url)}
+              onLoad={(e) => {
+                if ((e.currentTarget as HTMLImageElement).naturalWidth > 0) {
+                  GLOBAL_LOADED_TILES.add(tile.url);
+                }
+              }}
+              onError={() => GLOBAL_LOADED_TILES.delete(tile.url)}
               className="w-full h-full object-fill pointer-events-none select-none block"
               loading="eager"
               decoding="async"
