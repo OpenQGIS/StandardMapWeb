@@ -79,18 +79,20 @@ def process_map(item):
     l0_size_kb = os.path.getsize(os.path.join(l0_dir, '0_0.webp')) / 1024
     print(f"  Level 0 (1 tile): {w0}x{h0} -> {l0_size_kb:.1f} KB")
 
-    # Level 1:
+    # Level 1: 50% downsampled intermediate layer for fast smooth transition
     cols1, rows1 = item['l1_grid']
     l1_dir = os.path.join(out_dir, '1')
-    slice_grid(img, cols1, rows1, l1_dir, quality=82)
-    tile_w1 = W / cols1
-    tile_h1 = H / rows1
-    print(f"  Level 1 ({cols1}x{rows1} = {cols1*rows1} tiles): tile size ~{int(tile_w1)}x{int(tile_h1)} (aspect {tile_w1/tile_h1:.3f})")
+    w1, h1 = W // 2, H // 2
+    img_l1 = img.resize((w1, h1), Image.Resampling.LANCZOS)
+    slice_grid(img_l1, cols1, rows1, l1_dir, quality=80)
+    tile_w1 = w1 / cols1
+    tile_h1 = h1 / rows1
+    print(f"  Level 1 ({cols1}x{rows1} = {cols1*rows1} tiles, 50% downsampled): tile size ~{int(tile_w1)}x{int(tile_h1)} (aspect {tile_w1/tile_h1:.3f})")
 
-    # Level 2:
+    # Level 2: Full resolution tiles
     cols2, rows2 = item['l2_grid']
     l2_dir = os.path.join(out_dir, '2')
-    slice_grid(img, cols2, rows2, l2_dir, quality=84)
+    slice_grid(img, cols2, rows2, l2_dir, quality=82)
     tile_w2 = W / cols2
     tile_h2 = H / rows2
     print(f"  Level 2 ({cols2}x{rows2} = {cols2*rows2} tiles): tile size ~{int(tile_w2)}x{int(tile_h2)} (aspect {tile_w2/tile_h2:.3f})")
@@ -103,7 +105,15 @@ def process_map(item):
     ) / 1024
     print(f"  Total: {total_files} tiles, {total_size_kb/1024:.2f} MB")
 
+    # Mirror to GitHub repo workspace if different
+    git_out_dir = os.path.join(r'd:\GitHub\StandardMapWeb\public\maps\tiles', item['id'])
+    if git_out_dir != out_dir:
+        if os.path.exists(git_out_dir):
+            shutil.rmtree(git_out_dir)
+        shutil.copytree(out_dir, git_out_dir)
+        print(f"  Mirrored to {git_out_dir}")
+
 if __name__ == '__main__':
     for item in SOURCE_MAPS:
         process_map(item)
-    print("\nAll near-square tiles generated successfully!")
+    print("\nAll near-square tiles generated and synced successfully!")

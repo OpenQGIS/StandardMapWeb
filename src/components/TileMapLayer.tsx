@@ -139,6 +139,57 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     }, minDelay);
   };
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [visibleKeys, setVisibleKeys] = useState<Set<string>>(() => new Set());
+
+  // Viewport Culling: calculate which tiles intersect the visible screen area
+  useEffect(() => {
+    if (currentLevel === 0) {
+      setVisibleKeys(new Set());
+      return;
+    }
+
+    const updateVisibility = () => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+
+      const screenW = window.innerWidth;
+      const screenH = window.innerHeight;
+      const margin = 120; // 120px prefetch buffer around screen boundaries
+
+      const effectiveOrientation: MapOrientation = orientation || 'horizontal';
+      const config = GRID_CONFIGS[effectiveOrientation][currentLevel as 1 | 2];
+      if (!config) return;
+      const { cols, rows } = config;
+
+      const nextVisible = new Set<string>();
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const tileLeft = rect.left + (c / cols) * rect.width;
+          const tileRight = rect.left + ((c + 1) / cols) * rect.width;
+          const tileTop = rect.top + (r / rows) * rect.height;
+          const tileBottom = rect.top + ((r + 1) / rows) * rect.height;
+
+          if (
+            tileRight >= -margin &&
+            tileLeft <= screenW + margin &&
+            tileBottom >= -margin &&
+            tileTop <= screenH + margin
+          ) {
+            nextVisible.add(`${tilePath}_${currentLevel}_${r}_${c}`);
+          }
+        }
+      }
+
+      setVisibleKeys(nextVisible);
+    };
+
+    updateVisibility();
+    window.addEventListener('resize', updateVisibility);
+    return () => window.removeEventListener('resize', updateVisibility);
+  }, [viewport?.scale, viewport?.x, viewport?.y, currentLevel, orientation, tilePath]);
+
   // Monitor Level 0 loading
   useEffect(() => {
     if (GLOBAL_LOADED_TILES.has(level0Url)) {
@@ -165,24 +216,21 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     }
   }, [level0Url, onBaseLoaded]);
 
-  // Monitor Higher-Level (L1/L2) Tiles loading
+  // Visible tiles that need to be fetched over the network
+  const pendingTiles = useMemo(() => {
+    if (currentLevel === 0) return [];
+    return activeTiles.filter(
+      (tile) =>
+        (visibleKeys.size === 0 || visibleKeys.has(tile.key)) &&
+        !GLOBAL_LOADED_TILES.has(tile.url)
+    );
+  }, [currentLevel, activeTiles, visibleKeys]);
+
+  // Monitor Higher-Level (L1/L2) Visible Tiles loading
   useEffect(() => {
     let isCancelled = false;
 
-    if (currentLevel === 0) {
-      if (finishTimeoutRef.current) {
-        clearTimeout(finishTimeoutRef.current);
-        finishTimeoutRef.current = null;
-      }
-      loadStartTimeRef.current = null;
-      setIsTilesLoading(false);
-      return;
-    }
-
-    const pendingTiles = activeTiles.filter((tile) => !GLOBAL_LOADED_TILES.has(tile.url));
-
-    if (pendingTiles.length === 0) {
-      // If a loading sequence was underway, complete it smoothly rather than abruptly cutting off
+    if (currentLevel === 0 || pendingTiles.length === 0) {
       if (loadStartTimeRef.current !== null) {
         scheduleFinishLoading(() => isCancelled);
       } else {
@@ -227,19 +275,19 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
       }
     });
 
-    // 20-second safety fallback timeout: long enough to support slow networks without prematurely extinguishing the indicator
+    // 15-second safety fallback timeout
     const timeoutId = setTimeout(() => {
       if (!isCancelled) {
         setIsTilesLoading(false);
         loadStartTimeRef.current = null;
       }
-    }, 20000);
+    }, 15000);
 
     return () => {
       isCancelled = true;
       clearTimeout(timeoutId);
     };
-  }, [currentLevel, activeTiles]);
+  }, [currentLevel, pendingTiles]);
 
   const isLoading = !isLevel0Loaded || isTilesLoading;
 
@@ -249,6 +297,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
 
   return (
     <div
+      ref={containerRef}
       className={`w-full h-full relative overflow-hidden bg-[#1a1d26] select-none ${className}`}
     >
       {/* Loading placeholder spinner so user sees dynamic feedback while level 0 tiles arrive */}
@@ -281,27 +330,33 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
 
       {/* 2. Higher Level QuadTree Tiles (Rendered directly on top, instant paint as soon as decoded) */}
       {currentLevel > 0 &&
-        activeTiles.map((tile) => (
-          <div
-            key={tile.key}
-            style={tile.style}
-            className="overflow-hidden pointer-events-none select-none"
-          >
-            <img
-              src={tile.url}
-              alt={`${title} - Tile L${tile.level} (${tile.row},${tile.col})`}
-              onLoad={(e) => {
-                if ((e.currentTarget as HTMLImageElement).naturalWidth > 0) {
-                  GLOBAL_LOADED_TILES.add(tile.url);
-                }
-              }}
-              onError={() => GLOBAL_LOADED_TILES.delete(tile.url)}
-              className="w-full h-full object-fill pointer-events-none select-none block"
-              loading="eager"
-              decoding="async"
-            />
-          </div>
-        ))}
+        activeTiles.map((tile) => {
+          const isVisible = visibleKeys.size === 0 || visibleKeys.has(tile.key);
+          const isLoaded = GLOBAL_LOADED_TILES.has(tile.url);
+          if (!isVisible && !isLoaded) return null;
+
+          return (
+            <div
+              key={tile.key}
+              style={tile.style}
+              className="overflow-hidden pointer-events-none select-none"
+            >
+              <img
+                src={tile.url}
+                alt={`${title} - Tile L${tile.level} (${tile.row},${tile.col})`}
+                onLoad={(e) => {
+                  if ((e.currentTarget as HTMLImageElement).naturalWidth > 0) {
+                    GLOBAL_LOADED_TILES.add(tile.url);
+                  }
+                }}
+                onError={() => GLOBAL_LOADED_TILES.delete(tile.url)}
+                className="w-full h-full object-fill pointer-events-none select-none block"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+          );
+        })}
     </div>
   );
 };
