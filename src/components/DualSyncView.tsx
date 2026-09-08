@@ -307,15 +307,31 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
         />
 
         {/* Top Tag - Hidden on narrow screens / mobile, pure map title without prefix on large screens */}
-        <div className="absolute top-3 left-3 z-20 pointer-events-none hidden lg:flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-          <span className="text-xs font-semibold text-zinc-100 bg-panel/80 px-2 py-1 rounded border border-border shadow-sm">
-            {leftMap.title}
-          </span>
-          <span className="text-[10px] text-zinc-400 bg-panel/80 px-1.5 py-0.5 rounded border border-border shadow-sm">
-            {leftMap.approvalCode || leftMap.categoryLabel}
-          </span>
-        </div>
+        {(() => {
+          const isLeftBase = leftMap.type === 'base';
+          return (
+            <div className="absolute top-3 left-3 z-20 pointer-events-none hidden lg:flex items-center gap-2">
+              <div
+                className={`bg-panelSub/90 backdrop-blur-md px-2.5 py-1 rounded-lg border text-xs flex items-center gap-2 shadow-lg transition-colors ${
+                  isLeftBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
+                }`}
+              >
+                <span className="text-xs font-semibold text-zinc-100">
+                  {leftMap.title}
+                </span>
+                <span
+                  className={`text-[10px] font-medium px-1.5 py-0.5 rounded border shadow-sm ${
+                    isLeftBase
+                      ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600/70'
+                      : 'bg-amber-950/80 text-amber-300 border-amber-600/70'
+                  }`}
+                >
+                  {leftMap.approvalCode || leftMap.categoryLabel}
+                </span>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Map Canvas */}
         <div
@@ -376,15 +392,31 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
         />
 
         {/* Top Tag - Hidden on narrow screens / mobile, pure map title without prefix on large screens */}
-        <div className="absolute top-3 left-3 z-20 pointer-events-none hidden lg:flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-          <span className="text-xs font-semibold text-zinc-100 bg-panel/80 px-2 py-1 rounded border border-border shadow-sm">
-            {rightMap.title}
-          </span>
-          <span className="text-[10px] text-amber-400 bg-panel/80 px-1.5 py-0.5 rounded border border-border shadow-sm">
-            {rightMap.approvalCode || rightMap.categoryLabel}
-          </span>
-        </div>
+        {(() => {
+          const isRightBase = rightMap.type === 'base';
+          return (
+            <div className="absolute top-3 left-3 z-20 pointer-events-none hidden lg:flex items-center gap-2">
+              <div
+                className={`bg-panelSub/90 backdrop-blur-md px-2.5 py-1 rounded-lg border text-xs flex items-center gap-2 shadow-lg transition-colors ${
+                  isRightBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
+                }`}
+              >
+                <span className="text-xs font-semibold text-zinc-100">
+                  {rightMap.title}
+                </span>
+                <span
+                  className={`text-[10px] font-medium px-1.5 py-0.5 rounded border shadow-sm ${
+                    isRightBase
+                      ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600/70'
+                      : 'bg-amber-950/80 text-amber-300 border-amber-600/70'
+                  }`}
+                >
+                  {rightMap.approvalCode || rightMap.categoryLabel}
+                </span>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Map Canvas */}
         <div

@@ -444,25 +444,51 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
       </div>
 
       {/* Floating Labels indicating layers - Hidden on narrow screens / mobile, pure map title on large screens */}
-      <div className="absolute top-4 left-4 z-20 pointer-events-none hidden lg:flex items-center gap-2">
-        <div className="bg-panelSub/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-border text-xs flex items-center gap-2 shadow-lg">
-          <span className="w-2 h-2 rounded-full bg-emerald-400" />
-          <span className="text-zinc-100 font-medium">{bottomMap.title}</span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
-            {bottomMap.approvalCode || bottomMap.categoryLabel}
-          </span>
-        </div>
-      </div>
+      {(() => {
+        const isBottomBase = bottomMap.type === 'base';
+        const isTopBase = topMap.type === 'base';
+        return (
+          <>
+            <div className="absolute top-4 left-4 z-20 pointer-events-none hidden lg:flex items-center gap-2">
+              <div
+                className={`bg-panelSub/90 backdrop-blur-md px-3 py-1.5 rounded-lg border text-xs flex items-center gap-2 shadow-lg transition-colors ${
+                  isBottomBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
+                }`}
+              >
+                <span className="text-zinc-100 font-medium">{bottomMap.title}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.5 rounded font-medium border shadow-sm ${
+                    isBottomBase
+                      ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600/70'
+                      : 'bg-amber-950/80 text-amber-300 border-amber-600/70'
+                  }`}
+                >
+                  {bottomMap.approvalCode || bottomMap.categoryLabel}
+                </span>
+              </div>
+            </div>
 
-      <div className="absolute top-4 right-4 z-20 pointer-events-none hidden lg:flex items-center gap-2">
-        <div className="bg-panelSub/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-border text-xs flex items-center gap-2 shadow-lg">
-          <span className="w-2 h-2 rounded-full bg-amber-400" />
-          <span className="text-zinc-100 font-medium">{topMap.title}</span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-950/60 text-amber-300 border border-amber-700/60">
-            {topMap.approvalCode || topMap.categoryLabel}
-          </span>
-        </div>
-      </div>
+            <div className="absolute top-4 right-4 z-20 pointer-events-none hidden lg:flex items-center gap-2">
+              <div
+                className={`bg-panelSub/90 backdrop-blur-md px-3 py-1.5 rounded-lg border text-xs flex items-center gap-2 shadow-lg transition-colors ${
+                  isTopBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
+                }`}
+              >
+                <span className="text-zinc-100 font-medium">{topMap.title}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.5 rounded font-medium border shadow-sm ${
+                    isTopBase
+                      ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600/70'
+                      : 'bg-amber-950/80 text-amber-300 border-amber-600/70'
+                  }`}
+                >
+                  {topMap.approvalCode || topMap.categoryLabel}
+                </span>
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
       {/* Floating Zoom Controls */}
       <div className="absolute bottom-3 right-2.5 min-[500px]:bottom-4 min-[500px]:right-4 z-20 flex flex-col gap-1 min-[500px]:gap-1.5 bg-panelSub/60 hover:bg-panelSub/80 p-1 min-[500px]:p-1.5 rounded-lg border border-white/10 hover:border-zinc-600 shadow-md hover:shadow-xl swipe-control-panel transition-all duration-200">
