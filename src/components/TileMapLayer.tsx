@@ -9,6 +9,8 @@ interface TileMapLayerProps {
   viewport?: ViewportState;
   className?: string;
   onLoadingChange?: (isLoading: boolean) => void;
+  onBaseLoaded?: () => void;
+  hideLoader?: boolean;
 }
 
 interface TileInfo {
@@ -46,6 +48,8 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   viewport,
   className = '',
   onLoadingChange,
+  onBaseLoaded,
+  hideLoader = false,
 }) => {
   const scale = viewport?.scale ?? 1;
 
@@ -102,6 +106,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   useEffect(() => {
     if (GLOBAL_LOADED_TILES.has(level0Url)) {
       setIsLevel0Loaded(true);
+      onBaseLoaded?.();
       return;
     }
     setIsLevel0Loaded(false);
@@ -109,6 +114,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     const done = () => {
       GLOBAL_LOADED_TILES.add(level0Url);
       setIsLevel0Loaded(true);
+      onBaseLoaded?.();
     };
     img.onload = done;
     img.onerror = done;
@@ -116,7 +122,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     if (img.complete) {
       done();
     }
-  }, [level0Url]);
+  }, [level0Url, onBaseLoaded]);
 
   // Monitor Higher-Level (L1/L2) Tiles loading
   useEffect(() => {
@@ -177,7 +183,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
       className={`w-full h-full relative overflow-hidden bg-[#1a1d26] select-none ${className}`}
     >
       {/* Loading placeholder spinner so user sees dynamic feedback while level 0 tiles arrive */}
-      {!isLevel0Loaded && (
+      {!isLevel0Loaded && !hideLoader && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#161822]/90 z-10 select-none pointer-events-none">
           <LottieLoader size={60} text="载入高精度地图中..." />
         </div>
@@ -190,10 +196,12 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
         onLoad={() => {
           GLOBAL_LOADED_TILES.add(level0Url);
           setIsLevel0Loaded(true);
+          onBaseLoaded?.();
         }}
         onError={() => {
           GLOBAL_LOADED_TILES.add(level0Url);
           setIsLevel0Loaded(true);
+          onBaseLoaded?.();
         }}
         className="w-full h-full object-fill pointer-events-none select-none block map-image-layer"
         loading="eager"

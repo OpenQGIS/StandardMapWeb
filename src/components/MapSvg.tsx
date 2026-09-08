@@ -9,9 +9,19 @@ interface MapSvgProps {
   viewport?: ViewportState;
   className?: string;
   onLoadingChange?: (isLoading: boolean) => void;
+  onBaseLoaded?: () => void;
+  hideLoader?: boolean;
 }
 
-export const MapSvg: React.FC<MapSvgProps> = ({ item, orientation, viewport, className = '', onLoadingChange }) => {
+export const MapSvg: React.FC<MapSvgProps> = ({
+  item,
+  orientation,
+  viewport,
+  className = '',
+  onLoadingChange,
+  onBaseLoaded,
+  hideLoader = false,
+}) => {
   // If QuadTree tiling is available, render TileMapLayer for instant load and progressive zoom
   if (item.tilePath) {
     return (
@@ -23,6 +33,8 @@ export const MapSvg: React.FC<MapSvgProps> = ({ item, orientation, viewport, cla
         viewport={viewport}
         className={className}
         onLoadingChange={onLoadingChange}
+        onBaseLoaded={onBaseLoaded}
+        hideLoader={hideLoader}
       />
     );
   }
@@ -34,17 +46,18 @@ export const MapSvg: React.FC<MapSvgProps> = ({ item, orientation, viewport, cla
     if (imgRef.current && imgRef.current.complete && imgRef.current.naturalWidth > 0) {
       setIsLoaded(true);
       onLoadingChange?.(false);
+      onBaseLoaded?.();
     } else {
       setIsLoaded(false);
       onLoadingChange?.(true);
     }
-  }, [item.imageUrl, onLoadingChange]);
+  }, [item.imageUrl, onLoadingChange, onBaseLoaded]);
 
   if (item.imageUrl) {
     return (
       <div className={`w-full h-full relative overflow-hidden bg-[#1a1d26] select-none flex items-center justify-center ${className}`}>
         {/* Loading placeholder spinner so user never sees a stale previous map */}
-        {!isLoaded && (
+        {!isLoaded && !hideLoader && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#161822]/90 z-10 select-none pointer-events-none">
             <LottieLoader size={60} text="载入高精度地图中..." />
           </div>
@@ -54,7 +67,10 @@ export const MapSvg: React.FC<MapSvgProps> = ({ item, orientation, viewport, cla
           key={item.imageUrl}
           src={item.imageUrl}
           alt={item.title}
-          onLoad={() => setIsLoaded(true)}
+          onLoad={() => {
+            setIsLoaded(true);
+            onBaseLoaded?.();
+          }}
           className={`w-full h-full object-contain pointer-events-none select-none block map-image-layer transition-opacity duration-200 ${
             isLoaded ? 'opacity-100' : 'opacity-0'
           }`}

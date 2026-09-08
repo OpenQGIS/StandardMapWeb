@@ -3,6 +3,7 @@ import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
 import { MapSvg } from './MapSvg';
 import { useCardDimensions } from '../hooks/useCardDimensions';
 import { ZoomIn, ZoomOut, Maximize2, MoveHorizontal } from 'lucide-react';
+import { LottieLoader } from './LottieLoader';
 
 interface SwipeCurtainViewProps {
   baseMap: MapLayer;
@@ -33,6 +34,26 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
 
   // Screen-locked curtain position in percentage (0% to 100% of viewport width)
   const [curtainPercent, setCurtainPercent] = useState<number>(50);
+
+  // Track whether base overview layers (Level 0) are ready
+  const [baseLoaded, setBaseLoaded] = useState<boolean>(false);
+  const [reproductionLoaded, setReproductionLoaded] = useState<boolean>(false);
+
+  // Reset base loaded states when active map group changes
+  useEffect(() => {
+    setBaseLoaded(false);
+    setReproductionLoaded(false);
+
+    // Safety fallback: reveal curtain after 2000ms if any network hang occurs
+    const timer = setTimeout(() => {
+      setBaseLoaded(true);
+      setReproductionLoaded(true);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [baseMap.id, reproductionMap.id]);
+
+  const isCurtainReady = baseLoaded && reproductionLoaded;
 
   // Independent loading states for bottom and top maps (drives status LED indicators)
   const [bottomLoading, setBottomLoading] = useState<boolean>(true);
@@ -399,6 +420,11 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
             orientation={orientation}
             viewport={viewport}
             onLoadingChange={setBottomLoading}
+            onBaseLoaded={() => {
+              if (bottomMap.type === 'base') setBaseLoaded(true);
+              else setReproductionLoaded(true);
+            }}
+            hideLoader
           />
         </div>
       </div>
@@ -431,6 +457,11 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
               orientation={orientation}
               viewport={viewport}
               onLoadingChange={setTopLoading}
+              onBaseLoaded={() => {
+                if (topMap.type === 'base') setBaseLoaded(true);
+                else setReproductionLoaded(true);
+              }}
+              hideLoader
             />
           </div>
         </div>
@@ -438,7 +469,9 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
 
       {/* Screen-Locked Vertical Divider Bar (Fixed to screen coordinates, never scales with map!) */}
       <div
-        className="absolute top-0 bottom-0 z-20 cursor-ew-resize swipe-divider-handle flex items-center justify-center group pointer-events-auto"
+        className={`absolute top-0 bottom-0 z-20 cursor-ew-resize swipe-divider-handle flex items-center justify-center group transition-opacity duration-500 ease-out ${
+          isCurtainReady ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
         style={{ left: `${curtainPercent}%`, transform: 'translateX(-50%)', width: '36px' }}
         onMouseDown={handleDividerMouseDown}
         onTouchStart={handleDividerTouchStart}
@@ -569,7 +602,11 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
       </div>
 
       {/* Screen Curtain Position Gauge (Hidden on small windows, click or double click to center on desktop) */}
-      <div className="absolute bottom-4 left-4 z-20 hidden lg:flex items-center gap-2 swipe-control-panel">
+      <div
+        className={`absolute bottom-4 left-4 z-20 hidden lg:flex items-center gap-2 swipe-control-panel transition-opacity duration-500 ease-out ${
+          isCurtainReady ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      >
         <button
           onClick={() => setCurtainPercent(50)}
           onDoubleClick={() => setCurtainPercent(50)}
@@ -583,6 +620,13 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
           </span>
         </button>
       </div>
+
+      {/* Unified Initial Loading Overlay: completely unobstructed, no clip seam, perfectly centered */}
+      {!isCurtainReady && (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#0d0e12]/60 backdrop-blur-xs select-none pointer-events-none transition-opacity duration-300">
+          <LottieLoader size={60} text="载入高精度地图中..." />
+        </div>
+      )}
     </div>
   );
 };
