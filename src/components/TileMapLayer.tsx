@@ -50,8 +50,6 @@ const LEVEL_SOURCE_WIDTH: Record<MapOrientation, readonly [number, number, numbe
 // Pre-downsampled overviews lose thin-line detail long before pixel counts match,
 // so the chosen level must oversample the rendered viewport by this factor
 const QUALITY_FACTOR = 1.5;
-// Demote a level only clearly below its promote threshold to avoid flicker while zooming
-const DEMOTION_HYSTERESIS = 1.25;
 
 // Persistent session cache of loaded tile URLs
 const GLOBAL_LOADED_TILES = new Set<string>();
@@ -101,40 +99,30 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  const previousLevelRef = useRef(0);
-
-  // Level determination by the device pixels the card actually has to fill:
-  // neededPx = card CSS width * devicePixelRatio * scale * quality headroom,
-  // then the smallest level whose source width covers it. On retina phones the
-  // fit view already warrants L1, while a small desktop window stays on L0.
-  const currentLevel = useMemo(() => {
+  // Level determination:
+  // Level 0 is the instant low-res overview underlay (always rendered underneath in ~50ms).
+  // Active QuadTree tiles on top:
+  // - Level 1 (50% downsampled, 4~6 tiles): default high-definition baseline for all devices (mobile & desktop).
+  // - Level 2 (100% original, 20~24 tiles): ultra-high-precision scan, rendered when zoomed in (scale >= 2.0).
+  const currentLevel = useMemo<1 | 2>(() => {
     const widths = LEVEL_SOURCE_WIDTH[orientation || 'horizontal'];
-    const neededPx = layout.cardW * devicePixelRatio * scale * QUALITY_FACTOR;
-    let target = widths.length - 1;
-    for (let level = 0; level < widths.length; level++) {
-      if (widths[level] >= neededPx) {
-        target = level;
-        break;
-      }
-    }
-    const previous = previousLevelRef.current;
-    if (target < previous) {
-      const demotionFloor = previous > 0 ? widths[previous - 1] / DEMOTION_HYSTERESIS : 0;
-      if (neededPx > demotionFloor) return previous;
-    }
-    return target;
-  }, [layout.cardW, devicePixelRatio, scale, orientation]);
+    const l1Width = widths[1]; // 4956 (horizontal) or 3424 (vertical)
+    const effectiveCardW = layout.cardW || (typeof window !== 'undefined' ? window.innerWidth : 390);
+    const neededPx = effectiveCardW * devicePixelRatio * scale * QUALITY_FACTOR;
 
-  useEffect(() => {
-    previousLevelRef.current = currentLevel;
-  }, [currentLevel]);
+    // Transition to Level 2 (original scan precision) when user zooms in
+    if (scale >= 2.0 || neededPx >= l1Width) {
+      return 2;
+    }
+
+    // Default baseline for all normal viewports (mobile & desktop): Level 1 high-definition tiles
+    return 1;
+  }, [layout.cardW, devicePixelRatio, scale, orientation]);
 
   // Compute tiles for the active level
   const activeTiles = useMemo(() => {
-    if (currentLevel === 0) return [];
-
     const effectiveOrientation: MapOrientation = orientation || 'horizontal';
-    const config = GRID_CONFIGS[effectiveOrientation][currentLevel as 1 | 2];
+    const config = GRID_CONFIGS[effectiveOrientation][currentLevel];
     const { cols, rows } = config;
 
     const stepX = 100 / cols;
@@ -170,12 +158,11 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   // first frame after a level change, which kills the full-level fetch storm.
   const visibleKeys = useMemo(() => {
     const keys = new Set<string>();
-    if (currentLevel === 0) return keys;
     const { viewW, viewH, cardW, cardH } = layout;
     if (!viewW || !viewH || !cardW || !cardH) return keys;
 
     const effectiveOrientation: MapOrientation = orientation || 'horizontal';
-    const config = GRID_CONFIGS[effectiveOrientation][currentLevel as 1 | 2];
+    const config = GRID_CONFIGS[effectiveOrientation][currentLevel];
     if (!config) return keys;
     const { cols, rows } = config;
 
@@ -288,17 +275,16 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
 
   // Visible tiles that need to be fetched over the network
   const pendingTiles = useMemo(() => {
-    if (currentLevel === 0) return [];
     return activeTiles.filter(
       (tile) => visibleKeys.has(tile.key) && !GLOBAL_LOADED_TILES.has(tile.url)
     );
-  }, [currentLevel, activeTiles, visibleKeys]);
+  }, [activeTiles, visibleKeys]);
 
   // Monitor Higher-Level (L1/L2) Visible Tiles loading
   useEffect(() => {
     let isCancelled = false;
 
-    if (currentLevel === 0 || pendingTiles.length === 0) {
+    if (pendingTiles.length === 0) {
       if (loadStartTimeRef.current !== null) {
         scheduleFinishLoading(() => isCancelled);
       } else {
@@ -397,34 +383,33 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
       />
 
       {/* 2. Higher Level QuadTree Tiles (Rendered directly on top, instant paint as soon as decoded) */}
-      {currentLevel > 0 &&
-        activeTiles.map((tile) => {
-          const isVisible = visibleKeys.has(tile.key);
-          const isLoaded = GLOBAL_LOADED_TILES.has(tile.url);
-          if (!isVisible && !isLoaded) return null;
+      {activeTiles.map((tile) => {
+        const isVisible = visibleKeys.has(tile.key);
+        const isLoaded = GLOBAL_LOADED_TILES.has(tile.url);
+        if (!isVisible && !isLoaded) return null;
 
-          return (
-            <div
-              key={tile.key}
-              style={tile.style}
-              className="overflow-hidden pointer-events-none select-none"
-            >
-              <img
-                src={tile.url}
-                alt={`${title} - Tile L${tile.level} (${tile.row},${tile.col})`}
-                onLoad={(e) => {
-                  if ((e.currentTarget as HTMLImageElement).naturalWidth > 0) {
-                    GLOBAL_LOADED_TILES.add(tile.url);
-                  }
-                }}
-                onError={() => GLOBAL_LOADED_TILES.delete(tile.url)}
-                className="w-full h-full object-fill pointer-events-none select-none block"
-                loading="eager"
-                decoding="async"
-              />
-            </div>
-          );
-        })}
+        return (
+          <div
+            key={tile.key}
+            style={tile.style}
+            className="overflow-hidden pointer-events-none select-none"
+          >
+            <img
+              src={tile.url}
+              alt={`${title} - Tile L${tile.level} (${tile.row},${tile.col})`}
+              onLoad={(e) => {
+                if ((e.currentTarget as HTMLImageElement).naturalWidth > 0) {
+                  GLOBAL_LOADED_TILES.add(tile.url);
+                }
+              }}
+              onError={() => GLOBAL_LOADED_TILES.delete(tile.url)}
+              className="w-full h-full object-fill pointer-events-none select-none block"
+              loading="eager"
+              decoding="async"
+            />
+          </div>
+        );
+      })}
     </div>
   );
 };
