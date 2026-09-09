@@ -21,18 +21,60 @@ const fetchOne = async (url: string, timeoutMs = 10000): Promise<string> => {
 
 const shortenUa = () => {
   const ua = navigator.userAgent;
-  const ios = ua.match(/iPhone OS (\d+_\d+)/)?.[1]?.replace('_', '.');
+
+  // OS: iPad reports "CPU OS", desktop needs its own tokens.
+  // NOTE: iOS 26+ Safari freezes its UA at "iPhone OS 18_7" for web compat,
+  // so a Safari reporting 18.7 may actually be a newer iOS (third-party
+  // browsers build their own UA with the real version).
+  const iphone = ua.match(/iPhone OS (\d+_\d+)/)?.[1]?.replace('_', '.');
+  const ipad = ua.match(/CPU OS (\d+_\d+)/)?.[1]?.replace('_', '.');
   const android = ua.match(/Android (\d+)/)?.[1];
-  const os = ios ? `iOS ${ios}` : android ? `Android ${android}` : '其他';
+  const os = iphone
+    ? `iOS ${iphone}`
+    : ipad
+      ? `iPadOS ${ipad}`
+      : android
+        ? `Android ${android}${/HarmonyOS/i.test(ua) ? '(鸿蒙)' : ''}`
+        : /Windows NT/.test(ua)
+          ? 'Windows'
+          : /Macintosh/.test(ua)
+            ? 'macOS'
+            : '其他';
+
+  // App: order matters — every Chromium browser contains "Chrome/", and every
+  // WebKit browser contains "Safari", so specific tokens must win first.
+  const chromiumSub =
+    /SamsungBrowser/.test(ua)
+      ? '三星浏览器'
+      : /HeyTapBrowser/.test(ua)
+        ? 'OPPO浏览器'
+        : /HuaweiBrowser|HBBrowser/.test(ua)
+          ? '华为浏览器'
+          : /MiuiBrowser/.test(ua)
+            ? '小米浏览器'
+            : /MQQBrowser/.test(ua)
+              ? 'QQ浏览器'
+              : /UCBrowser|UBrowser/.test(ua)
+                ? 'UC浏览器'
+                : /360SE|QIHU/.test(ua)
+                  ? '360浏览器'
+                  : /baiduboxapp|Baidu/.test(ua)
+                    ? '百度浏览器'
+                    : /OPR\//.test(ua)
+                      ? 'Opera'
+                      : 'Chrome';
   const app = /MicroMessenger/.test(ua)
     ? '微信'
-    : /FxiOS/.test(ua)
-      ? 'Firefox'
-      : /CriOS/.test(ua)
-        ? 'Chrome'
-        : /Safari/.test(ua)
-          ? 'Safari'
-          : '?';
+    : /EdgiOS|Edg\//.test(ua)
+      ? 'Edge'
+      : /FxiOS|Firefox\//.test(ua)
+        ? 'Firefox'
+        : /CriOS|Chrome\//.test(ua)
+          ? chromiumSub
+          : /Safari/.test(ua)
+            ? `Safari${(iphone || ipad) === '18.7' ? '(UA冻结)' : ''}`
+            : '?';
+
   return `${app} · ${os}`;
 };
 

@@ -360,40 +360,36 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
         {(() => {
           const isLeftBase = leftMap.type === 'base';
           return (
-            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-20 pointer-events-none flex items-center gap-2">
+            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-20 pointer-events-none flex flex-col items-start gap-1 lg:flex-row lg:items-center lg:gap-2">
               <div
-                className={`bg-panelSub/90 backdrop-blur-md px-2 py-1.5 sm:px-2.5 sm:py-1 rounded-lg border text-xs flex flex-col items-start gap-1 lg:flex-row lg:items-center lg:gap-2 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
+                className={`bg-panelSub/90 backdrop-blur-md px-2 py-1.5 sm:px-2.5 sm:py-1 rounded-lg border text-xs flex items-center gap-1.5 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
                   isLeftBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
-                {/* Row 1: Status LED dot + Title (truncated at 30vw on mobile) */}
-                <div className="flex items-center gap-1.5 min-w-0 max-w-full">
-                  <span
-                    className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
-                      isLeftBase
-                        ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
-                        : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
-                    } ${leftLoading ? 'animate-pulse scale-110' : ''}`}
-                    title={leftLoading ? '正在加载高清切片...' : '高清切片已就绪'}
-                  />
-                  <span
-                    className="text-[11px] sm:text-xs font-semibold text-zinc-100 truncate max-w-[30vw] lg:max-w-none"
-                    title={leftMap.title}
-                  >
-                    {leftMap.title}
-                  </span>
-                </div>
-                {/* Row 2: Subtitle / approval badge */}
                 <span
-                  className={`text-[9px] sm:text-[10px] font-medium px-1.5 py-0.5 rounded border shadow-sm shrink-0 ${
+                  className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
                     isLeftBase
-                      ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600/70'
-                      : 'bg-amber-950/80 text-amber-300 border-amber-600/70'
-                  }`}
+                      ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                      : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
+                  } ${leftLoading ? 'animate-pulse scale-110' : ''}`}
+                  title={leftLoading ? '正在加载高清切片...' : '高清切片已就绪'}
+                />
+                <span
+                  className="text-[11px] sm:text-xs font-semibold text-zinc-100 truncate max-w-[30vw] lg:max-w-none"
+                  title={leftMap.title}
                 >
-                  {leftMap.approvalCode || leftMap.categoryLabel}
+                  {leftMap.title}
                 </span>
               </div>
+              <span
+                className={`text-[9px] sm:text-[10px] font-medium px-1.5 py-0.5 rounded border shadow-sm shrink-0 ${
+                  isLeftBase
+                    ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600/70'
+                    : 'bg-amber-950/80 text-amber-300 border-amber-600/70'
+                }`}
+              >
+                {leftMap.approvalCode || leftMap.categoryLabel}
+              </span>
             </div>
           );
         })()}
@@ -460,40 +456,36 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
         {(() => {
           const isRightBase = rightMap.type === 'base';
           return (
-            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 landscape:left-auto landscape:right-2 md:left-auto md:right-3 z-20 pointer-events-none flex items-center gap-2">
+            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 landscape:left-auto landscape:right-2 md:left-auto md:right-3 z-20 pointer-events-none flex flex-col items-start gap-1 landscape:items-end md:items-end lg:flex-row lg:items-center lg:gap-2">
               <div
-                className={`bg-panelSub/90 backdrop-blur-md px-2 py-1.5 sm:px-2.5 sm:py-1 rounded-lg border text-xs flex flex-col items-start gap-1 lg:flex-row lg:items-center lg:gap-2 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
+                className={`bg-panelSub/90 backdrop-blur-md px-2 py-1.5 sm:px-2.5 sm:py-1 rounded-lg border text-xs flex items-center gap-1.5 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
                   isRightBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
-                {/* Row 1: Status LED dot + Title (truncated at 30vw on mobile) */}
-                <div className="flex items-center gap-1.5 min-w-0 max-w-full">
-                  <span
-                    className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
-                      isRightBase
-                        ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
-                        : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
-                    } ${rightLoading ? 'animate-pulse scale-110' : ''}`}
-                    title={rightLoading ? '正在加载高清切片...' : '高清切片已就绪'}
-                  />
-                  <span
-                    className="text-[11px] sm:text-xs font-semibold text-zinc-100 truncate max-w-[30vw] lg:max-w-none"
-                    title={rightMap.title}
-                  >
-                    {rightMap.title}
-                  </span>
-                </div>
-                {/* Row 2: Subtitle / approval badge */}
                 <span
-                  className={`text-[9px] sm:text-[10px] font-medium px-1.5 py-0.5 rounded border shadow-sm shrink-0 ${
+                  className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
                     isRightBase
-                      ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600/70'
-                      : 'bg-amber-950/80 text-amber-300 border-amber-600/70'
-                  }`}
+                      ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                      : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
+                  } ${rightLoading ? 'animate-pulse scale-110' : ''}`}
+                  title={rightLoading ? '正在加载高清切片...' : '高清切片已就绪'}
+                />
+                <span
+                  className="text-[11px] sm:text-xs font-semibold text-zinc-100 truncate max-w-[30vw] lg:max-w-none"
+                  title={rightMap.title}
                 >
-                  {rightMap.approvalCode || rightMap.categoryLabel}
+                  {rightMap.title}
                 </span>
               </div>
+              <span
+                className={`text-[9px] sm:text-[10px] font-medium px-1.5 py-0.5 rounded border shadow-sm shrink-0 ${
+                  isRightBase
+                    ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600/70'
+                    : 'bg-amber-950/80 text-amber-300 border-amber-600/70'
+                }`}
+              >
+                {rightMap.approvalCode || rightMap.categoryLabel}
+              </span>
             </div>
           );
         })()}
