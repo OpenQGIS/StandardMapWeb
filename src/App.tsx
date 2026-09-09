@@ -6,6 +6,7 @@ import { SwipeCurtainView } from './components/SwipeCurtainView';
 import { DualSyncView } from './components/DualSyncView';
 import { OverlayFadeView } from './components/OverlayFadeView';
 import { GalleryCarousel } from './components/GalleryCarousel';
+import { DebugOverlay } from './components/DebugOverlay';
 import './App.css';
 
 export function App() {
@@ -26,6 +27,9 @@ export function App() {
 
   // Floating gallery drawer open/collapsed state (defaults to false for maximized map workspace!)
   const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
+
+  // Phone diagnostics panel, only with ?debug=1 in the URL
+  const showDebug = new URLSearchParams(window.location.search).has('debug');
 
   // Keyboard shortcut listener: 'G' toggles gallery, 'Esc' closes it
   useEffect(() => {
@@ -135,6 +139,8 @@ export function App() {
         onToggleOpen={() => setIsGalleryOpen((prev) => !prev)}
         onClose={() => setIsGalleryOpen(false)}
       />
+
+      {showDebug && <DebugOverlay />}
     </div>
   );
 }

@@ -50,11 +50,31 @@ const LEVEL_SOURCE_WIDTH: Record<MapOrientation, readonly [number, number, numbe
 // Pre-downsampled overviews lose thin-line detail long before pixel counts match,
 // so the chosen level must oversample the rendered viewport by this factor
 const QUALITY_FACTOR = 1.5;
-// Demote a level only clearly below its promote threshold to avoid flicker while zooming
-const DEMOTION_HYSTERESIS = 1.25;
 
 // Persistent session cache of loaded tile URLs
 const GLOBAL_LOADED_TILES = new Set<string>();
+
+// Lightweight diagnostics surfaced by DebugOverlay (?debug=1); negligible cost
+export interface TileDebugInfo {
+  level: number;
+  viewW: number;
+  viewH: number;
+  cardW: number;
+  cardH: number;
+  visible: number;
+  loaded: number;
+  errors: number;
+}
+export const TILE_DEBUG: Record<string, TileDebugInfo> = {};
+
+const bumpTileError = (tilePath: string) => {
+  const prev =
+    TILE_DEBUG[tilePath] ??
+    (TILE_DEBUG[tilePath] = {
+      level: 0, viewW: 0, viewH: 0, cardW: 0, cardH: 0, visible: 0, loaded: 0, errors: 0,
+    });
+  prev.errors += 1;
+};
 
 export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   tilePath,
@@ -101,40 +121,23 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  const previousLevelRef = useRef(0);
-
-  // Level determination by the device pixels the card actually has to fill:
-  // neededPx = card CSS width * devicePixelRatio * scale * quality headroom,
-  // then the smallest level whose source width covers it. On retina phones the
-  // fit view already warrants L1, while a small desktop window stays on L0.
-  const currentLevel = useMemo(() => {
+  // Level 0 is only the instant underlay below, never a selectable display level:
+  // every device starts at the L1 baseline (4956px / 3424px) so phones never rest
+  // on the 1600px overview. L2 (original scan) kicks in on zoom. This kills the
+  // threshold lock-out where most phones (neededPx 1050~1584 < 1600) stuck at L0
+  // with zero tile requests and a single-flash loading LED.
+  const currentLevel = useMemo<1 | 2>(() => {
     const widths = LEVEL_SOURCE_WIDTH[orientation || 'horizontal'];
-    const neededPx = layout.cardW * devicePixelRatio * scale * QUALITY_FACTOR;
-    let target = widths.length - 1;
-    for (let level = 0; level < widths.length; level++) {
-      if (widths[level] >= neededPx) {
-        target = level;
-        break;
-      }
-    }
-    const previous = previousLevelRef.current;
-    if (target < previous) {
-      const demotionFloor = previous > 0 ? widths[previous - 1] / DEMOTION_HYSTERESIS : 0;
-      if (neededPx > demotionFloor) return previous;
-    }
-    return target;
+    const effectiveCardW = layout.cardW || window.innerWidth;
+    const neededPx = effectiveCardW * devicePixelRatio * scale * QUALITY_FACTOR;
+    if (scale >= 2.0 || neededPx >= widths[1]) return 2;
+    return 1;
   }, [layout.cardW, devicePixelRatio, scale, orientation]);
-
-  useEffect(() => {
-    previousLevelRef.current = currentLevel;
-  }, [currentLevel]);
 
   // Compute tiles for the active level
   const activeTiles = useMemo(() => {
-    if (currentLevel === 0) return [];
-
     const effectiveOrientation: MapOrientation = orientation || 'horizontal';
-    const config = GRID_CONFIGS[effectiveOrientation][currentLevel as 1 | 2];
+    const config = GRID_CONFIGS[effectiveOrientation][currentLevel];
     const { cols, rows } = config;
 
     const stepX = 100 / cols;
@@ -163,6 +166,15 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     return tiles;
   }, [currentLevel, tilePath, orientation]);
 
+  // Measurement-failure fuse: if layout geometry is still incomplete after 600ms
+  // (pathological device), give up on culling and admit the whole level so tiles
+  // always load — function over optimization in that degraded case.
+  const [layoutFallback, setLayoutFallback] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setLayoutFallback(true), 600);
+    return () => clearTimeout(t);
+  }, []);
+
   // Pure synchronous viewport culling: derive the on-screen row/col ranges from
   // the gesture state itself. The transform wrapper centers the card, so the
   // card's rendered rect is viewW/2 - cardW*scale/2 + x (same for Y). Tiles
@@ -170,12 +182,14 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   // first frame after a level change, which kills the full-level fetch storm.
   const visibleKeys = useMemo(() => {
     const keys = new Set<string>();
-    if (currentLevel === 0) return keys;
     const { viewW, viewH, cardW, cardH } = layout;
-    if (!viewW || !viewH || !cardW || !cardH) return keys;
+    if (!viewW || !viewH || !cardW || !cardH) {
+      if (layoutFallback) activeTiles.forEach((t) => keys.add(t.key));
+      return keys;
+    }
 
     const effectiveOrientation: MapOrientation = orientation || 'horizontal';
-    const config = GRID_CONFIGS[effectiveOrientation][currentLevel as 1 | 2];
+    const config = GRID_CONFIGS[effectiveOrientation][currentLevel];
     if (!config) return keys;
     const { cols, rows } = config;
 
@@ -213,7 +227,21 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
       }
     }
     return keys;
-  }, [currentLevel, layout, scale, panX, panY, orientation, tilePath, clipWindow]);
+  }, [currentLevel, layout, scale, panX, panY, orientation, tilePath, clipWindow, activeTiles, layoutFallback]);
+
+  // Publish diagnostics for DebugOverlay (?debug=1)
+  useEffect(() => {
+    TILE_DEBUG[tilePath] = {
+      level: currentLevel,
+      viewW: layout.viewW,
+      viewH: layout.viewH,
+      cardW: layout.cardW,
+      cardH: layout.cardH,
+      visible: visibleKeys.size,
+      loaded: [...GLOBAL_LOADED_TILES].filter((u) => u.startsWith(`${tilePath}/`)).length,
+      errors: TILE_DEBUG[tilePath]?.errors ?? 0,
+    };
+  }, [currentLevel, layout, visibleKeys, tilePath]);
 
   const level0Url = `${tilePath}/0/0_0.webp`;
 
@@ -288,17 +316,16 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
 
   // Visible tiles that need to be fetched over the network
   const pendingTiles = useMemo(() => {
-    if (currentLevel === 0) return [];
     return activeTiles.filter(
       (tile) => visibleKeys.has(tile.key) && !GLOBAL_LOADED_TILES.has(tile.url)
     );
-  }, [currentLevel, activeTiles, visibleKeys]);
+  }, [activeTiles, visibleKeys]);
 
   // Monitor Higher-Level (L1/L2) Visible Tiles loading
   useEffect(() => {
     let isCancelled = false;
 
-    if (currentLevel === 0 || pendingTiles.length === 0) {
+    if (pendingTiles.length === 0) {
       if (loadStartTimeRef.current !== null) {
         scheduleFinishLoading(() => isCancelled);
       } else {
@@ -388,6 +415,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
         }}
         onError={() => {
           GLOBAL_LOADED_TILES.delete(level0Url);
+          bumpTileError(tilePath);
           setIsLevel0Loaded(true);
           onBaseLoaded?.();
         }}
@@ -397,8 +425,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
       />
 
       {/* 2. Higher Level QuadTree Tiles (Rendered directly on top, instant paint as soon as decoded) */}
-      {currentLevel > 0 &&
-        activeTiles.map((tile) => {
+      {activeTiles.map((tile) => {
           const isVisible = visibleKeys.has(tile.key);
           const isLoaded = GLOBAL_LOADED_TILES.has(tile.url);
           if (!isVisible && !isLoaded) return null;
@@ -417,7 +444,10 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
                     GLOBAL_LOADED_TILES.add(tile.url);
                   }
                 }}
-                onError={() => GLOBAL_LOADED_TILES.delete(tile.url)}
+                onError={() => {
+                  GLOBAL_LOADED_TILES.delete(tile.url);
+                  bumpTileError(tilePath);
+                }}
                 className="w-full h-full object-fill pointer-events-none select-none block"
                 loading="eager"
                 decoding="async"
