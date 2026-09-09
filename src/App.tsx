@@ -127,6 +127,11 @@ export function App() {
             isSwapped={isSwapped}
           />
         )}
+
+        {/* Mobile zoom readout (desktop keeps the header pill; the bottom-left curtain gauge is desktop-only too) */}
+        <div className="lg:hidden absolute bottom-3 left-3 z-20 pointer-events-none select-none bg-panelSub/60 px-2 py-1 rounded-lg border border-white/10 text-[10px] font-mono text-zinc-300 shadow-md">
+          缩放 <span className="text-zinc-100 font-semibold">{zoomPercent}%</span>
+        </div>
       </main>
 
       {/* 3. Floating Collapsible Themes Gallery (22 maps in pairs) */}
