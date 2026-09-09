@@ -79,12 +79,14 @@ const shortenUa = () => {
 };
 
 /**
- * Full phone-side diagnostics, rendered only with ?debug=1.
- * Draggable, collapsible (double tap), copyable — plus live DOM tile state,
- * resource-timing stats, JS error capture, and two probe buttons that
- * discriminate "network stall" from "image-pipeline stall" in one screenshot.
+ * Full phone-side diagnostics, rendered with ?debug=1 or 5-tap on header.
+ * Draggable, collapsible (double tap), copyable.
  */
-export const DebugOverlay: React.FC = () => {
+interface DebugOverlayProps {
+  onClose?: () => void;
+}
+
+export const DebugOverlay: React.FC<DebugOverlayProps> = ({ onClose }) => {
   const [, setTick] = useState(0);
   const [copied, setCopied] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -324,13 +326,28 @@ export const DebugOverlay: React.FC = () => {
         <>
           <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-1 mb-1">
             <span className="text-amber-300 font-bold">调试黑匣子</span>
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="px-1.5 py-0.5 bg-lime-500/20 hover:bg-lime-500/30 text-lime-200 text-[10px] rounded border border-lime-400/40 active:scale-95 transition-transform"
-            >
-              {copied ? '✓ 已复制' : '复制文本'}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="px-1.5 py-0.5 bg-lime-500/20 hover:bg-lime-500/30 text-lime-200 text-[10px] rounded border border-lime-400/40 active:scale-95 transition-transform"
+              >
+                {copied ? '✓ 已复制' : '复制文本'}
+              </button>
+              {onClose && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClose();
+                  }}
+                  className="px-1.5 py-0.5 bg-red-500/20 hover:bg-red-500/30 text-red-200 text-[10px] rounded border border-red-400/40 active:scale-95 transition-transform"
+                  title="关闭调试面板"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
           <div className="text-amber-300">{lines[0]}</div>
           <div>UA: {shortenUa()} | 网: {connText}</div>

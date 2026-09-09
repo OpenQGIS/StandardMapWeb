@@ -12,6 +12,7 @@ interface HeaderProps {
   isGalleryOpen: boolean;
   onToggleGallery: () => void;
   themesCount?: number;
+  onToggleDebug?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -23,14 +24,43 @@ export const Header: React.FC<HeaderProps> = ({
   isGalleryOpen,
   onToggleGallery,
   themesCount = 2,
+  onToggleDebug,
 }) => {
   const [showComplianceModal, setShowComplianceModal] = useState(false);
+  const tapCountRef = React.useRef(0);
+  const lastTapTimeRef = React.useRef(0);
+
+  const handleBrandingClick = () => {
+    const now = Date.now();
+    if (now - lastTapTimeRef.current > 2500) {
+      tapCountRef.current = 1;
+    } else {
+      tapCountRef.current += 1;
+    }
+    lastTapTimeRef.current = now;
+
+    if (tapCountRef.current >= 5) {
+      tapCountRef.current = 0;
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        try {
+          navigator.vibrate?.([40, 60, 40]);
+        } catch {
+          // ignore
+        }
+      }
+      onToggleDebug?.();
+    }
+  };
 
   return (
     <header className="h-14 bg-panel border-b border-border flex items-center justify-between px-2.5 sm:px-4 z-40 relative select-none">
       {/* Left: Branding & Compliance Info */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        <div className="flex items-center gap-2 sm:gap-2.5">
+        <div
+          onClick={handleBrandingClick}
+          className="flex items-center gap-2 sm:gap-2.5 cursor-pointer active:opacity-75 transition-opacity"
+          title="标准地图/复刻地图 (连击5次开启/关闭调试面板)"
+        >
           <img
             src="./icons/webicon.svg"
             alt="标准地图/复刻地图"

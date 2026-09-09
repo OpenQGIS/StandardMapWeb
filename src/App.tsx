@@ -28,8 +28,11 @@ export function App() {
   // Floating gallery drawer open/collapsed state (defaults to false for maximized map workspace!)
   const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
 
-  // Phone diagnostics panel, only with ?debug=1 in the URL
-  const showDebug = new URLSearchParams(window.location.search).has('debug');
+  // Phone diagnostics panel: enabled if ?debug in URL or toggled via 5-tap easter egg on logo
+  const [showDebug, setShowDebug] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return new URLSearchParams(window.location.search).has('debug');
+  });
 
   // Keyboard shortcut listener: 'G' toggles gallery, 'Esc' closes it
   useEffect(() => {
@@ -88,6 +91,7 @@ export function App() {
         isGalleryOpen={isGalleryOpen}
         onToggleGallery={() => setIsGalleryOpen((prev) => !prev)}
         themesCount={MAP_THEMES.length}
+        onToggleDebug={() => setShowDebug((prev) => !prev)}
       />
 
       {/* 2. Main Comparison Viewport (Takes up flexible height) */}
@@ -145,7 +149,7 @@ export function App() {
         onClose={() => setIsGalleryOpen(false)}
       />
 
-      {showDebug && <DebugOverlay />}
+      {showDebug && <DebugOverlay onClose={() => setShowDebug(false)} />}
     </div>
   );
 }
