@@ -39,3 +39,30 @@ export const nextZoomStep = (current: number, dir: 1 | -1, cap: number): number 
   const prev = [...ZOOM_STEPS].reverse().find((s) => s < current - 1e-9);
   return Math.max(prev ?? 1, 1);
 };
+
+/**
+ * Next progressive zoom rung for double-tap / double-click.
+ * Always zooms in towards maxScale (e.g. ~100% -> 300% -> 600% -> maxScale).
+ * Once at or near maxScale, it stays at maxScale (never resets to fit;
+ * reset to fit is exclusively handled by the dedicated fit button).
+ */
+export const nextDoubleTapScale = (current: number, maxScale: number): number | null => {
+  if (current >= maxScale - 0.05) {
+    return null; // Already at or near maxScale, do not zoom further or reset
+  }
+  // Ladder rungs: 3x (regional), 6x (detail), maxScale (native pixel ceiling)
+  const candidateLadder = [3, 6, maxScale];
+  const ladder: number[] = [];
+  for (const step of candidateLadder) {
+    if (step <= maxScale && (ladder.length === 0 || step > ladder[ladder.length - 1] + 0.5)) {
+      ladder.push(step);
+    }
+  }
+  if (!ladder.includes(maxScale)) {
+    ladder.push(maxScale);
+  }
+
+  const next = ladder.find((s) => s > current + 0.1);
+  return next ? Math.min(next, maxScale) : maxScale;
+};
+

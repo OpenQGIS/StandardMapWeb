@@ -1,12 +1,9 @@
 import { useEffect, useRef } from 'react';
 import type { ViewportState } from '../types/map';
+import { nextDoubleTapScale } from '../utils/zoom';
 
 interface DoubleTapZoomConfig {
-  /** Zoom-in target of a double tap (4 crosses the L2 threshold on retina phones) */
-  targetScale?: number;
-  /** Scale the second double tap returns to (1 = fit) */
-  minScale?: number;
-  /** Upper zoom clamp, same as gesture zoom */
+  /** Upper zoom clamp (e.g. 8x on desktop, 10x on mobile) */
   maxScale?: number;
   /** Reads the freshest viewport so native listeners never see stale closures */
   getViewport: () => ViewportState;
@@ -23,10 +20,10 @@ const INTERACTIVE_SELECTOR =
   'button, a, input, .swipe-divider-handle, .swipe-control-panel, .overlay-control-panel, .overlay-zoom-controls';
 
 /**
- * Photo-viewer style zoom: double tap/double click zooms to targetScale anchored
- * at the tap point; a second double tap only returns to fit once already at or
- * above the target (below it, double tap always zooms in). Reuses the same
- * anchor invariant as the pinch handler, so the tapped point stays under the finger.
+ * WebGIS-standard progressive zoom: double tap/double click zooms in along a
+ * clean integer ladder (e.g. 100% -> 300% -> 600% -> maxScale) anchored at the
+ * tapped point. Once at or near maxScale, double tap stops (never resets to fit;
+ * view reset is exclusively handled by the dedicated fit/maximize button).
  */
 export function useDoubleTapZoom(
   containerRef: React.RefObject<HTMLDivElement | null>,
@@ -45,24 +42,31 @@ export function useDoubleTapZoom(
     let touchStart: { x: number; y: number; time: number } | null = null;
     let lastTap: { x: number; y: number; time: number } | null = null;
     let lastTouchTime = 0;
+    let lastZoomTime = 0;
 
     const zoomAt = (clientX: number, clientY: number, target: EventTarget | null) => {
-      const { targetScale = 4, minScale = 1, maxScale = 16, getAnchorEl } = configRef.current;
+      const now = Date.now();
+      // Debounce rapid triple/quadruple taps to prevent accidental double-jumps
+      if (now - lastZoomTime < 350) return;
+
+      const { maxScale = 10, getAnchorEl } = configRef.current;
       const current = configRef.current.getViewport();
-      // Only toggle back to fit when already at (or above) the target zoom —
-      // below it a double tap always means "zoom in here". The dedicated fit
-      // button and pinch-out remain the other reset paths.
-      if (current.scale >= targetScale) {
-        setViewport({ scale: minScale, x: 0, y: 0 });
+
+      const newScale = nextDoubleTapScale(current.scale, maxScale);
+      // Already at maxScale: stay firm, no-op, never bounce back to fit!
+      if (newScale === null || Math.abs(newScale - current.scale) < 1e-4) {
         return;
       }
+
+      lastZoomTime = now;
+
       const anchorEl =
         (getAnchorEl && target instanceof HTMLElement && getAnchorEl(target)) || container;
       const rect = anchorEl.getBoundingClientRect();
       const dx = clientX - rect.left - rect.width / 2;
       const dy = clientY - rect.top - rect.height / 2;
-      const newScale = Math.min(targetScale, maxScale);
       const scaleRatio = newScale / current.scale;
+
       setViewport({
         scale: newScale,
         x: dx - (dx - current.x) * scaleRatio,
