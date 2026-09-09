@@ -58,7 +58,8 @@ body, #root {
 
 /* Opacity slider: fully custom thumb so it stays a perfect circle on every
    engine (native thumbs get squashed into ellipses on short tracks in iOS
-   WebKit). Amber ring + white fill + amber halo. */
+   WebKit). Amber ring + white fill + amber halo; the amber track fill up to
+   the thumb is a gradient set inline from the current value. */
 .opacity-slider {
   -webkit-appearance: none;
   appearance: none;
@@ -70,25 +71,30 @@ body, #root {
 .opacity-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #ffffff;
-  border: 2px solid #fbbf24;
+  border: 3px solid #fbbf24;
   box-shadow:
-    0 0 0 4px rgba(251, 191, 36, 0.22),
-    0 0 10px rgba(251, 191, 36, 0.65);
+    0 0 0 3px rgba(251, 191, 36, 0.25),
+    0 0 8px rgba(251, 191, 36, 0.65);
   cursor: pointer;
 }
 .opacity-slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #ffffff;
-  border: 2px solid #fbbf24;
+  border: 3px solid #fbbf24;
   box-shadow:
-    0 0 0 4px rgba(251, 191, 36, 0.22),
-    0 0 10px rgba(251, 191, 36, 0.65);
+    0 0 0 3px rgba(251, 191, 36, 0.25),
+    0 0 8px rgba(251, 191, 36, 0.65);
   cursor: pointer;
+}
+.opacity-slider::-moz-range-progress {
+  height: 6px;
+  background: #fbbf24;
+  border-radius: 9999px;
 }
 
