@@ -3,6 +3,7 @@ import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
 import { MapSvg } from './MapSvg';
 import { useCardDimensions } from '../hooks/useCardDimensions';
 import { useDoubleTapZoom } from '../hooks/useDoubleTapZoom';
+import { maxNativeScale } from '../utils/zoom';
 import { ZoomIn, ZoomOut, Maximize2, Crosshair } from 'lucide-react';
 
 interface DualSyncViewProps {
@@ -28,6 +29,13 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
   const leftPaneRef = useRef<HTMLDivElement>(null);
   const rightPaneRef = useRef<HTMLDivElement>(null);
   const cardDimensions = useCardDimensions(leftPaneRef, aspectRatio, orientation, 0.92);
+
+  // Clamp gestures at the L2 native-pixel zoom: further zoom only upsamples
+  const zoomMax = maxNativeScale(
+    cardDimensions.width,
+    window.devicePixelRatio || 1,
+    orientation
+  );
   const [isPanning, setIsPanning] = useState(false);
   const [hoverNormalizedPos, setHoverNormalizedPos] = useState<{ x: number; y: number } | null>(null);
   const panStartRef = useRef<{ x: number; y: number; startX: number; startY: number }>({
@@ -56,6 +64,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
   useDoubleTapZoom(containerRef, setViewport, {
     getViewport: () => viewportRef.current,
     getAnchorEl: (target) => target.closest('.dual-pane'),
+    maxScale: zoomMax,
   });
 
   const rafIdRef = useRef<number | null>(null);
@@ -109,7 +118,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
     }
 
     const current = viewportRef.current;
-    const newScale = Math.min(Math.max(current.scale * zoomFactor, 0.1), 16);
+    const newScale = Math.min(Math.max(current.scale * zoomFactor, 0.1), zoomMax);
     const scaleRatio = newScale / current.scale;
 
     const newX = dx - (dx - current.x) * scaleRatio;
@@ -240,7 +249,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
 
       const factor = dist / touchPinchDistRef.current;
       const startScale = touchPinchStartScaleRef.current;
-      const newScale = Math.min(Math.max(startScale * factor, 0.1), 16);
+      const newScale = Math.min(Math.max(startScale * factor, 0.1), zoomMax);
 
       const targetPane = (e.currentTarget as HTMLDivElement) || containerRef.current;
       if (targetPane) {
@@ -290,7 +299,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
   // Zoom controls (centered on viewport)
   const zoomIn = () => {
     setViewport((prev) => {
-      const newScale = Math.min(prev.scale * 1.25, 16);
+      const newScale = Math.min(prev.scale * 1.25, zoomMax);
       const ratio = newScale / prev.scale;
       return { scale: newScale, x: prev.x * ratio, y: prev.y * ratio };
     });

@@ -3,6 +3,7 @@ import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
 import { MapSvg } from './MapSvg';
 import { useCardDimensions } from '../hooks/useCardDimensions';
 import { useDoubleTapZoom } from '../hooks/useDoubleTapZoom';
+import { maxNativeScale } from '../utils/zoom';
 import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { LayerOverlayIcon } from './CustomIcons';
 
@@ -27,6 +28,13 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const cardDimensions = useCardDimensions(containerRef, aspectRatio, orientation, 0.94);
+
+  // Clamp gestures at the L2 native-pixel zoom: further zoom only upsamples
+  const zoomMax = maxNativeScale(
+    cardDimensions.width,
+    window.devicePixelRatio || 1,
+    orientation
+  );
   const [opacity, setOpacity] = useState<number>(0.65);
   const [mixBlendMode, setMixBlendMode] = useState<'normal' | 'multiply' | 'difference'>('normal');
   const [isPanning, setIsPanning] = useState(false);
@@ -49,6 +57,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
   // Double tap on the stack jumps straight to high-res tiles and back to fit
   useDoubleTapZoom(containerRef, setViewport, {
     getViewport: () => viewportRef.current,
+    maxScale: zoomMax,
   });
 
   const rafIdRef = useRef<number | null>(null);
@@ -96,7 +105,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
     }
 
     const current = viewportRef.current;
-    const newScale = Math.min(Math.max(current.scale * zoomFactor, 0.1), 16);
+    const newScale = Math.min(Math.max(current.scale * zoomFactor, 0.1), zoomMax);
     const scaleRatio = newScale / current.scale;
 
     const newX = dx - (dx - current.x) * scaleRatio;
@@ -180,7 +189,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
 
       const factor = dist / touchPinchDistRef.current;
       const startScale = touchPinchStartScaleRef.current;
-      const newScale = Math.min(Math.max(startScale * factor, 0.1), 16);
+      const newScale = Math.min(Math.max(startScale * factor, 0.1), zoomMax);
 
       const container = containerRef.current;
       if (container) {
@@ -363,7 +372,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
         <button
           onClick={() =>
             setViewport((prev) => {
-              const newScale = Math.min(prev.scale * 1.25, 16);
+              const newScale = Math.min(prev.scale * 1.25, zoomMax);
               const ratio = newScale / prev.scale;
               return { scale: newScale, x: prev.x * ratio, y: prev.y * ratio };
             })

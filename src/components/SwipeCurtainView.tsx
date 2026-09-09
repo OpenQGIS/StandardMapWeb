@@ -5,6 +5,7 @@ import { useCardDimensions } from '../hooks/useCardDimensions';
 import { ZoomIn, ZoomOut, Maximize2, MoveHorizontal } from 'lucide-react';
 import { LottieLoader } from './LottieLoader';
 import { useDoubleTapZoom } from '../hooks/useDoubleTapZoom';
+import { maxNativeScale } from '../utils/zoom';
 
 interface SwipeCurtainViewProps {
   baseMap: MapLayer;
@@ -28,6 +29,13 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const cardDimensions = useCardDimensions(containerRef, aspectRatio, orientation, 0.94);
+
+  // Clamp gestures at the L2 native-pixel zoom: further zoom only upsamples
+  const zoomMax = maxNativeScale(
+    cardDimensions.width,
+    window.devicePixelRatio || 1,
+    orientation
+  );
 
   // Active layer order based on isSwapped (bottomMap on left, topMap on right)
   const bottomMap = isSwapped ? reproductionMap : baseMap;
@@ -99,6 +107,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
   // Double tap on the map jumps straight to high-res tiles and back to fit
   useDoubleTapZoom(containerRef, setViewport, {
     getViewport: () => viewportRef.current,
+    maxScale: zoomMax,
   });
 
   const rafIdRef = useRef<number | null>(null);
@@ -147,7 +156,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
     }
 
     const current = viewportRef.current;
-    const newScale = Math.min(Math.max(current.scale * zoomFactor, 0.1), 16);
+    const newScale = Math.min(Math.max(current.scale * zoomFactor, 0.1), zoomMax);
     const scaleRatio = newScale / current.scale;
 
     const newX = dx - (dx - current.x) * scaleRatio;
@@ -337,7 +346,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
 
       const factor = dist / touchPinchDistRef.current;
       const startScale = touchPinchStartScaleRef.current;
-      const newScale = Math.min(Math.max(startScale * factor, 0.1), 16);
+      const newScale = Math.min(Math.max(startScale * factor, 0.1), zoomMax);
 
       const container = containerRef.current;
       if (container) {
@@ -390,7 +399,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
   // Quick zoom buttons (centered on viewport)
   const zoomIn = () => {
     setViewport((prev) => {
-      const newScale = Math.min(prev.scale * 1.25, 16);
+      const newScale = Math.min(prev.scale * 1.25, zoomMax);
       const ratio = newScale / prev.scale;
       return { scale: newScale, x: prev.x * ratio, y: prev.y * ratio };
     });
