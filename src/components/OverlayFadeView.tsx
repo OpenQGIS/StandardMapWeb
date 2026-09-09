@@ -347,7 +347,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
               step="0.01"
               value={opacity}
               onChange={(e) => setOpacity(parseFloat(e.target.value))}
-              className="flex-1 min-w-[36px] sm:min-w-[60px] max-w-[130px] accent-amber-400 cursor-pointer h-1.5 bg-zinc-700 rounded-lg"
+              className="opacity-slider flex-1 min-w-[36px] sm:min-w-[60px] max-w-[130px] cursor-pointer"
               title={`透明度: ${Math.round(opacity * 100)}%`}
             />
             <span className="text-xs font-mono text-amber-400 w-8 sm:w-9 text-right font-semibold shrink-0 select-none">

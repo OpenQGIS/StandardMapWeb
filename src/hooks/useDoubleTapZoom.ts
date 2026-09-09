@@ -24,8 +24,9 @@ const INTERACTIVE_SELECTOR =
 
 /**
  * Photo-viewer style zoom: double tap/double click zooms to targetScale anchored
- * at the tap point; tapping again returns to fit. Reuses the same anchor
- * invariant as the pinch handler, so the tapped point stays under the finger.
+ * at the tap point; a second double tap only returns to fit once already at or
+ * above the target (below it, double tap always zooms in). Reuses the same
+ * anchor invariant as the pinch handler, so the tapped point stays under the finger.
  */
 export function useDoubleTapZoom(
   containerRef: React.RefObject<HTMLDivElement | null>,
@@ -48,7 +49,10 @@ export function useDoubleTapZoom(
     const zoomAt = (clientX: number, clientY: number, target: EventTarget | null) => {
       const { targetScale = 4, minScale = 1, maxScale = 16, getAnchorEl } = configRef.current;
       const current = configRef.current.getViewport();
-      if (current.scale >= targetScale / 2) {
+      // Only toggle back to fit when already at (or above) the target zoom —
+      // below it a double tap always means "zoom in here". The dedicated fit
+      // button and pinch-out remain the other reset paths.
+      if (current.scale >= targetScale) {
         setViewport({ scale: minScale, x: 0, y: 0 });
         return;
       }

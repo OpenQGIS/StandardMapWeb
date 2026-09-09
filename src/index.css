@@ -56,3 +56,39 @@ body, #root {
   image-rendering: high-quality;
 }
 
+/* Opacity slider: fully custom thumb so it stays a perfect circle on every
+   engine (native thumbs get squashed into ellipses on short tracks in iOS
+   WebKit). Amber ring + white fill + amber halo. */
+.opacity-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: #3f3f46;
+  border-radius: 9999px;
+  outline: none;
+}
+.opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #fbbf24;
+  box-shadow:
+    0 0 0 4px rgba(251, 191, 36, 0.22),
+    0 0 10px rgba(251, 191, 36, 0.65);
+  cursor: pointer;
+}
+.opacity-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #fbbf24;
+  box-shadow:
+    0 0 0 4px rgba(251, 191, 36, 0.22),
+    0 0 10px rgba(251, 191, 36, 0.65);
+  cursor: pointer;
+}
+
