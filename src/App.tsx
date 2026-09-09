@@ -77,7 +77,7 @@ export function App() {
   const zoomPercent = Math.round(viewport.scale * 100);
 
   return (
-    <div className="w-screen h-screen flex flex-col bg-[#0c0d10] text-zinc-100 overflow-hidden select-none">
+    <div className="w-screen h-full flex flex-col bg-[#0c0d10] text-zinc-100 overflow-hidden select-none">
       {/* 1. Header Toolbar */}
       <Header
         mode={mode}
