@@ -37,6 +37,23 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
     orientation
   );
 
+  // Layout zoom (Leaflet-style): bake the scale into the card's layout size
+  // instead of a transform scale on the wrapper. Mobile WebKit rasters
+  // transform-scaled layers at layout resolution and then stretches the
+  // texture, which looked blurry even with L2 tiles loaded; a translate-only
+  // wrapper forces re-rasterization at the final device resolution.
+  // Screen mapping stays identical: center + d*scale + (x, y).
+  const zoomedW = cardDimensions.width
+    ? Math.round(cardDimensions.width * viewport.scale)
+    : 0;
+  const zoomedH = cardDimensions.height
+    ? Math.round(cardDimensions.height * viewport.scale)
+    : 0;
+  const cardSize = useMemo(
+    () => ({ width: zoomedW, height: zoomedH }),
+    [zoomedW, zoomedH]
+  );
+
   // Active layer order based on isSwapped (bottomMap on left, topMap on right)
   const bottomMap = isSwapped ? reproductionMap : baseMap;
   const topMap = isSwapped ? baseMap : reproductionMap;
@@ -439,18 +456,15 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
       <div
         className="absolute inset-0 flex items-center justify-center pointer-events-none"
         style={{
-          transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0) scale(${viewport.scale})`,
-          transformOrigin: 'center center',
+          transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0)`,
         }}
       >
         <div
           ref={cardRef}
-          className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15"
+          className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0"
           style={{
-            width: cardDimensions.width ? `${cardDimensions.width}px` : 'auto',
-            height: cardDimensions.height ? `${cardDimensions.height}px` : 'auto',
-            maxWidth: '94%',
-            maxHeight: '94%',
+            width: zoomedW ? `${zoomedW}px` : 'auto',
+            height: zoomedH ? `${zoomedH}px` : 'auto',
             aspectRatio,
           }}
         >
@@ -466,6 +480,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
               }}
               hideLoader
               clipWindow={bottomClipWindow}
+              cardSize={cardSize}
             />
         </div>
       </div>
@@ -478,17 +493,14 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
         <div
           className="absolute inset-0 flex items-center justify-center"
           style={{
-            transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0) scale(${viewport.scale})`,
-            transformOrigin: 'center center',
+            transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0)`,
           }}
         >
           <div
-            className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15"
+            className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0"
             style={{
-              width: cardDimensions.width ? `${cardDimensions.width}px` : 'auto',
-              height: cardDimensions.height ? `${cardDimensions.height}px` : 'auto',
-              maxWidth: '94%',
-              maxHeight: '94%',
+              width: zoomedW ? `${zoomedW}px` : 'auto',
+              height: zoomedH ? `${zoomedH}px` : 'auto',
               aspectRatio,
             }}
           >
@@ -504,6 +516,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
               }}
               hideLoader
               clipWindow={topClipWindow}
+              cardSize={cardSize}
             />
           </div>
         </div>

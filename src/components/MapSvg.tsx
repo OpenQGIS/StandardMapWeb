@@ -12,6 +12,7 @@ interface MapSvgProps {
   onBaseLoaded?: () => void;
   hideLoader?: boolean;
   clipWindow?: TileClipWindow;
+  cardSize?: { width: number; height: number };
 }
 
 export const MapSvg: React.FC<MapSvgProps> = ({
@@ -23,6 +24,7 @@ export const MapSvg: React.FC<MapSvgProps> = ({
   onBaseLoaded,
   hideLoader = false,
   clipWindow,
+  cardSize,
 }) => {
   // If QuadTree tiling is available, render TileMapLayer for instant load and progressive zoom
   if (item.tilePath) {
@@ -38,6 +40,7 @@ export const MapSvg: React.FC<MapSvgProps> = ({
         onBaseLoaded={onBaseLoaded}
         hideLoader={hideLoader}
         clipWindow={clipWindow}
+        cardSize={cardSize}
       />
     );
   }

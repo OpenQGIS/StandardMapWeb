@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
 import { MapSvg } from './MapSvg';
 import { useCardDimensions } from '../hooks/useCardDimensions';
@@ -34,6 +34,20 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
     cardDimensions.width,
     window.devicePixelRatio || 1,
     orientation
+  );
+
+  // Layout zoom (Leaflet-style): bake scale into the card size so mobile WebKit
+  // rasters at final device resolution; wrapper transform stays translate-only.
+  // Screen mapping stays identical: center + d*scale + (x, y).
+  const zoomedW = cardDimensions.width
+    ? Math.round(cardDimensions.width * viewport.scale)
+    : 0;
+  const zoomedH = cardDimensions.height
+    ? Math.round(cardDimensions.height * viewport.scale)
+    : 0;
+  const cardSize = useMemo(
+    () => ({ width: zoomedW, height: zoomedH }),
+    [zoomedW, zoomedH]
   );
   const [opacity, setOpacity] = useState<number>(0.65);
   const [mixBlendMode, setMixBlendMode] = useState<'normal' | 'multiply' | 'difference'>('normal');
@@ -279,21 +293,18 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
       <div
         className="absolute inset-0 flex items-center justify-center pointer-events-none"
         style={{
-          transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0) scale(${viewport.scale})`,
-          transformOrigin: 'center center',
+          transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0)`,
         }}
       >
         <div
-          className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15"
+          className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0"
           style={{
-            width: cardDimensions.width ? `${cardDimensions.width}px` : 'auto',
-            height: cardDimensions.height ? `${cardDimensions.height}px` : 'auto',
-            maxWidth: '94%',
-            maxHeight: '94%',
+            width: zoomedW ? `${zoomedW}px` : 'auto',
+            height: zoomedH ? `${zoomedH}px` : 'auto',
             aspectRatio,
           }}
         >
-          <MapSvg key={bottomMap.tilePath || bottomMap.imageUrl || bottomMap.id} item={bottomMap} orientation={orientation} viewport={viewport} />
+          <MapSvg key={bottomMap.tilePath || bottomMap.imageUrl || bottomMap.id} item={bottomMap} orientation={orientation} viewport={viewport} cardSize={cardSize} />
         </div>
       </div>
 
@@ -303,21 +314,18 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
         style={{
           opacity,
           mixBlendMode,
-          transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0) scale(${viewport.scale})`,
-          transformOrigin: 'center center',
+          transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0)`,
         }}
       >
         <div
-          className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15"
+          className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0"
           style={{
-            width: cardDimensions.width ? `${cardDimensions.width}px` : 'auto',
-            height: cardDimensions.height ? `${cardDimensions.height}px` : 'auto',
-            maxWidth: '94%',
-            maxHeight: '94%',
+            width: zoomedW ? `${zoomedW}px` : 'auto',
+            height: zoomedH ? `${zoomedH}px` : 'auto',
             aspectRatio,
           }}
         >
-          <MapSvg key={topMap.tilePath || topMap.imageUrl || topMap.id} item={topMap} orientation={orientation} viewport={viewport} />
+          <MapSvg key={topMap.tilePath || topMap.imageUrl || topMap.id} item={topMap} orientation={orientation} viewport={viewport} cardSize={cardSize} />
         </div>
       </div>
 

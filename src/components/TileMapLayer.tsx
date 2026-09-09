@@ -13,6 +13,8 @@ interface TileMapLayerProps {
   hideLoader?: boolean;
   /** Horizontal window of the view actually visible (curtain clipping); omit for full width */
   clipWindow?: TileClipWindow;
+  /** Exact (zoom-baked) card layout size from the view; measured geometry is the fallback */
+  cardSize?: { width: number; height: number };
 }
 
 interface TileInfo {
@@ -86,6 +88,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   onBaseLoaded,
   hideLoader = false,
   clipWindow,
+  cardSize,
 }) => {
   const scale = viewport?.scale ?? 1;
   const panX = viewport?.x ?? 0;
@@ -128,11 +131,14 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   // with zero tile requests and a single-flash loading LED.
   const currentLevel = useMemo<1 | 2>(() => {
     const widths = LEVEL_SOURCE_WIDTH[orientation || 'horizontal'];
-    const effectiveCardW = layout.cardW || window.innerWidth;
-    const neededPx = effectiveCardW * devicePixelRatio * scale * QUALITY_FACTOR;
+    // The card is laid out at base size * scale (layout zoom), so no extra
+    // scale factor here. Prefer the view-provided exact size: the ResizeObserver
+    // measurement lags one frame on zoom jumps.
+    const effectiveCardW = cardSize?.width || layout.cardW || window.innerWidth;
+    const neededPx = effectiveCardW * devicePixelRatio * QUALITY_FACTOR;
     if (scale >= 2.0 || neededPx >= widths[1]) return 2;
     return 1;
-  }, [layout.cardW, devicePixelRatio, scale, orientation]);
+  }, [cardSize, layout.cardW, devicePixelRatio, scale, orientation]);
 
   // Compute tiles for the active level
   const activeTiles = useMemo(() => {
@@ -182,7 +188,9 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   // first frame after a level change, which kills the full-level fetch storm.
   const visibleKeys = useMemo(() => {
     const keys = new Set<string>();
-    const { viewW, viewH, cardW, cardH } = layout;
+    const { viewW, viewH } = layout;
+    const cardW = cardSize?.width || layout.cardW;
+    const cardH = cardSize?.height || layout.cardH;
     if (!viewW || !viewH || !cardW || !cardH) {
       if (layoutFallback) activeTiles.forEach((t) => keys.add(t.key));
       return keys;
@@ -196,20 +204,22 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     const SCREEN_MARGIN = 120; // px prefetch buffer around the visible box
     const CLIP_BUFFER = 64; // px slack on each side of a curtain clip window
 
-    const left = viewW / 2 - (cardW * scale) / 2 + panX;
-    const top = viewH / 2 - (cardH * scale) / 2 + panY;
+    // layout.cardW/cardH already bake in the zoom (layout zoom), so the
+    // rendered rect is simply centered + pan.
+    const left = viewW / 2 - cardW / 2 + panX;
+    const top = viewH / 2 - cardH / 2 + panY;
 
     let x0 = Math.max(0, left - SCREEN_MARGIN);
-    let x1 = Math.min(viewW, left + cardW * scale + SCREEN_MARGIN);
+    let x1 = Math.min(viewW, left + cardW + SCREEN_MARGIN);
     if (clipWindow) {
       x0 = Math.max(x0, clipWindow.minX * viewW - CLIP_BUFFER);
       x1 = Math.min(x1, clipWindow.maxX * viewW + CLIP_BUFFER);
     }
     const y0 = Math.max(0, top - SCREEN_MARGIN);
-    const y1 = Math.min(viewH, top + cardH * scale + SCREEN_MARGIN);
+    const y1 = Math.min(viewH, top + cardH + SCREEN_MARGIN);
 
-    const spanW = cardW * scale;
-    const spanH = cardH * scale;
+    const spanW = cardW;
+    const spanH = cardH;
     const fX0 = spanW > 0 ? Math.min(1, Math.max(0, (x0 - left) / spanW)) : 0;
     const fX1 = spanW > 0 ? Math.min(1, Math.max(0, (x1 - left) / spanW)) : 0;
     const fY0 = spanH > 0 ? Math.min(1, Math.max(0, (y0 - top) / spanH)) : 0;
@@ -227,7 +237,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
       }
     }
     return keys;
-  }, [currentLevel, layout, scale, panX, panY, orientation, tilePath, clipWindow, activeTiles, layoutFallback]);
+  }, [currentLevel, layout, cardSize, panX, panY, orientation, tilePath, clipWindow, activeTiles, layoutFallback]);
 
   // Publish diagnostics for DebugOverlay (?debug=1)
   useEffect(() => {
@@ -235,13 +245,13 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
       level: currentLevel,
       viewW: layout.viewW,
       viewH: layout.viewH,
-      cardW: layout.cardW,
-      cardH: layout.cardH,
+      cardW: cardSize?.width || layout.cardW,
+      cardH: cardSize?.height || layout.cardH,
       visible: visibleKeys.size,
       loaded: [...GLOBAL_LOADED_TILES].filter((u) => u.startsWith(`${tilePath}/`)).length,
       errors: TILE_DEBUG[tilePath]?.errors ?? 0,
     };
-  }, [currentLevel, layout, visibleKeys, tilePath]);
+  }, [currentLevel, layout, cardSize, visibleKeys, tilePath]);
 
   const level0Url = `${tilePath}/0/0_0.webp`;
 

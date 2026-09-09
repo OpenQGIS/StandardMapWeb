@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
 import { MapSvg } from './MapSvg';
 import { useCardDimensions } from '../hooks/useCardDimensions';
@@ -35,6 +35,20 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
     cardDimensions.width,
     window.devicePixelRatio || 1,
     orientation
+  );
+
+  // Layout zoom (Leaflet-style): bake scale into the card size so mobile WebKit
+  // rasters at final device resolution; wrapper transform stays translate-only.
+  // Screen mapping stays identical: center + d*scale + (x, y).
+  const zoomedW = cardDimensions.width
+    ? Math.round(cardDimensions.width * viewport.scale)
+    : 0;
+  const zoomedH = cardDimensions.height
+    ? Math.round(cardDimensions.height * viewport.scale)
+    : 0;
+  const cardSize = useMemo(
+    () => ({ width: zoomedW, height: zoomedH }),
+    [zoomedW, zoomedH]
   );
   const [isPanning, setIsPanning] = useState(false);
   const [hoverNormalizedPos, setHoverNormalizedPos] = useState<{ x: number; y: number } | null>(null);
@@ -388,17 +402,14 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
         <div
           className="absolute inset-0 flex items-center justify-center pointer-events-none"
           style={{
-            transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0) scale(${viewport.scale})`,
-            transformOrigin: 'center center',
+            transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0)`,
           }}
         >
           <div
-            className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15"
+            className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0"
             style={{
-              width: cardDimensions.width ? `${cardDimensions.width}px` : 'auto',
-              height: cardDimensions.height ? `${cardDimensions.height}px` : 'auto',
-              maxWidth: '92%',
-              maxHeight: '92%',
+              width: zoomedW ? `${zoomedW}px` : 'auto',
+              height: zoomedH ? `${zoomedH}px` : 'auto',
               aspectRatio,
             }}
           >
@@ -408,6 +419,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
               orientation={orientation}
               viewport={viewport}
               onLoadingChange={setLeftLoading}
+              cardSize={cardSize}
             />
           </div>
         </div>
@@ -490,17 +502,14 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
         <div
           className="absolute inset-0 flex items-center justify-center pointer-events-none"
           style={{
-            transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0) scale(${viewport.scale})`,
-            transformOrigin: 'center center',
+            transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0)`,
           }}
         >
           <div
-            className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15"
+            className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0"
             style={{
-              width: cardDimensions.width ? `${cardDimensions.width}px` : 'auto',
-              height: cardDimensions.height ? `${cardDimensions.height}px` : 'auto',
-              maxWidth: '92%',
-              maxHeight: '92%',
+              width: zoomedW ? `${zoomedW}px` : 'auto',
+              height: zoomedH ? `${zoomedH}px` : 'auto',
               aspectRatio,
             }}
           >
@@ -510,6 +519,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
               orientation={orientation}
               viewport={viewport}
               onLoadingChange={setRightLoading}
+              cardSize={cardSize}
             />
           </div>
         </div>
