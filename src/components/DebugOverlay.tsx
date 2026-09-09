@@ -1,17 +1,58 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { TILE_DEBUG } from './TileMapLayer';
 
+/** Fetch one URL with a hard timeout, returning a compact result line. */
+const fetchOne = async (url: string, timeoutMs = 10000): Promise<string> => {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  const t0 = performance.now();
+  try {
+    const res = await fetch(url, { cache: 'no-store', signal: ctrl.signal });
+    const blob = await res.blob();
+    return `✓ ${res.status} · ${Math.round(performance.now() - t0)}ms · ${Math.round(blob.size / 1024)}KB`;
+  } catch (err) {
+    const label =
+      (err as Error).name === 'AbortError' ? '超时' : (err as Error).message || '失败';
+    return `✗ ${label} · ${Math.round(performance.now() - t0)}ms`;
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+const shortenUa = () => {
+  const ua = navigator.userAgent;
+  const ios = ua.match(/iPhone OS (\d+_\d+)/)?.[1]?.replace('_', '.');
+  const android = ua.match(/Android (\d+)/)?.[1];
+  const os = ios ? `iOS ${ios}` : android ? `Android ${android}` : '其他';
+  const app = /MicroMessenger/.test(ua)
+    ? '微信'
+    : /FxiOS/.test(ua)
+      ? 'Firefox'
+      : /CriOS/.test(ua)
+        ? 'Chrome'
+        : /Safari/.test(ua)
+          ? 'Safari'
+          : '?';
+  return `${app} · ${os}`;
+};
+
 /**
- * Phone-side diagnostics, rendered only when the URL carries ?debug=1.
- * Draggable (pointer events, touch + mouse) and collapsible (double tap)
- * so it never has to sit on top of the toolbar or labels.
+ * Full phone-side diagnostics, rendered only with ?debug=1.
+ * Draggable, collapsible (double tap), copyable — plus live DOM tile state,
+ * resource-timing stats, JS error capture, and two probe buttons that
+ * discriminate "network stall" from "image-pipeline stall" in one screenshot.
  */
 export const DebugOverlay: React.FC = () => {
   const [, setTick] = useState(0);
   const [copied, setCopied] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [pos, setPos] = useState({ x: 6, y: 64 });
-  const [probe, setProbe] = useState<string | null>(null);
+  const [probes, setProbes] = useState<string[]>([]);
+  const [jsErrors, setJsErrors] = useState<string[]>([]);
+  const [env, setEnv] = useState<{ webp: boolean | null; storage: boolean }>({
+    webp: null,
+    storage: true,
+  });
   const dragRef = useRef<{ startX: number; startY: number; baseX: number; baseY: number } | null>(
     null
   );
@@ -21,36 +62,33 @@ export const DebugOverlay: React.FC = () => {
     return () => clearInterval(t);
   }, []);
 
-  // Live DOM tile state (refreshed by the 500ms tick): distinguishes
-  // "requests hanging" (pending) from "decoded but not painted" (ok).
-  const domStats = (() => {
-    const imgs = [
-      ...document.querySelectorAll<HTMLElement>('main img[src*="/tiles/"]'),
-    ] as HTMLImageElement[];
-    let ok = 0;
-    let fail = 0;
-    let pend = 0;
-    imgs.forEach((i) => {
-      if (i.complete && i.naturalWidth > 0) ok++;
-      else if (i.complete) fail++;
-      else pend++;
-    });
-    return { mounted: imgs.length, ok, fail, pend };
-  })();
-
-  const runProbe = async () => {
-    setProbe('测试中...');
-    const t0 = performance.now();
+  // Environment checks (once): webp decode, storage writability (private-mode hint)
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setEnv((e) => ({ ...e, webp: img.width === 1 }));
+    img.onerror = () => setEnv((e) => ({ ...e, webp: false }));
+    img.src = 'data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==';
     try {
-      const res = await fetch('./maps/tiles/h-china-base/1/0_1.webp', { cache: 'no-store' });
-      const ms = Math.round(performance.now() - t0);
-      const blob = await res.blob();
-      setProbe(`HTTP ${res.status} · ${ms}ms · ${Math.round(blob.size / 1024)}KB`);
-    } catch (err) {
-      const ms = Math.round(performance.now() - t0);
-      setProbe(`失败: ${(err as Error).message} · ${ms}ms`);
+      localStorage.setItem('__dbg', '1');
+      localStorage.removeItem('__dbg');
+    } catch {
+      setEnv((e) => ({ ...e, storage: false }));
     }
-  };
+  }, []);
+
+  // Capture silent JS errors/rejections (debug mode only)
+  useEffect(() => {
+    const onErr = (e: ErrorEvent) =>
+      setJsErrors((a) => [...a.slice(-2), (e.message || 'error').slice(0, 90)]);
+    const onRej = (e: PromiseRejectionEvent) =>
+      setJsErrors((a) => [...a.slice(-2), `rej: ${String(e.reason).slice(0, 80)}`]);
+    window.addEventListener('error', onErr);
+    window.addEventListener('unhandledrejection', onRej);
+    return () => {
+      window.removeEventListener('error', onErr);
+      window.removeEventListener('unhandledrejection', onRej);
+    };
+  }, []);
 
   const bundle =
     [...document.scripts]
@@ -59,23 +97,141 @@ export const DebugOverlay: React.FC = () => {
       ?.split('/')
       .pop() || 'unknown';
 
-  const debugText = [
+  // Live per-layer DOM tile state (mounted / decoded / failed / pending + names)
+  const domLines = Object.keys(TILE_DEBUG).map((path) => {
+    const key = path.split('/').pop() || path;
+    const imgs = [
+      ...document.querySelectorAll<HTMLImageElement>(`main img[src*="${key}"]`),
+    ];
+    let ok = 0;
+    let fail = 0;
+    imgs.forEach((i) => {
+      if (i.complete && i.naturalWidth > 0) ok++;
+      else if (i.complete) fail++;
+    });
+    const pend = imgs.length - ok - fail;
+    const pendNames = imgs
+      .filter((i) => !i.complete)
+      .slice(0, 3)
+      .map((i) => i.src.split('/').slice(-2).join('/'));
+    return { key, mounted: imgs.length, ok, fail, pend, pendNames };
+  });
+
+  // Resource-timing stats for tile traffic
+  const netStats = (() => {
+    const es = performance
+      .getEntriesByType('resource')
+      .filter((e) => e.name.includes('/tiles/')) as PerformanceResourceTiming[];
+    if (!es.length) return { n: 0, kb: 0, avg: 0, proto: '?', lastAge: -1 };
+    const kb = Math.round(es.reduce((s, e) => s + (e.transferSize || 0), 0) / 1024);
+    const avg = Math.round(es.reduce((s, e) => s + e.duration, 0) / es.length);
+    const lastAge = Math.round((performance.now() - Math.max(...es.map((e) => e.responseEnd))) / 1000);
+    return { n: es.length, kb, avg, proto: es[es.length - 1].nextHopProtocol || '?', lastAge };
+  })();
+
+  const conn = (navigator as unknown as { connection?: { effectiveType?: string; downlink?: number; rtt?: number } })
+    .connection;
+  const connText = conn ? `${conn.effectiveType}${conn.downlink ? ` · ${conn.downlink}Mbps` : ''}` : 'n/a';
+
+  const pushProbe = (line: string) => setProbes((a) => [...a.slice(-5), line]);
+
+  const runNetTest = async () => {
+    pushProbe('── 并发网络测试 ×4 ──');
+    const urls = [
+      './maps/tiles/h-china-base/1/0_0.webp',
+      './maps/tiles/h-china-base/1/1_2.webp',
+      './maps/tiles/h-china-repro/1/0_0.webp',
+      './maps/tiles/h-china-base/2/2_3.webp',
+    ];
+    const results = await Promise.all(urls.map((u) => fetchOne(u)));
+    urls.forEach((u, i) => pushProbe(`${u.split('/').slice(-2).join('/')} → ${results[i]}`));
+  };
+
+  const runPendingTest = async () => {
+    const pendingImgs = [
+      ...document.querySelectorAll<HTMLImageElement>('main img[src*="/tiles/"]'),
+    ].filter((i) => !i.complete);
+    if (!pendingImgs.length) {
+      pushProbe('── 挂起直测：当前无挂起瓦片 ──');
+      return;
+    }
+    pushProbe(`── 挂起直测 ×${Math.min(3, pendingImgs.length)} ──`);
+    const targets = [...new Set(pendingImgs.map((i) => i.src))].slice(0, 3);
+    for (const src of targets) {
+      const name = src.split('/').slice(-2).join('/');
+      pushProbe(`${name} → ${await fetchOne(src, 8000)}`);
+    }
+  };
+
+  /** no-cors connectivity probe: resolves = reachable, rejects/timeout = blocked */
+  const reachProbe = async (url: string, timeoutMs = 8000): Promise<string> => {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    const t0 = performance.now();
+    try {
+      await fetch(url, { mode: 'no-cors', cache: 'no-store', signal: ctrl.signal });
+      return `✓ 可达 · ${Math.round(performance.now() - t0)}ms`;
+    } catch (err) {
+      const label =
+        (err as Error).name === 'AbortError' ? '超时' : (err as Error).message || '失败';
+      return `✗ ${label} · ${Math.round(performance.now() - t0)}ms`;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+
+  /**
+   * Interference battery: same-origin baseline vs bait URLs (ad-keyword query,
+   * ad-like path) to expose content blockers, plus cross-origin domestic and
+   * international reachability to expose relay / routing problems.
+   */
+  const runBlockerTest = async () => {
+    pushProbe('── 拦截排查 ×5 ──');
+    pushProbe(`① 同源基线 → ${await fetchOne('./maps/tiles/h-china-base/1/0_0.webp', 8000)}`);
+    pushProbe(
+      `② 广告关键词诱饵 → ${await fetchOne('./maps/tiles/h-china-base/1/0_0.webp?utm_source=ad&tracker=1&banner=ad', 8000)} （✗=拦截器按关键词杀请求）`
+    );
+    let pathProbe: string;
+    const t0 = performance.now();
+    try {
+      const r = await fetch('./maps/ads.js', { cache: 'no-store' });
+      pathProbe = `✓ ${r.status}（404=通路正常） · ${Math.round(performance.now() - t0)}ms`;
+    } catch {
+      pathProbe = `✗ 异常 · ${Math.round(performance.now() - t0)}ms`;
+    }
+    pushProbe(`③ 伪广告路径 /ads.js → ${pathProbe}`);
+    pushProbe(`④ 跨域国内(baidu) → ${await reachProbe('https://www.baidu.com/favicon.ico')}`);
+    pushProbe(`⑤ 跨域国际(cloudflare) → ${await reachProbe('https://www.cloudflare.com/cdn-cgi/trace')}`);
+    pushProbe('（①✗=CDN整体问题 ②✗=内容拦截器 ④✓⑤✗=国际线路/私人中继）');
+  };
+
+  const lines = [
     `${bundle} | dpr ${Math.round(window.devicePixelRatio * 100) / 100} | ${window.innerWidth}x${window.innerHeight}`,
+    `UA: ${shortenUa()} | 网: ${connText}`,
+    `env: webp${env.webp === null ? '?' : env.webp ? '✓' : '✗'} 存储${env.storage ? '✓' : '✗(隐私模式?)'} DNT:${navigator.doNotTrack ?? 'unset'} 触点:${navigator.maxTouchPoints}`,
+    `zoom: ${Math.round((Object.values(TILE_DEBUG)[0]?.scale ?? 1) * 100)}%`,
+    `net统计: ${netStats.n}req · ${netStats.kb}KB · 均${netStats.avg}ms · ${netStats.proto} · 最近完成${netStats.lastAge}s前`,
+    ...domLines.map(
+      (d) => `dom ${d.key}: ${d.mounted}张 ok${d.ok} 挂${d.pend} 败${d.fail}${d.pendNames.length ? ` ↳${d.pendNames.join(',')}` : ''}`
+    ),
     ...Object.entries(TILE_DEBUG).map(
       ([id, d]) =>
-        `${id}: L${d.level} card ${d.cardW}x${d.cardH} view ${d.viewW}x${d.viewH} vis ${d.visible} loaded ${d.loaded} err ${d.errors}`
+        `${id.split('/').pop()}: L${d.level} card${d.cardW}x${d.cardH} vis${d.visible} load${d.loaded} err${d.errors}`
     ),
-  ].join('\n');
+    ...(jsErrors.length ? [`JS错误: ${jsErrors.join(' | ')}`] : []),
+    ...probes,
+  ];
+  const debugText = lines.join('\n');
 
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
+    const done = () => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    };
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(debugText).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      });
+      navigator.clipboard.writeText(debugText).then(done);
     } else {
-      // Fallback for WeChat or older webviews
       const textArea = document.createElement('textarea');
       textArea.value = debugText;
       textArea.style.position = 'fixed';
@@ -84,8 +240,7 @@ export const DebugOverlay: React.FC = () => {
       textArea.select();
       try {
         document.execCommand('copy');
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        done();
       } catch (err) {
         console.error(err);
       }
@@ -94,7 +249,6 @@ export const DebugOverlay: React.FC = () => {
   };
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // don't start a drag from the copy button
     if ((e.target as HTMLElement).closest('button')) return;
     e.currentTarget.setPointerCapture?.(e.pointerId);
     dragRef.current = { startX: e.clientX, startY: e.clientY, baseX: pos.x, baseY: pos.y };
@@ -136,33 +290,72 @@ export const DebugOverlay: React.FC = () => {
               {copied ? '✓ 已复制' : '复制文本'}
             </button>
           </div>
-          <div className="text-amber-300">
-            {bundle} | dpr {Math.round(window.devicePixelRatio * 100) / 100} | {window.innerWidth}x
-            {window.innerHeight}
+          <div className="text-amber-300">{lines[0]}</div>
+          <div>UA: {shortenUa()} | 网: {connText}</div>
+          <div>
+            env: webp{env.webp === null ? '?' : env.webp ? '✓' : '✗'} 存储
+            {env.storage ? '✓' : '✗(隐私模式?)'} DNT:{navigator.doNotTrack ?? 'unset'} 触点:
+            {navigator.maxTouchPoints}
+          </div>
+          <div className="text-yellow-200">
+            zoom: {Math.round((Object.values(TILE_DEBUG)[0]?.scale ?? 1) * 100)}%
           </div>
           <div className="text-cyan-300">
-            dom: {domStats.mounted} 张 · 解码ok {domStats.ok} · 失败 {domStats.fail} · 挂起{' '}
-            {domStats.pend}
+            net统计: {netStats.n}req · {netStats.kb}KB · 均{netStats.avg}ms · {netStats.proto} ·
+            最近完成{netStats.lastAge}s前
           </div>
-          {Object.entries(TILE_DEBUG).map(([id, d]) => (
-            <div key={id} className="mt-0.5">
-              {id}: L{d.level} card {d.cardW}x{d.cardH} view {d.viewW}x{d.viewH} vis {d.visible}{' '}
-              loaded {d.loaded} err {d.errors}
+          {domLines.map((d) => (
+            <div key={d.key} className="text-cyan-200">
+              dom {d.key}: {d.mounted}张 ok{d.ok} 挂{d.pend} 败{d.fail}
+              {d.pendNames.length ? ` ↳${d.pendNames.join(',')}` : ''}
             </div>
           ))}
-          <div className="flex items-center gap-2 mt-1">
+          {Object.entries(TILE_DEBUG).map(([id, d]) => (
+            <div key={id} className="mt-0.5">
+              {id.split('/').pop()}: L{d.level} card{d.cardW}x{d.cardH} vis{d.visible} load{d.loaded}{' '}
+              err{d.errors}
+            </div>
+          ))}
+          {jsErrors.length > 0 && (
+            <div className="text-red-400">JS错误: {jsErrors.join(' | ')}</div>
+          )}
+          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                runProbe();
+                runNetTest();
               }}
               className="px-1.5 py-0.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 text-[10px] rounded border border-cyan-400/40 active:scale-95 transition-transform"
             >
-              网络测试
+              并发网络测试
             </button>
-            <span className="text-cyan-200">{probe ?? ''}</span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                runPendingTest();
+              }}
+              className="px-1.5 py-0.5 bg-fuchsia-500/20 hover:bg-fuchsia-500/30 text-fuchsia-200 text-[10px] rounded border border-fuchsia-400/40 active:scale-95 transition-transform"
+            >
+              挂起直测
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                runBlockerTest();
+              }}
+              className="px-1.5 py-0.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-[10px] rounded border border-amber-400/40 active:scale-95 transition-transform"
+            >
+              拦截排查
+            </button>
           </div>
+          {probes.map((p, i) => (
+            <div key={i} className={p.startsWith('──') ? 'text-zinc-400 mt-0.5' : 'text-fuchsia-200'}>
+              {p}
+            </div>
+          ))}
           <div className="text-zinc-500 mt-1">拖动移动 · 双击折叠</div>
         </>
       )}

@@ -59,6 +59,7 @@ const GLOBAL_LOADED_TILES = new Set<string>();
 // Lightweight diagnostics surfaced by DebugOverlay (?debug=1); negligible cost
 export interface TileDebugInfo {
   level: number;
+  scale: number;
   viewW: number;
   viewH: number;
   cardW: number;
@@ -73,7 +74,7 @@ const bumpTileError = (tilePath: string) => {
   const prev =
     TILE_DEBUG[tilePath] ??
     (TILE_DEBUG[tilePath] = {
-      level: 0, viewW: 0, viewH: 0, cardW: 0, cardH: 0, visible: 0, loaded: 0, errors: 0,
+      level: 0, scale: 0, viewW: 0, viewH: 0, cardW: 0, cardH: 0, visible: 0, loaded: 0, errors: 0,
     });
   prev.errors += 1;
 };
@@ -243,6 +244,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   useEffect(() => {
     TILE_DEBUG[tilePath] = {
       level: currentLevel,
+      scale,
       viewW: layout.viewW,
       viewH: layout.viewH,
       cardW: cardSize?.width || layout.cardW,
