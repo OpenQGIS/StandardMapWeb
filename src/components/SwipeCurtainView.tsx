@@ -5,7 +5,7 @@ import { useCardDimensions } from '../hooks/useCardDimensions';
 import { ZoomIn, ZoomOut, Maximize2, MoveHorizontal } from 'lucide-react';
 import { LottieLoader } from './LottieLoader';
 import { useDoubleTapZoom } from '../hooks/useDoubleTapZoom';
-import { maxNativeScale } from '../utils/zoom';
+import { maxNativeScale, nextZoomStep } from '../utils/zoom';
 
 interface SwipeCurtainViewProps {
   baseMap: MapLayer;
@@ -414,16 +414,17 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
   };
 
   // Quick zoom buttons (centered on viewport)
+  // Quick zoom buttons snap to whole multiples (200%, 300%...) anchored at the view center
   const zoomIn = () => {
     setViewport((prev) => {
-      const newScale = Math.min(prev.scale * 1.25, zoomMax);
+      const newScale = nextZoomStep(prev.scale, 1, zoomMax);
       const ratio = newScale / prev.scale;
       return { scale: newScale, x: prev.x * ratio, y: prev.y * ratio };
     });
   };
   const zoomOut = () => {
     setViewport((prev) => {
-      const newScale = Math.max(prev.scale / 1.25, 0.1);
+      const newScale = nextZoomStep(prev.scale, -1, zoomMax);
       const ratio = newScale / prev.scale;
       return { scale: newScale, x: prev.x * ratio, y: prev.y * ratio };
     });
@@ -627,14 +628,14 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
         <button
           onClick={zoomIn}
           className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors"
-          title="放大 (+)"
+          title={`放大至 ${Math.round(nextZoomStep(viewport.scale, 1, zoomMax) * 100)}%`}
         >
           <ZoomIn className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
         </button>
         <button
           onClick={zoomOut}
           className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors"
-          title="缩小 (-)"
+          title={`缩小至 ${Math.round(nextZoomStep(viewport.scale, -1, zoomMax) * 100)}%`}
         >
           <ZoomOut className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
         </button>
