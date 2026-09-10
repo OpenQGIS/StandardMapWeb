@@ -297,7 +297,9 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
         }}
       >
         <div
-          className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0"
+          className={`shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0 transition-opacity duration-150 ${
+            zoomedW ? 'opacity-100' : 'opacity-0'
+          }`}
           style={{
             width: zoomedW ? `${zoomedW}px` : 'auto',
             height: zoomedH ? `${zoomedH}px` : 'auto',
@@ -318,7 +320,9 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
         }}
       >
         <div
-          className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0"
+          className={`shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0 transition-opacity duration-150 ${
+            zoomedW ? 'opacity-100' : 'opacity-0'
+          }`}
           style={{
             width: zoomedW ? `${zoomedW}px` : 'auto',
             height: zoomedH ? `${zoomedH}px` : 'auto',

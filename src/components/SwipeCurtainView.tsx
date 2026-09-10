@@ -479,22 +479,33 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
         }}
       />
 
-      {/* Layer 1: Left / Bottom Map (revealed on the left of divider) */}
+      {/* Layer 1: Left / Top Map (Screen-Level Clip: revealed on the left or top of divider) */}
       <div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        className="absolute inset-0 overflow-hidden pointer-events-none"
         style={{
-          transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0)`,
+          clipPath:
+            direction === 'horizontal'
+              ? `inset(0 0 ${100 - curtainPercent}% 0)`
+              : `inset(0 ${100 - curtainPercent}% 0 0)`,
         }}
       >
         <div
-          ref={cardRef}
-          className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0"
+          className="absolute inset-0 flex items-center justify-center"
           style={{
-            width: zoomedW ? `${zoomedW}px` : 'auto',
-            height: zoomedH ? `${zoomedH}px` : 'auto',
-            aspectRatio,
+            transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0)`,
           }}
         >
+          <div
+            ref={cardRef}
+            className={`shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0 transition-opacity duration-150 ${
+              zoomedW ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{
+              width: zoomedW ? `${zoomedW}px` : 'auto',
+              height: zoomedH ? `${zoomedH}px` : 'auto',
+              aspectRatio,
+            }}
+          >
             <MapSvg
               key={bottomMap.tilePath || bottomMap.imageUrl || bottomMap.id}
               item={bottomMap}
@@ -509,6 +520,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
               clipWindow={bottomClipWindow}
               cardSize={cardSize}
             />
+          </div>
         </div>
       </div>
 
@@ -529,7 +541,9 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
           }}
         >
           <div
-            className="shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0"
+            className={`shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0 transition-opacity duration-150 ${
+              zoomedW ? 'opacity-100' : 'opacity-0'
+            }`}
             style={{
               width: zoomedW ? `${zoomedW}px` : 'auto',
               height: zoomedH ? `${zoomedH}px` : 'auto',

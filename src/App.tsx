@@ -136,9 +136,15 @@ export function App() {
         </button>
       )}
 
-      {/* 2. Main Comparison Viewport (Takes up flexible height) */}
-      <main className="flex-1 relative w-full h-full min-h-0 overflow-hidden">
-        {mode === 'swipe' && (
+      {/* 2. Main Comparison Viewport (Takes up flexible height, keep-alive across mode toggles for zero flash) */}
+      <main className="flex-1 relative w-full h-full min-h-0 overflow-hidden bg-[#0c0d10]">
+        <div
+          className={`absolute inset-0 transition-opacity duration-200 ease-in-out ${
+            mode === 'swipe'
+              ? 'opacity-100 pointer-events-auto z-10'
+              : 'opacity-0 pointer-events-none z-0 invisible'
+          }`}
+        >
           <SwipeCurtainView
             baseMap={selectedTheme.baseMap}
             reproductionMap={selectedTheme.reproductionMap}
@@ -149,9 +155,15 @@ export function App() {
             isSwapped={isSwapped}
             direction={swipeDirection}
           />
-        )}
+        </div>
 
-        {mode === 'sync' && (
+        <div
+          className={`absolute inset-0 transition-opacity duration-200 ease-in-out ${
+            mode === 'sync'
+              ? 'opacity-100 pointer-events-auto z-10'
+              : 'opacity-0 pointer-events-none z-0 invisible'
+          }`}
+        >
           <DualSyncView
             baseMap={selectedTheme.baseMap}
             reproductionMap={selectedTheme.reproductionMap}
@@ -162,9 +174,15 @@ export function App() {
             isSwapped={isSwapped}
             direction={dualDirection}
           />
-        )}
+        </div>
 
-        {mode === 'overlay' && (
+        <div
+          className={`absolute inset-0 transition-opacity duration-200 ease-in-out ${
+            mode === 'overlay'
+              ? 'opacity-100 pointer-events-auto z-10'
+              : 'opacity-0 pointer-events-none z-0 invisible'
+          }`}
+        >
           <OverlayFadeView
             baseMap={selectedTheme.baseMap}
             reproductionMap={selectedTheme.reproductionMap}
@@ -174,7 +192,7 @@ export function App() {
             setViewport={setViewport}
             isSwapped={isSwapped}
           />
-        )}
+        </div>
 
         {/* Mobile zoom readout (desktop keeps the header pill; the bottom-left curtain gauge is desktop-only too) */}
         <div className="lg:hidden absolute bottom-3 left-3 z-20 pointer-events-none select-none bg-panelSub/60 px-2 py-1 rounded-lg border border-white/10 text-[10px] font-mono text-zinc-300 shadow-md">
