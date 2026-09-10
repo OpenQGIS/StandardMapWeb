@@ -7,6 +7,8 @@ import { LottieLoader } from './LottieLoader';
 import { useDoubleTapZoom } from '../hooks/useDoubleTapZoom';
 import { maxNativeScale, nextZoomStep } from '../utils/zoom';
 
+import { GLOBAL_LOADED_TILES } from './TileMapLayer';
+
 interface SwipeCurtainViewProps {
   baseMap: MapLayer;
   reproductionMap: MapLayer;
@@ -79,14 +81,31 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
     [curtainPercent, direction]
   );
 
+  // Check if base layers are already decoded in persistent session cache
+  const isBaseCached = () =>
+    bottomMap.tilePath
+      ? GLOBAL_LOADED_TILES.has(`${bottomMap.tilePath}/0/0_0.webp`)
+      : Boolean(bottomMap.imageUrl);
+  const isReproCached = () =>
+    topMap.tilePath
+      ? GLOBAL_LOADED_TILES.has(`${topMap.tilePath}/0/0_0.webp`)
+      : Boolean(topMap.imageUrl);
+
   // Track whether base overview layers (Level 0) are ready
-  const [baseLoaded, setBaseLoaded] = useState<boolean>(false);
-  const [reproductionLoaded, setReproductionLoaded] = useState<boolean>(false);
+  const [baseLoaded, setBaseLoaded] = useState<boolean>(isBaseCached);
+  const [reproductionLoaded, setReproductionLoaded] = useState<boolean>(isReproCached);
 
   // Reset base loaded states when active map group changes
   useEffect(() => {
-    setBaseLoaded(false);
-    setReproductionLoaded(false);
+    const bCached = isBaseCached();
+    const rCached = isReproCached();
+    if (bCached && rCached) {
+      setBaseLoaded(true);
+      setReproductionLoaded(true);
+      return;
+    }
+    setBaseLoaded(bCached);
+    setReproductionLoaded(rCached);
 
     // Safety fallback: reveal curtain after 2000ms if any network hang occurs
     const timer = setTimeout(() => {

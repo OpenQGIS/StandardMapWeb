@@ -54,7 +54,7 @@ const LEVEL_SOURCE_WIDTH: Record<MapOrientation, readonly [number, number, numbe
 const QUALITY_FACTOR = 1.5;
 
 // Persistent session cache of loaded tile URLs
-const GLOBAL_LOADED_TILES = new Set<string>();
+export const GLOBAL_LOADED_TILES = new Set<string>();
 
 // Lightweight diagnostics surfaced by DebugOverlay (?debug=1); negligible cost
 export interface TileDebugInfo {
@@ -104,13 +104,15 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     const el = containerRef.current;
     if (!el) return;
     const wrapper = el.offsetParent instanceof HTMLElement ? el.offsetParent : el;
-    const update = () =>
+    const update = () => {
+      if (!wrapper.offsetWidth || !wrapper.offsetHeight) return;
       setLayout({
         viewW: wrapper.offsetWidth,
         viewH: wrapper.offsetHeight,
         cardW: el.offsetWidth,
         cardH: el.offsetHeight,
       });
+    };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);

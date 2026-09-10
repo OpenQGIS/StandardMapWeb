@@ -138,13 +138,7 @@ export function App() {
 
       {/* 2. Main Comparison Viewport (Takes up flexible height, keep-alive across mode toggles for zero flash) */}
       <main className="flex-1 relative w-full h-full min-h-0 overflow-hidden bg-[#0c0d10]">
-        <div
-          className={`absolute inset-0 transition-opacity duration-200 ease-in-out ${
-            mode === 'swipe'
-              ? 'opacity-100 pointer-events-auto z-10'
-              : 'opacity-0 pointer-events-none z-0 invisible'
-          }`}
-        >
+        <div className={`absolute inset-0 ${mode === 'swipe' ? 'block' : 'hidden'}`}>
           <SwipeCurtainView
             baseMap={selectedTheme.baseMap}
             reproductionMap={selectedTheme.reproductionMap}
@@ -157,13 +151,7 @@ export function App() {
           />
         </div>
 
-        <div
-          className={`absolute inset-0 transition-opacity duration-200 ease-in-out ${
-            mode === 'sync'
-              ? 'opacity-100 pointer-events-auto z-10'
-              : 'opacity-0 pointer-events-none z-0 invisible'
-          }`}
-        >
+        <div className={`absolute inset-0 ${mode === 'sync' ? 'block' : 'hidden'}`}>
           <DualSyncView
             baseMap={selectedTheme.baseMap}
             reproductionMap={selectedTheme.reproductionMap}
@@ -176,13 +164,7 @@ export function App() {
           />
         </div>
 
-        <div
-          className={`absolute inset-0 transition-opacity duration-200 ease-in-out ${
-            mode === 'overlay'
-              ? 'opacity-100 pointer-events-auto z-10'
-              : 'opacity-0 pointer-events-none z-0 invisible'
-          }`}
-        >
+        <div className={`absolute inset-0 ${mode === 'overlay' ? 'block' : 'hidden'}`}>
           <OverlayFadeView
             baseMap={selectedTheme.baseMap}
             reproductionMap={selectedTheme.reproductionMap}
