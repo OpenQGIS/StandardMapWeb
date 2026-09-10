@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { ComparisonMode, MapThemeGroup, ViewportState } from './types/map';
+import type { ComparisonMode, MapThemeGroup, ViewportState, SplitDirection } from './types/map';
 import { MAP_THEMES } from './data/maps';
 import { Header } from './components/Header';
 import { SwipeCurtainView } from './components/SwipeCurtainView';
@@ -7,6 +7,7 @@ import { DualSyncView } from './components/DualSyncView';
 import { OverlayFadeView } from './components/OverlayFadeView';
 import { GalleryCarousel } from './components/GalleryCarousel';
 import { DebugOverlay } from './components/DebugOverlay';
+import { ChevronDown } from 'lucide-react';
 import './App.css';
 
 export function App() {
@@ -17,6 +18,13 @@ export function App() {
 
   // Order swap state (false: Map A is Left/Bottom, true: Map B is Left/Bottom)
   const [isSwapped, setIsSwapped] = useState<boolean>(false);
+
+  // Sub-direction states: swipe curtain (vertical/horizontal), dual sync view (horizontal/vertical)
+  const [swipeDirection, setSwipeDirection] = useState<SplitDirection>('vertical');
+  const [dualDirection, setDualDirection] = useState<SplitDirection>('horizontal');
+
+  // Immersive / Fullscreen mode: collapse header bar to maximize map viewport
+  const [isHeaderCollapsed, setIsHeaderCollapsed] = useState<boolean>(false);
 
   // Synchronized viewport pan & zoom state
   const [viewport, setViewport] = useState<ViewportState>({
@@ -34,19 +42,25 @@ export function App() {
     return new URLSearchParams(window.location.search).has('debug');
   });
 
-  // Keyboard shortcut listener: 'G' toggles gallery, 'Esc' closes it
+  // Keyboard shortcut listener: 'G' toggles gallery, 'F' toggles header collapse, 'Esc' closes gallery / exits collapse
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === 'Escape') {
-        if (isGalleryOpen) setIsGalleryOpen(false);
+        if (isGalleryOpen) {
+          setIsGalleryOpen(false);
+        } else if (isHeaderCollapsed) {
+          setIsHeaderCollapsed(false);
+        }
       } else if (e.key === 'g' || e.key === 'G') {
         setIsGalleryOpen((prev) => !prev);
+      } else if (e.key === 'f' || e.key === 'F') {
+        setIsHeaderCollapsed((prev) => !prev);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isGalleryOpen]);
+  }, [isGalleryOpen, isHeaderCollapsed]);
 
   // Preload other map images in background so switching between horizontal & vertical is instantaneous!
   useEffect(() => {
@@ -80,19 +94,47 @@ export function App() {
   const zoomPercent = Math.round(viewport.scale * 100);
 
   return (
-    <div className="w-screen h-full flex flex-col bg-[#0c0d10] text-zinc-100 overflow-hidden select-none">
-      {/* 1. Header Toolbar */}
-      <Header
-        mode={mode}
-        onModeChange={setMode}
-        zoomPercent={zoomPercent}
-        onSwapOrder={handleSwapOrder}
-        isSwapped={isSwapped}
-        isGalleryOpen={isGalleryOpen}
-        onToggleGallery={() => setIsGalleryOpen((prev) => !prev)}
-        themesCount={MAP_THEMES.length}
-        onToggleDebug={() => setShowDebug((prev) => !prev)}
-      />
+    <div className="w-screen h-full flex flex-col bg-[#0c0d10] text-zinc-100 overflow-hidden select-none relative">
+      {/* 1. Header Toolbar with smooth collapse transition */}
+      <div
+        className={`transition-all duration-300 ease-in-out z-40 overflow-hidden shrink-0 ${
+          isHeaderCollapsed ? 'h-0 opacity-0 -translate-y-full pointer-events-none' : 'h-14 opacity-100 translate-y-0'
+        }`}
+      >
+        <Header
+          mode={mode}
+          onModeChange={setMode}
+          swipeDirection={swipeDirection}
+          onToggleSwipeDirection={() =>
+            setSwipeDirection((prev) => (prev === 'vertical' ? 'horizontal' : 'vertical'))
+          }
+          dualDirection={dualDirection}
+          onToggleDualDirection={() =>
+            setDualDirection((prev) => (prev === 'horizontal' ? 'vertical' : 'horizontal'))
+          }
+          zoomPercent={zoomPercent}
+          onSwapOrder={handleSwapOrder}
+          isSwapped={isSwapped}
+          isGalleryOpen={isGalleryOpen}
+          onToggleGallery={() => setIsGalleryOpen((prev) => !prev)}
+          themesCount={MAP_THEMES.length}
+          onToggleDebug={() => setShowDebug((prev) => !prev)}
+          onToggleHeaderCollapse={() => setIsHeaderCollapsed(true)}
+        />
+      </div>
+
+      {/* Floating Top Capsule to Restore Header when Collapsed */}
+      {isHeaderCollapsed && (
+        <button
+          onClick={() => setIsHeaderCollapsed(false)}
+          className="absolute top-2 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 px-3 py-1 rounded-full bg-panelSub/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-white/15 hover:border-amber-400/50 shadow-xl backdrop-blur-md text-xs font-medium cursor-pointer transition-all duration-200 group hover:scale-105 animate-in fade-in slide-in-from-top-2"
+          title="展开顶部工具栏 (快捷键 F 或 Esc)"
+        >
+          <ChevronDown className="w-3.5 h-3.5 text-amber-400 group-hover:translate-y-0.5 transition-transform" />
+          <span>展开工具栏</span>
+          <span className="text-[10px] text-zinc-400 bg-white/10 px-1 rounded font-mono hidden sm:inline">F / Esc</span>
+        </button>
+      )}
 
       {/* 2. Main Comparison Viewport (Takes up flexible height) */}
       <main className="flex-1 relative w-full h-full min-h-0 overflow-hidden">
@@ -105,6 +147,7 @@ export function App() {
             viewport={viewport}
             setViewport={setViewport}
             isSwapped={isSwapped}
+            direction={swipeDirection}
           />
         )}
 
@@ -117,6 +160,7 @@ export function App() {
             viewport={viewport}
             setViewport={setViewport}
             isSwapped={isSwapped}
+            direction={dualDirection}
           />
         )}
 

@@ -1,8 +1,8 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
-import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
+import type { MapLayer, MapOrientation, ViewportState, SplitDirection } from '../types/map';
 import { MapSvg } from './MapSvg';
 import { useCardDimensions } from '../hooks/useCardDimensions';
-import { ZoomIn, ZoomOut, Maximize2, MoveHorizontal } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, MoveHorizontal, MoveVertical } from 'lucide-react';
 import { LottieLoader } from './LottieLoader';
 import { useDoubleTapZoom } from '../hooks/useDoubleTapZoom';
 import { maxNativeScale, nextZoomStep } from '../utils/zoom';
@@ -15,6 +15,7 @@ interface SwipeCurtainViewProps {
   viewport: ViewportState;
   setViewport: React.Dispatch<React.SetStateAction<ViewportState>>;
   isSwapped: boolean;
+  direction?: SplitDirection;
 }
 
 export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
@@ -25,6 +26,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
   viewport,
   setViewport,
   isSwapped,
+  direction = 'vertical',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -63,12 +65,18 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
 
   // Each layer only needs the tiles on its own side of the curtain
   const bottomClipWindow = useMemo(
-    () => ({ minX: 0, maxX: curtainPercent / 100 }),
-    [curtainPercent]
+    () =>
+      direction === 'horizontal'
+        ? { minY: 0, maxY: curtainPercent / 100 }
+        : { minX: 0, maxX: curtainPercent / 100 },
+    [curtainPercent, direction]
   );
   const topClipWindow = useMemo(
-    () => ({ minX: curtainPercent / 100, maxX: 1 }),
-    [curtainPercent]
+    () =>
+      direction === 'horizontal'
+        ? { minY: curtainPercent / 100, maxY: 1 }
+        : { minX: curtainPercent / 100, maxX: 1 },
+    [curtainPercent, direction]
   );
 
   // Track whether base overview layers (Level 0) are ready
@@ -105,7 +113,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
   });
 
   const lastDividerClickTimeRef = useRef<number>(0);
-  const dividerDownXRef = useRef<number>(0);
+  const dividerDownPosRef = useRef<number>(0);
   const dragThresholdPassedRef = useRef<boolean>(false);
   const lastDividerTouchTimeRef = useRef<number>(0);
 
@@ -219,7 +227,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
     }
 
     lastDividerClickTimeRef.current = now;
-    dividerDownXRef.current = e.clientX;
+    dividerDownPosRef.current = direction === 'horizontal' ? e.clientY : e.clientX;
     dragThresholdPassedRef.current = false;
     setIsDraggingHandle(true);
   };
@@ -234,6 +242,11 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
       return;
     }
     lastDividerTouchTimeRef.current = now;
+    const touch = e.touches[0];
+    if (touch) {
+      dividerDownPosRef.current = direction === 'horizontal' ? touch.clientY : touch.clientX;
+    }
+    dragThresholdPassedRef.current = false;
     setIsDraggingHandle(true);
   };
 
@@ -242,16 +255,23 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
     const handleMouseMove = (e: MouseEvent) => {
       if (isDraggingHandle) {
         // Require moving > 3px to count as drag, protecting clicks and double clicks
+        const currentCoord = direction === 'horizontal' ? e.clientY : e.clientX;
         if (!dragThresholdPassedRef.current) {
-          if (Math.abs(e.clientX - dividerDownXRef.current) > 3) {
+          if (Math.abs(currentCoord - dividerDownPosRef.current) > 3) {
             dragThresholdPassedRef.current = true;
           }
         }
         if (dragThresholdPassedRef.current && containerRef.current) {
           const rect = containerRef.current.getBoundingClientRect();
-          const relativeX = e.clientX - rect.left;
-          const newPercent = Math.max(0, Math.min(100, (relativeX / rect.width) * 100));
-          setCurtainPercent(newPercent);
+          if (direction === 'horizontal') {
+            const relativeY = e.clientY - rect.top;
+            const newPercent = Math.max(0, Math.min(100, (relativeY / rect.height) * 100));
+            setCurtainPercent(newPercent);
+          } else {
+            const relativeX = e.clientX - rect.left;
+            const newPercent = Math.max(0, Math.min(100, (relativeX / rect.width) * 100));
+            setCurtainPercent(newPercent);
+          }
         }
       } else if (isPanning) {
         const dx = e.clientX - panStartRef.current.x;
@@ -333,9 +353,15 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
       const touch = e.touches[0];
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        const relativeX = touch.clientX - rect.left;
-        const newPercent = Math.max(0, Math.min(100, (relativeX / rect.width) * 100));
-        setCurtainPercent(newPercent);
+        if (direction === 'horizontal') {
+          const relativeY = touch.clientY - rect.top;
+          const newPercent = Math.max(0, Math.min(100, (relativeY / rect.height) * 100));
+          setCurtainPercent(newPercent);
+        } else {
+          const relativeX = touch.clientX - rect.left;
+          const newPercent = Math.max(0, Math.min(100, (relativeX / rect.width) * 100));
+          setCurtainPercent(newPercent);
+        }
       }
     } else if (isPanning && e.touches.length === 1) {
       const touch = e.touches[0];
@@ -486,10 +512,15 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
         </div>
       </div>
 
-      {/* Layer 2: Right / Top Map (Screen-Level Clip: revealed on the right of divider) */}
+      {/* Layer 2: Right / Top Map (Screen-Level Clip: revealed on the right or bottom of divider) */}
       <div
         className="absolute inset-0 overflow-hidden pointer-events-none"
-        style={{ clipPath: `inset(0 0 0 ${curtainPercent}%)` }}
+        style={{
+          clipPath:
+            direction === 'horizontal'
+              ? `inset(${curtainPercent}% 0 0 0)`
+              : `inset(0 0 0 ${curtainPercent}%)`,
+        }}
       >
         <div
           className="absolute inset-0 flex items-center justify-center"
@@ -523,12 +554,20 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
         </div>
       </div>
 
-      {/* Screen-Locked Vertical Divider Bar (Fixed to screen coordinates, never scales with map!) */}
+      {/* Screen-Locked Divider Bar (Fixed to screen coordinates, never scales with map!) */}
       <div
-        className={`absolute top-0 bottom-0 z-20 cursor-ew-resize swipe-divider-handle flex items-center justify-center group transition-opacity duration-500 ease-out ${
+        className={`absolute z-20 swipe-divider-handle flex items-center justify-center group transition-opacity duration-500 ease-out ${
+          direction === 'horizontal'
+            ? 'left-0 right-0 cursor-ns-resize'
+            : 'top-0 bottom-0 cursor-ew-resize'
+        } ${
           isCurtainReady ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
-        style={{ left: `${curtainPercent}%`, transform: 'translateX(-50%)', width: '36px' }}
+        style={
+          direction === 'horizontal'
+            ? { top: `${curtainPercent}%`, transform: 'translateY(-50%)', height: '36px' }
+            : { left: `${curtainPercent}%`, transform: 'translateX(-50%)', width: '36px' }
+        }
         onMouseDown={handleDividerMouseDown}
         onTouchStart={handleDividerTouchStart}
         onDoubleClick={(e) => {
@@ -537,14 +576,22 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
           setIsDraggingHandle(false);
           dragThresholdPassedRef.current = false;
         }}
-        title="拖动调整屏幕卷帘位置，双击居中 (50%)"
+        title={`拖动调整${direction === 'horizontal' ? '水平' : '垂直'}卷帘位置，双击居中 (50%)`}
       >
-        {/* Full-height vertical guideline */}
-        <div className="w-[2px] h-full bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.9)] group-hover:bg-amber-300 transition-colors pointer-events-none" />
+        {/* Full guideline */}
+        <div
+          className={`${
+            direction === 'horizontal' ? 'w-full h-[2px]' : 'w-[2px] h-full'
+          } bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.9)] group-hover:bg-amber-300 transition-colors pointer-events-none`}
+        />
 
         {/* Center Grab Handle - Always fixed 32px on screen */}
         <div className="absolute w-8 h-8 rounded-full bg-[#16181f] border-2 border-amber-400 flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.7)] text-amber-400 group-hover:scale-110 transition-transform pointer-events-none">
-          <MoveHorizontal className="w-4 h-4" />
+          {direction === 'horizontal' ? (
+            <MoveVertical className="w-4 h-4" />
+          ) : (
+            <MoveHorizontal className="w-4 h-4" />
+          )}
         </div>
       </div>
 
@@ -661,7 +708,9 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
           className="bg-panelSub/60 hover:bg-panelSub/80 px-3 py-1.5 rounded-lg border border-white/10 hover:border-zinc-600 text-xs flex items-center gap-2 shadow-md hover:shadow-xl cursor-pointer select-none transition-all duration-200 active:scale-95 group"
           title="点击或双击重置卷帘居中 (50%)"
         >
-          <span className="text-zinc-400 text-[11px]">屏幕卷帘:</span>
+          <span className="text-zinc-400 text-[11px]">
+            {direction === 'horizontal' ? '水平卷帘:' : '屏幕卷帘:'}
+          </span>
           <span className="text-amber-400 font-mono font-semibold">{Math.round(curtainPercent)}%</span>
           <span className="text-zinc-400 group-hover:text-amber-300 text-[10px] transition-colors">
             · 拖动分割线 / 点击居中

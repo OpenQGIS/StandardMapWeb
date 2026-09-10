@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import type { ComparisonMode } from '../types/map';
-import { Info, ExternalLink } from 'lucide-react';
+import type { ComparisonMode, SplitDirection } from '../types/map';
+import { Info, ExternalLink, ChevronUp } from 'lucide-react';
 import { RollingShutterIcon, DualWindowIcon, LayerOverlayIcon, GalleryIcon, SwapLeftAndRightIcon } from './CustomIcons';
 
 interface HeaderProps {
   mode: ComparisonMode;
   onModeChange: (mode: ComparisonMode) => void;
+  swipeDirection: SplitDirection;
+  onToggleSwipeDirection: () => void;
+  dualDirection: SplitDirection;
+  onToggleDualDirection: () => void;
   zoomPercent: number;
   onSwapOrder: () => void;
   isSwapped: boolean;
@@ -13,11 +17,16 @@ interface HeaderProps {
   onToggleGallery: () => void;
   themesCount?: number;
   onToggleDebug?: () => void;
+  onToggleHeaderCollapse?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   mode,
   onModeChange,
+  swipeDirection,
+  onToggleSwipeDirection,
+  dualDirection,
+  onToggleDualDirection,
   zoomPercent,
   onSwapOrder,
   isSwapped,
@@ -25,6 +34,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleGallery,
   themesCount = 2,
   onToggleDebug,
+  onToggleHeaderCollapse,
 }) => {
   const [showComplianceModal, setShowComplianceModal] = useState(false);
   const tapCountRef = React.useRef(0);
@@ -90,29 +100,65 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Center: Comparison Mode Switcher */}
       <div className="flex items-center bg-surface border border-border p-1 rounded-lg">
         <button
-          onClick={() => onModeChange('swipe')}
+          onClick={() => {
+            if (mode === 'swipe') {
+              onToggleSwipeDirection();
+            } else {
+              onModeChange('swipe');
+            }
+          }}
           className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:px-3 rounded-md text-xs font-medium transition-all ${
             mode === 'swipe'
               ? 'bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700'
               : 'text-zinc-400 hover:text-zinc-200'
           }`}
-          title="卷帘对比 (单视口拖动中轴卷帘对比)"
+          title={
+            mode !== 'swipe'
+              ? '卷帘对比 (点击激活)'
+              : swipeDirection === 'vertical'
+              ? '卷帘对比: 垂直分割线 (再次点击切换为水平分割线)'
+              : '卷帘对比: 水平分割线 (再次点击切换为垂直分割线)'
+          }
         >
-          <RollingShutterIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4" />
-          <span className="hidden lg:inline">卷帘对比</span>
+          <RollingShutterIcon
+            className={`w-[18px] h-[18px] sm:w-4 sm:h-4 transition-transform duration-200 ${
+              mode === 'swipe' && swipeDirection === 'horizontal' ? 'rotate-90 text-amber-400' : ''
+            }`}
+          />
+          <span className="hidden lg:inline">
+            {mode === 'swipe' && swipeDirection === 'horizontal' ? '卷帘(水平)' : '卷帘对比'}
+          </span>
         </button>
 
         <button
-          onClick={() => onModeChange('sync')}
+          onClick={() => {
+            if (mode === 'sync') {
+              onToggleDualDirection();
+            } else {
+              onModeChange('sync');
+            }
+          }}
           className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:px-3 rounded-md text-xs font-medium transition-all ${
             mode === 'sync'
               ? 'bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700'
               : 'text-zinc-400 hover:text-zinc-200'
           }`}
-          title="双屏联动 (左右双屏同步缩放与移动)"
+          title={
+            mode !== 'sync'
+              ? '双屏联动 (点击激活)'
+              : dualDirection === 'horizontal'
+              ? '双屏联动: 左右双屏 (再次点击切换为上下双屏)'
+              : '双屏联动: 上下双屏 (再次点击切换为左右双屏)'
+          }
         >
-          <DualWindowIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4" />
-          <span className="hidden lg:inline">双屏联动</span>
+          <DualWindowIcon
+            className={`w-[18px] h-[18px] sm:w-4 sm:h-4 transition-transform duration-200 ${
+              mode === 'sync' && dualDirection === 'vertical' ? 'rotate-90 text-amber-400' : ''
+            }`}
+          />
+          <span className="hidden lg:inline">
+            {mode === 'sync' && dualDirection === 'vertical' ? '双屏(上下)' : '双屏联动'}
+          </span>
         </button>
 
         <button
@@ -131,7 +177,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right: Swap Order & Viewport State & Tools */}
       <div className="flex items-center gap-1.5 sm:gap-2">
-        {/* Swap Map Order Button (互换左右图/底表层顺序) */}
+        {/* Swap Map Order Button (互换左右/上下图/底表层顺序) */}
         <button
           onClick={onSwapOrder}
           className={`group flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded text-xs font-medium transition-all border ${
@@ -141,8 +187,16 @@ export const Header: React.FC<HeaderProps> = ({
           }`}
           title={
             mode === 'sync'
-              ? (isSwapped ? '左右地图位置已互换 (点击恢复默认)' : '左右互换 (左右双屏位置对调)')
-              : (isSwapped ? '图层上下层顺序已对调 (点击恢复默认)' : '图层对调 (底图与复刻图层序互换)')
+              ? dualDirection === 'vertical'
+                ? isSwapped
+                  ? '上下地图位置已互换 (点击恢复默认)'
+                  : '上下互换 (上下双屏位置对调)'
+                : isSwapped
+                ? '左右地图位置已互换 (点击恢复默认)'
+                : '左右互换 (左右双屏位置对调)'
+              : isSwapped
+              ? '图层上下层顺序已对调 (点击恢复默认)'
+              : '图层对调 (底图与复刻图层序互换)'
           }
         >
           <SwapLeftAndRightIcon
@@ -150,7 +204,13 @@ export const Header: React.FC<HeaderProps> = ({
               isSwapped ? 'text-[#fbbf24]' : 'text-zinc-400 group-hover:text-zinc-200'
             }`}
           />
-          <span className="hidden lg:inline">{mode === 'sync' ? '互换左右图' : '对调图层顺序'}</span>
+          <span className="hidden lg:inline">
+            {mode === 'sync'
+              ? dualDirection === 'vertical'
+                ? '互换上下图'
+                : '互换左右图'
+              : '对调图层顺序'}
+          </span>
           {isSwapped && <span className="text-[10px] text-[#fbbf24] font-mono hidden lg:inline">(已调换)</span>}
         </button>
 
@@ -172,6 +232,18 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="hidden lg:inline">地图画廊</span>
           <span className="text-[10px] font-mono text-zinc-400 bg-surface px-1 rounded border border-border">{themesCount}</span>
         </button>
+
+        {/* Collapse Header Button (沉浸纯净模式 / 全屏) */}
+        {onToggleHeaderCollapse && (
+          <button
+            onClick={onToggleHeaderCollapse}
+            className="flex items-center gap-1.5 px-2 py-1.5 sm:px-2 rounded text-xs font-medium transition-all border bg-zinc-800 text-zinc-300 border-zinc-700 hover:text-zinc-100 hover:bg-zinc-750"
+            title="收起顶部工具栏进入全屏沉浸对比 (快捷键 F，按 Esc 或点击顶部边缘恢复)"
+          >
+            <ChevronUp className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-zinc-400 hover:text-zinc-200" />
+            <span className="hidden xl:inline">收起顶栏</span>
+          </button>
+        )}
       </div>
 
       {/* Map Information / Description Modal */}

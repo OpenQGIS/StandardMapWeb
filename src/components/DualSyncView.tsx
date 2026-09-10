@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
-import type { MapLayer, MapOrientation, ViewportState } from '../types/map';
+import type { MapLayer, MapOrientation, ViewportState, SplitDirection } from '../types/map';
 import { MapSvg } from './MapSvg';
 import { useCardDimensions } from '../hooks/useCardDimensions';
 import { useDoubleTapZoom } from '../hooks/useDoubleTapZoom';
@@ -14,6 +14,7 @@ interface DualSyncViewProps {
   viewport: ViewportState;
   setViewport: React.Dispatch<React.SetStateAction<ViewportState>>;
   isSwapped: boolean;
+  direction?: SplitDirection;
 }
 
 export const DualSyncView: React.FC<DualSyncViewProps> = ({
@@ -24,6 +25,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
   viewport,
   setViewport,
   isSwapped,
+  direction = 'horizontal',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const leftPaneRef = useRef<HTMLDivElement>(null);
@@ -336,7 +338,11 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
-      className="relative w-full h-full bg-[#0a0c10] grid grid-cols-1 landscape:grid-cols-2 md:grid-cols-2 gap-2 p-2 overflow-hidden select-none touch-none"
+      className={`relative w-full h-full bg-[#0a0c10] gap-2 p-2 overflow-hidden select-none touch-none ${
+        direction === 'vertical'
+          ? 'grid grid-cols-1 grid-rows-2'
+          : 'grid grid-cols-1 landscape:grid-cols-2 md:grid-cols-2'
+      }`}
     >
       {/* ================= LEFT PANE ================= */}
       <div

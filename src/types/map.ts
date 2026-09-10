@@ -53,8 +53,12 @@ export interface ViewportState {
   y: number;
 }
 
-/** Normalized horizontal window [0..1] of the view container that is actually visible */
+export type SplitDirection = 'vertical' | 'horizontal';
+
+/** Normalized horizontal/vertical window [0..1] of the view container that is actually visible */
 export interface TileClipWindow {
-  minX: number;
-  maxX: number;
+  minX?: number;
+  maxX?: number;
+  minY?: number;
+  maxY?: number;
 }

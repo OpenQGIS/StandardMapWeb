@@ -213,11 +213,15 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     let x0 = Math.max(0, left - SCREEN_MARGIN);
     let x1 = Math.min(viewW, left + cardW + SCREEN_MARGIN);
     if (clipWindow) {
-      x0 = Math.max(x0, clipWindow.minX * viewW - CLIP_BUFFER);
-      x1 = Math.min(x1, clipWindow.maxX * viewW + CLIP_BUFFER);
+      if (clipWindow.minX !== undefined) x0 = Math.max(x0, clipWindow.minX * viewW - CLIP_BUFFER);
+      if (clipWindow.maxX !== undefined) x1 = Math.min(x1, clipWindow.maxX * viewW + CLIP_BUFFER);
     }
-    const y0 = Math.max(0, top - SCREEN_MARGIN);
-    const y1 = Math.min(viewH, top + cardH + SCREEN_MARGIN);
+    let y0 = Math.max(0, top - SCREEN_MARGIN);
+    let y1 = Math.min(viewH, top + cardH + SCREEN_MARGIN);
+    if (clipWindow) {
+      if (clipWindow.minY !== undefined) y0 = Math.max(y0, clipWindow.minY * viewH - CLIP_BUFFER);
+      if (clipWindow.maxY !== undefined) y1 = Math.min(y1, clipWindow.maxY * viewH + CLIP_BUFFER);
+    }
 
     const spanW = cardW;
     const spanH = cardH;
