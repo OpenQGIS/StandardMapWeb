@@ -4,7 +4,8 @@ import { MapSvg } from './MapSvg';
 import { useCardDimensions } from '../hooks/useCardDimensions';
 import { useDoubleTapZoom } from '../hooks/useDoubleTapZoom';
 import { maxNativeScale, nextZoomStep } from '../utils/zoom';
-import { ZoomIn, ZoomOut, Maximize2, Crosshair } from 'lucide-react';
+import { ZoomIn, ZoomOut, Crosshair } from 'lucide-react';
+import { Zoom100Icon } from './Zoom100Icon';
 
 interface DualSyncViewProps {
   baseMap: MapLayer;
@@ -560,9 +561,9 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
         <button
           onClick={fitScreen}
           className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors"
-          title="双屏自适应居中"
+          title="双屏自适应居中 (100% 原始比例)"
         >
-          <Maximize2 className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+          <Zoom100Icon className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
         </button>
       </div>
     </div>

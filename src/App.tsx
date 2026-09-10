@@ -26,12 +26,26 @@ export function App() {
   // Immersive / Fullscreen mode: collapse header bar to maximize map viewport
   const [isHeaderCollapsed, setIsHeaderCollapsed] = useState<boolean>(false);
 
-  // Synchronized viewport pan & zoom state
-  const [viewport, setViewport] = useState<ViewportState>({
-    scale: 1,
-    x: 0,
-    y: 0,
+  // Independent viewports per comparison mode: preserve mode parameters on same map
+  const [viewports, setViewports] = useState<Record<ComparisonMode, ViewportState>>({
+    swipe: { scale: 1, x: 0, y: 0 },
+    sync: { scale: 1, x: 0, y: 0 },
+    overlay: { scale: 1, x: 0, y: 0 },
   });
+
+  const handleModeViewportChange = (
+    targetMode: ComparisonMode,
+    value: ViewportState | ((prev: ViewportState) => ViewportState)
+  ) => {
+    setViewports((prev) => {
+      const current = prev[targetMode];
+      const updated = typeof value === 'function' ? value(current) : value;
+      return {
+        ...prev,
+        [targetMode]: updated,
+      };
+    });
+  };
 
   // Floating gallery drawer open/collapsed state (defaults to false for maximized map workspace!)
   const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
@@ -83,7 +97,12 @@ export function App() {
   const handleSelectTheme = (theme: MapThemeGroup) => {
     setSelectedTheme(theme);
     setIsSwapped(false);
-    setViewport({ scale: 1, x: 0, y: 0 });
+    // Reset all modes to default initial viewport when switching map theme
+    setViewports({
+      swipe: { scale: 1, x: 0, y: 0 },
+      sync: { scale: 1, x: 0, y: 0 },
+      overlay: { scale: 1, x: 0, y: 0 },
+    });
   };
 
   // Toggle order of Left vs Right / Bottom vs Top
@@ -91,7 +110,7 @@ export function App() {
     setIsSwapped((prev) => !prev);
   };
 
-  const zoomPercent = Math.round(viewport.scale * 100);
+  const zoomPercent = Math.round((viewports[mode]?.scale ?? 1) * 100);
 
   return (
     <div className="w-screen h-full flex flex-col bg-[#0c0d10] text-zinc-100 overflow-hidden select-none relative">
@@ -144,8 +163,8 @@ export function App() {
             reproductionMap={selectedTheme.reproductionMap}
             orientation={selectedTheme.orientation}
             aspectRatio={selectedTheme.aspectRatio}
-            viewport={viewport}
-            setViewport={setViewport}
+            viewport={viewports.swipe}
+            setViewport={(v) => handleModeViewportChange('swipe', v)}
             isSwapped={isSwapped}
             direction={swipeDirection}
           />
@@ -157,8 +176,8 @@ export function App() {
             reproductionMap={selectedTheme.reproductionMap}
             orientation={selectedTheme.orientation}
             aspectRatio={selectedTheme.aspectRatio}
-            viewport={viewport}
-            setViewport={setViewport}
+            viewport={viewports.sync}
+            setViewport={(v) => handleModeViewportChange('sync', v)}
             isSwapped={isSwapped}
             direction={dualDirection}
           />
@@ -170,8 +189,8 @@ export function App() {
             reproductionMap={selectedTheme.reproductionMap}
             orientation={selectedTheme.orientation}
             aspectRatio={selectedTheme.aspectRatio}
-            viewport={viewport}
-            setViewport={setViewport}
+            viewport={viewports.overlay}
+            setViewport={(v) => handleModeViewportChange('overlay', v)}
             isSwapped={isSwapped}
           />
         </div>
