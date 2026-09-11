@@ -232,11 +232,16 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="hidden lg:inline">
               {mode === 'sync'
                 ? dualDirection === 'vertical'
-                  ? '互换上下图'
+                  ? isSwapped
+                    ? '已互换上下图'
+                    : '互换上下图'
+                  : isSwapped
+                  ? '已互换左右图'
                   : '互换左右图'
+                : isSwapped
+                ? '已对调图层'
                 : '对调图层'}
             </span>
-            {isSwapped && <span className="text-[10px] text-[#fbbf24] font-mono hidden lg:inline">(已调换)</span>}
           </button>
         </Tooltip>
 
