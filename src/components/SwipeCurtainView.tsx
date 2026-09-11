@@ -488,13 +488,13 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
-      className="relative w-full h-full bg-[#0d0e12] overflow-hidden cursor-grab active:cursor-grabbing select-none touch-none"
+      className="relative w-full h-full bg-zinc-100 dark:bg-[#0d0e12] overflow-hidden cursor-grab active:cursor-grabbing select-none touch-none transition-colors duration-150"
     >
       {/* Background Canvas Grid Pattern */}
       <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        className="absolute inset-0 opacity-[0.04] dark:opacity-[0.03] pointer-events-none text-zinc-400 dark:text-white"
         style={{
-          backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`,
+          backgroundImage: `linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)`,
           backgroundSize: '40px 40px',
         }}
       />
@@ -754,7 +754,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
 
       {/* Unified Initial Loading Overlay: completely unobstructed, no clip seam, perfectly centered */}
       {!isCurtainReady && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#0d0e12]/60 select-none pointer-events-none transition-opacity duration-300">
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-zinc-100/60 dark:bg-[#0d0e12]/60 select-none pointer-events-none transition-opacity duration-300">
           <LottieLoader size={60} text="载入高精度地图中..." />
         </div>
       )}

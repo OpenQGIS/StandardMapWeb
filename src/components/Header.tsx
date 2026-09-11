@@ -99,16 +99,16 @@ export const Header: React.FC<HeaderProps> = ({
         <Tooltip content="标准地图与复刻地图对比说明" position="bottom">
           <button
             onClick={() => setShowComplianceModal(true)}
-            className="flex items-center justify-center gap-1 text-[11px] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 p-1.5 sm:px-2 sm:py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 transition-colors ml-0.5 sm:ml-1 cursor-pointer min-w-[31px] min-h-[31px]"
+            className="flex items-center justify-center gap-1 text-[11px] text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 p-1.5 sm:px-2.5 sm:py-1.5 rounded text-xs font-medium bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-750 transition-colors ml-0.5 sm:ml-1 cursor-pointer min-w-[31px] min-h-[31px]"
           >
-            <Info className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-400 shrink-0" />
+            <Info className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 shrink-0" />
             <span className="hidden xl:inline">地图说明</span>
           </button>
         </Tooltip>
       </div>
 
       {/* Center: Comparison Mode Switcher */}
-      <div className="flex items-center bg-zinc-100/90 dark:bg-surface border border-zinc-200/90 dark:border-border p-1 rounded-lg">
+      <div className="flex items-center bg-zinc-100 dark:bg-surface border border-zinc-200 dark:border-border p-1 rounded-lg">
         <Tooltip
           content={
             mode === 'swipe'
@@ -130,17 +130,17 @@ export const Header: React.FC<HeaderProps> = ({
             }}
             className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:px-3 rounded-md text-xs font-medium transition-all ${
               mode === 'swipe'
-                ? 'bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200/90 dark:border-zinc-700'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/40'
             }`}
           >
             <RollingShutterIcon
               className={`w-[18px] h-[18px] sm:w-4 sm:h-4 transition-transform duration-200 ${
-                mode === 'swipe' && swipeDirection === 'horizontal' ? 'rotate-90 text-amber-400' : ''
+                mode === 'swipe' ? (swipeDirection === 'horizontal' ? 'rotate-90 text-amber-500 dark:text-amber-400' : 'text-amber-500 dark:text-amber-400') : 'text-zinc-500 dark:text-zinc-400'
               }`}
             />
             <span className="hidden lg:inline">
-              {mode === 'swipe' && swipeDirection === 'horizontal' ? '卷帘(水平)' : '卷帘对比'}
+              卷帘对比
             </span>
           </button>
         </Tooltip>
@@ -166,17 +166,17 @@ export const Header: React.FC<HeaderProps> = ({
             }}
             className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:px-3 rounded-md text-xs font-medium transition-all ${
               mode === 'sync'
-                ? 'bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200/90 dark:border-zinc-700'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/40'
             }`}
           >
             <DualWindowIcon
               className={`w-[18px] h-[18px] sm:w-4 sm:h-4 transition-transform duration-200 ${
-                mode === 'sync' && dualDirection === 'vertical' ? 'rotate-90 text-amber-400' : ''
+                mode === 'sync' ? (dualDirection === 'vertical' ? 'rotate-90 text-amber-500 dark:text-amber-400' : 'text-amber-500 dark:text-amber-400') : 'text-zinc-500 dark:text-zinc-400'
               }`}
             />
             <span className="hidden lg:inline">
-              {mode === 'sync' && dualDirection === 'vertical' ? '双屏(上下)' : '双屏联动'}
+              双屏联动
             </span>
           </button>
         </Tooltip>
@@ -186,11 +186,11 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => onModeChange('overlay')}
             className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:px-3 rounded-md text-xs font-medium transition-all ${
               mode === 'overlay'
-                ? 'bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200/90 dark:border-zinc-700'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/40'
             }`}
           >
-            <LayerOverlayIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4" />
+            <LayerOverlayIcon className={`w-[18px] h-[18px] sm:w-4 sm:h-4 ${mode === 'overlay' ? 'text-amber-500 dark:text-amber-400' : 'text-zinc-500 dark:text-zinc-400'}`} />
             <span className="hidden lg:inline">透明叠置</span>
           </button>
         </Tooltip>
@@ -220,13 +220,13 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={onSwapOrder}
             className={`group flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded text-xs font-medium transition-all border ${
               isSwapped
-                ? 'bg-amber-500/20 text-[#fbbf24] border-amber-500/50 shadow-sm'
-                : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-750 hover:text-zinc-100'
+                ? 'bg-amber-500/15 text-amber-700 dark:text-[#fbbf24] border-amber-400/50 dark:border-amber-500/50 shadow-sm'
+                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-750 hover:text-zinc-900 dark:hover:text-zinc-100'
             }`}
           >
             <SwapLeftAndRightIcon
               className={`w-[18px] h-[18px] sm:w-4 sm:h-4 transition-colors ${
-                isSwapped ? 'text-[#fbbf24]' : 'text-zinc-400 group-hover:text-zinc-200'
+                isSwapped ? 'text-amber-600 dark:text-[#fbbf24]' : 'text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200'
               }`}
             />
             <span className="hidden lg:inline">
@@ -245,23 +245,23 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </Tooltip>
 
-        <div className="hidden lg:block text-[11px] font-mono text-zinc-400 bg-surface px-2.5 py-1 rounded border border-border">
-          缩放: <span className="text-zinc-200 font-semibold">{zoomPercent}%</span>
+        <div className="hidden lg:block text-[11px] font-mono text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-surface px-2.5 py-1 rounded border border-zinc-200 dark:border-border">
+          缩放: <span className="text-zinc-900 dark:text-zinc-100 font-semibold">{zoomPercent}%</span>
         </div>
 
         {/* Toggle Floating Gallery Button */}
         <Tooltip content="展开或收起底部浮动地图画廊" position="bottom" shortcut="G">
           <button
             onClick={onToggleGallery}
-            className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded text-xs font-medium transition-all border ${
+            className={`group flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded text-xs font-medium transition-all border ${
               isGalleryOpen
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
-                : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:text-zinc-100 hover:bg-zinc-750'
+                ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-400/50 dark:border-amber-500/50 shadow-sm'
+                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-750'
             }`}
           >
-            <GalleryIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-400" />
+            <GalleryIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400" />
             <span className="hidden lg:inline">地图画廊</span>
-            <span className="text-[10px] font-mono text-zinc-400 bg-zinc-200 dark:bg-surface text-zinc-600 dark:text-zinc-400 px-1 rounded border border-zinc-300 dark:border-border">{themesCount}</span>
+            <span className="text-[10px] font-mono bg-zinc-200/80 dark:bg-surface text-zinc-700 dark:text-zinc-400 px-1 rounded border border-zinc-300/80 dark:border-border">{themesCount}</span>
           </button>
         </Tooltip>
 
@@ -303,7 +303,7 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={onToggleHeaderCollapse}
               className="flex items-center gap-1.5 px-2 py-1.5 sm:px-2 rounded text-xs font-medium transition-all border bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-750"
             >
-              <ChevronUp className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-zinc-400 hover:text-zinc-200" />
+              <ChevronUp className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200" />
               <span className="hidden xl:inline">收起顶栏</span>
             </button>
           </Tooltip>
