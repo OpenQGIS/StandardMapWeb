@@ -6,6 +6,7 @@ import { useDoubleTapZoom } from '../hooks/useDoubleTapZoom';
 import { maxNativeScale, nextZoomStep } from '../utils/zoom';
 import { ZoomIn, ZoomOut } from 'lucide-react';
 import { Zoom100Icon } from './Zoom100Icon';
+import { Tooltip } from './Tooltip';
 import { LayerOverlayIcon } from './CustomIcons';
 
 interface OverlayFadeViewProps {
@@ -386,61 +387,78 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
           </div>
         </div>
 
-        {/* Row 2: Blend Modes (No redundant label text, directly display the 3 modes) */}
+        {/* Row 2: Blend Modes (Using Glassmorphism Tooltip) */}
         <div className="w-full grid grid-cols-3 gap-1 pt-1.5 border-t border-zinc-800/80">
-          {(['normal', 'multiply', 'difference'] as const).map((m) => (
-            <button
-              key={m}
-              onClick={() => setMixBlendMode(m)}
-              className={`py-0.5 sm:py-1 px-1 rounded text-[10px] sm:text-[11px] font-medium text-center transition-colors truncate ${
-                mixBlendMode === m
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
-                  : 'text-zinc-400 hover:text-zinc-200 bg-zinc-800/90 border border-zinc-700/80 hover:bg-zinc-750'
-              }`}
-              title={`混合模式: ${m === 'normal' ? '正常' : m === 'multiply' ? '正片叠底' : '差值比对'}`}
-            >
-              {m === 'normal' ? '正常' : m === 'multiply' ? '正片叠底' : '差值比对'}
-            </button>
+          {(
+            [
+              { key: 'normal', label: '正常', desc: '正常模式 (标准半透明叠置)' },
+              { key: 'multiply', label: '正片叠底', desc: '正片叠底 (过滤底图背景，高亮线划差异)' },
+              { key: 'difference', label: '差值比对', desc: '差值比对 (重合一致变黑，差异区域反色高亮)' },
+            ] as const
+          ).map((m) => (
+            <Tooltip key={m.key} content={m.desc} position="bottom" className="w-full flex">
+              <button
+                onClick={() => setMixBlendMode(m.key)}
+                className={`w-full py-0.5 sm:py-1 px-1 rounded text-[10px] sm:text-[11px] font-medium text-center transition-colors truncate cursor-pointer ${
+                  mixBlendMode === m.key
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
+                    : 'text-zinc-400 hover:text-zinc-200 bg-zinc-800/90 border border-zinc-700/80 hover:bg-zinc-750'
+                }`}
+              >
+                {m.label}
+              </button>
+            </Tooltip>
           ))}
         </div>
       </div>
 
       {/* Floating Zoom Controls */}
       <div className="absolute bottom-3 right-2.5 min-[500px]:bottom-4 min-[500px]:right-4 z-20 flex flex-col gap-1 min-[500px]:gap-1.5 bg-panelSub/60 hover:bg-panelSub/80 p-1 min-[500px]:p-1.5 rounded-lg border border-white/10 hover:border-zinc-600 shadow-md hover:shadow-xl overlay-zoom-controls transition-all duration-200">
-        <button
-          onClick={() =>
-            setViewport((prev) => {
-              const newScale = nextZoomStep(prev.scale, 1, zoomMax);
-              const ratio = newScale / prev.scale;
-              return { scale: newScale, x: prev.x * ratio, y: prev.y * ratio };
-            })
-          }
-          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors"
-          title={`放大至 ${Math.round(nextZoomStep(viewport.scale, 1, zoomMax) * 100)}%`}
+        <Tooltip
+          content={`放大至 ${Math.round(nextZoomStep(viewport.scale, 1, zoomMax) * 100)}%`}
+          position="top"
+          shortcut="+"
         >
-          <ZoomIn className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
-        </button>
-        <button
-          onClick={() =>
-            setViewport((prev) => {
-              const newScale = nextZoomStep(prev.scale, -1, zoomMax);
-              const ratio = newScale / prev.scale;
-              return { scale: newScale, x: prev.x * ratio, y: prev.y * ratio };
-            })
-          }
-          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors"
-          title={`缩小至 ${Math.round(nextZoomStep(viewport.scale, -1, zoomMax) * 100)}%`}
+          <button
+            onClick={() =>
+              setViewport((prev) => {
+                const newScale = nextZoomStep(prev.scale, 1, zoomMax);
+                const ratio = newScale / prev.scale;
+                return { scale: newScale, x: prev.x * ratio, y: prev.y * ratio };
+              })
+            }
+            className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+          >
+            <ZoomIn className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+          </button>
+        </Tooltip>
+        <Tooltip
+          content={`缩小至 ${Math.round(nextZoomStep(viewport.scale, -1, zoomMax) * 100)}%`}
+          position="top"
+          shortcut="-"
         >
-          <ZoomOut className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
-        </button>
+          <button
+            onClick={() =>
+              setViewport((prev) => {
+                const newScale = nextZoomStep(prev.scale, -1, zoomMax);
+                const ratio = newScale / prev.scale;
+                return { scale: newScale, x: prev.x * ratio, y: prev.y * ratio };
+              })
+            }
+            className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+          >
+            <ZoomOut className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+          </button>
+        </Tooltip>
         <div className="h-[1px] bg-white/10 my-0.5" />
-        <button
-          onClick={() => setViewport({ scale: 1, x: 0, y: 0 })}
-          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors"
-          title="自适应居中 (100% 原始比例)"
-        >
-          <Zoom100Icon className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
-        </button>
+        <Tooltip content="自适应居中 (100% 原始比例)" position="top" shortcut="0">
+          <button
+            onClick={() => setViewport({ scale: 1, x: 0, y: 0 })}
+            className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+          >
+            <Zoom100Icon className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+          </button>
+        </Tooltip>
       </div>
     </div>
   );
