@@ -357,33 +357,37 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
       >
         {/* Row 1: Opacity Slider */}
         <div className="w-full flex items-center justify-between gap-1.5 sm:gap-2">
-          <div className="flex items-center gap-1.5 shrink-0" title="图层透明度">
-            <LayerOverlayIcon className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-            <span className="text-xs font-medium text-zinc-300 shrink-0 hidden min-[360px]:inline">
-              透明度
-            </span>
-          </div>
+          <Tooltip content="图层透明度" position="bottom">
+            <div className="flex items-center gap-1.5 shrink-0 cursor-default">
+              <LayerOverlayIcon className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="text-xs font-medium text-zinc-300 shrink-0 hidden min-[360px]:inline">
+                透明度
+              </span>
+            </div>
+          </Tooltip>
           <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0 justify-end">
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={opacity}
-              onChange={(e) => setOpacity(parseFloat(e.target.value))}
-              className="opacity-slider flex-1 min-w-[36px] sm:min-w-[60px] max-w-[130px] cursor-pointer"
-              style={{
-                background: `linear-gradient(to right, #fbbf24 0%, #fbbf24 ${opacity * 100}%, #3f3f46 ${opacity * 100}%, #3f3f46 100%)`,
-              }}
-              title={`透明度: ${Math.round(opacity * 100)}% (悬停滚轮微调，快捷键 [ / ]，双击重置 50%)`}
-            />
-            <span
-              onDoubleClick={() => setOpacity(0.5)}
-              className="text-xs font-mono text-amber-400 w-8 sm:w-9 text-right font-semibold shrink-0 select-none cursor-pointer hover:underline"
-              title="双击重置为 50% (快捷键 [ 降低 / ] 提高)"
-            >
-              {Math.round(opacity * 100)}%
-            </span>
+            <Tooltip content="调节顶层透明度 (支持滚轮微调)" position="bottom" shortcut="[ / ]" className="flex-1 min-w-[36px] sm:min-w-[60px] max-w-[130px] flex">
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={opacity}
+                onChange={(e) => setOpacity(parseFloat(e.target.value))}
+                className="opacity-slider w-full cursor-pointer"
+                style={{
+                  background: `linear-gradient(to right, #fbbf24 0%, #fbbf24 ${opacity * 100}%, #3f3f46 ${opacity * 100}%, #3f3f46 100%)`,
+                }}
+              />
+            </Tooltip>
+            <Tooltip content="双击重置为 50%" position="bottom" shortcut="双击">
+              <span
+                onDoubleClick={() => setOpacity(0.5)}
+                className="text-xs font-mono text-amber-400 w-8 sm:w-9 text-right font-semibold shrink-0 select-none cursor-pointer hover:underline"
+              >
+                {Math.round(opacity * 100)}%
+              </span>
+            </Tooltip>
           </div>
         </div>
 
@@ -391,9 +395,9 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
         <div className="w-full grid grid-cols-3 gap-1 pt-1.5 border-t border-zinc-800/80">
           {(
             [
-              { key: 'normal', label: '正常', desc: '正常模式 (标准半透明叠置)' },
-              { key: 'multiply', label: '正片叠底', desc: '正片叠底 (过滤底图背景，高亮线划差异)' },
-              { key: 'difference', label: '差值比对', desc: '差值比对 (重合一致变黑，差异区域反色高亮)' },
+              { key: 'normal', label: '正常', desc: '正常模式 · 标准半透明叠置，直观对比图层吻合度' },
+              { key: 'multiply', label: '正片叠底', desc: '正片叠底 · 过滤底图白底，高亮线划与色块差异' },
+              { key: 'difference', label: '差值比对', desc: '差值比对 · 重合完全一致呈黑色，差异区域反色高亮' },
             ] as const
           ).map((m) => (
             <Tooltip key={m.key} content={m.desc} position="bottom" className="w-full flex">

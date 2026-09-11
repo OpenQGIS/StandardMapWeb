@@ -205,8 +205,8 @@ export const Header: React.FC<HeaderProps> = ({
                 ? '左右地图位置已互换 (快捷键 X / S)'
                 : '对调左右双屏位置'
               : isSwapped
-              ? '图层上下层顺序已对调 (快捷键 X / S)'
-              : '对调底图与复刻图上下层顺序'
+              ? '图层已对调 (快捷键 X / S)'
+              : '对调图层'
           }
           position="bottom"
           shortcut="X"

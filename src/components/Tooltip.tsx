@@ -14,7 +14,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   content,
   shortcut,
   position = 'bottom',
-  delay = 250,
+  delay = 120,
   children,
   className = '',
 }) => {
