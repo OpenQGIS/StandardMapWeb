@@ -638,7 +638,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
             {/* Bottom/Left Layer Label: dark chip wraps LED + title only; the badge sits on its own row */}
             <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-20 pointer-events-none flex flex-col items-start gap-1 lg:flex-row lg:items-center lg:gap-2">
               <div
-                className={`bg-white/90 dark:bg-panelSub/90 backdrop-blur-md px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-lg border text-xs flex items-center gap-1.5 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
+                className={`bg-themeCard/90 backdrop-blur-md px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-lg border border-themeBorder/15 text-xs flex items-center gap-1.5 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
                   isBottomBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
@@ -705,7 +705,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
       })()}
 
       {/* Floating Zoom Controls */}
-      <div className="absolute bottom-3 right-2.5 min-[500px]:bottom-4 min-[500px]:right-4 z-20 flex flex-col gap-1 min-[500px]:gap-1.5 bg-white/90 dark:bg-panelSub/60 hover:bg-white dark:hover:bg-panelSub/80 p-1 min-[500px]:p-1.5 rounded-lg border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-zinc-600 shadow-md hover:shadow-xl swipe-control-panel transition-all duration-200">
+      <div className="absolute bottom-3 right-2.5 min-[500px]:bottom-4 min-[500px]:right-4 z-20 flex flex-col gap-1 min-[500px]:gap-1.5 bg-themeCard/70 hover:bg-themeCard/95 p-1 min-[500px]:p-1.5 rounded-lg border border-themeBorder/15 hover:border-themeBorder/30 shadow-md hover:shadow-xl swipe-control-panel transition-all duration-200">
         <button
           onClick={zoomIn}
           className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
@@ -739,7 +739,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
         <button
           onClick={() => setCurtainPercent(50)}
           onDoubleClick={() => setCurtainPercent(50)}
-          className="bg-white/90 dark:bg-panelSub/60 hover:bg-white dark:hover:bg-panelSub/80 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-zinc-600 text-xs flex items-center gap-2 shadow-md hover:shadow-xl cursor-pointer select-none transition-all duration-200 active:scale-95 group"
+          className="bg-themeCard/70 hover:bg-themeCard/95 px-3 py-1.5 rounded-lg border border-themeBorder/15 hover:border-themeBorder/30 text-xs flex items-center gap-2 shadow-md hover:shadow-xl cursor-pointer select-none transition-all duration-200 active:scale-95 group text-themeText"
           title="点击或双击重置卷帘居中 (50%)"
         >
           <span className="text-zinc-600 dark:text-zinc-400 text-[11px]">

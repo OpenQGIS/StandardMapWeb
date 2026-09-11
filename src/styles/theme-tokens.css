@@ -1,0 +1,60 @@
+/* =========================================================
+   StandardMapWeb Design Tokens (色彩主题配置表)
+   采用 R G B 格式定义色值通道，以原生支持 Tailwind 任意 Alpha 透明度修饰符
+   ========================================================= */
+
+/* 1. 浅色主题色彩配置 (Light Mode) */
+:root {
+  color-scheme: light;
+
+  /* 背景色系统 (Backgrounds) */
+  --token-bg-app:        241 243 247;  /* 视口底层与大底色 (#f1f3f7) */
+  --token-bg-panel:      255 255 255;  /* 顶栏、主要面板 (#ffffff) */
+  --token-bg-card:       255 255 255;  /* 悬浮标牌、缩放控制组、画廊抽屉 (#ffffff) */
+  --token-bg-btn:        244 244 245;  /* 按钮默认底色 (zinc-100) */
+  --token-bg-btn-hover:  228 228 231;  /* 按钮悬停底色 (zinc-200) */
+  --token-bg-btn-active: 254 243 199;  /* 激活按钮淡金背景 (amber-100) */
+
+  /* 文本系统 (Text) */
+  --token-text-primary:  24 24 27;     /* 主标题与强调字 (zinc-900) */
+  --token-text-muted:    82 82 91;     /* 次级文本与未激活标签 (zinc-600) */
+  --token-text-dim:      161 161 170;  /* 弱化辅助字 (zinc-400) */
+  --token-text-active:   217 119 6;    /* 激活态高亮字 (amber-600) */
+
+  /* 边框系统 (Borders) */
+  --token-border:        0 0 0;        /* 基础边框色 (配合 /8% ~ /15%) */
+  --token-border-hover:  0 0 0;        /* 悬停边框色 (配合 /20%) */
+  --token-border-active: 245 158 11;   /* 激活态金边 (amber-500) */
+
+  /* 控件与轨道 (Track & Sliders) */
+  --token-track:         228 228 231;  /* 滑块/滚动条轨道 (#e4e4e7) */
+  --token-thumb:         203 213 225;  /* 滚动条滑块 (#cbd5e1) */
+}
+
+/* 2. 深色主题色彩配置 (Dark Mode) */
+.dark {
+  color-scheme: dark;
+
+  /* 背景色系统 (Backgrounds) */
+  --token-bg-app:        14 16 19;     /* 视口底层与大底色 (#0e1013) */
+  --token-bg-panel:      26 28 34;     /* 顶栏 (#1a1c22) */
+  --token-bg-card:       26 28 34;     /* 悬浮标牌、缩放控制组、画廊抽屉 (#1a1c22) */
+  --token-bg-btn:        39 39 42;     /* 按钮默认底色 (zinc-800) */
+  --token-bg-btn-hover:  63 63 70;     /* 按钮悬停底色 (zinc-700) */
+  --token-bg-btn-active: 69 26 3;      /* 激活按钮淡金背景 (amber-950/80) */
+
+  /* 文本系统 (Text) */
+  --token-text-primary:  244 244 245;  /* 主标题与强调字 (zinc-100) */
+  --token-text-muted:    161 161 170;  /* 次级文本与未激活标签 (zinc-400) */
+  --token-text-dim:      113 113 122;  /* 弱化辅助字 (zinc-500) */
+  --token-text-active:   251 191 36;   /* 激活态高亮字 (amber-400) */
+
+  /* 边框系统 (Borders) */
+  --token-border:        255 255 255;  /* 基础边框色 (配合 /10% ~ /15%) */
+  --token-border-hover:  255 255 255;  /* 悬停边框色 (配合 /25%) */
+  --token-border-active: 245 158 11;   /* 激活态金边 (amber-500) */
+
+  /* 控件与轨道 (Track & Sliders) */
+  --token-track:         63 63 70;     /* 滑块/滚动条轨道 (#3f3f46) */
+  --token-thumb:         82 82 91;     /* 滚动条滑块 (zinc-600) */
+}

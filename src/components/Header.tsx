@@ -70,7 +70,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="h-14 border-b border-zinc-200 dark:border-border bg-white/95 dark:bg-panelSub/95 backdrop-blur px-3 sm:px-4 flex items-center justify-between z-30 select-none shadow-sm relative transition-colors duration-150">
+    <header className="h-14 border-b border-themeBorder/10 bg-themePanel/95 backdrop-blur px-3 sm:px-4 flex items-center justify-between z-30 select-none shadow-sm relative transition-colors duration-150">
       {/* Left: Branding & Compliance Info */}
       <div className="flex items-center gap-2 sm:gap-3">
         <div
@@ -86,11 +86,11 @@ export const Header: React.FC<HeaderProps> = ({
             />
           </div>
           <div>
-            <h1 className="text-xs sm:text-sm font-bold text-zinc-800 dark:text-zinc-100 leading-tight">
+            <h1 className="text-xs sm:text-sm font-bold text-themeText leading-tight">
               <span className="hidden md:inline">标准地图/复刻地图</span>
               <span className="inline md:hidden max-[420px]:hidden">标准/复刻</span>
             </h1>
-            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-tight hidden xl:block whitespace-nowrap">
+            <p className="text-[11px] text-themeDim leading-tight hidden xl:block whitespace-nowrap">
               左右顺序一键切换 视口联动缩放
             </p>
           </div>
@@ -99,7 +99,7 @@ export const Header: React.FC<HeaderProps> = ({
         <Tooltip content="标准地图与复刻地图对比说明" position="bottom">
           <button
             onClick={() => setShowComplianceModal(true)}
-            className="flex items-center justify-center gap-1 text-[11px] text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 p-1.5 sm:px-2.5 sm:py-1.5 rounded text-xs font-medium bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-750 transition-colors ml-0.5 sm:ml-1 cursor-pointer min-w-[31px] min-h-[31px]"
+            className="flex items-center justify-center gap-1 text-[11px] text-themeMuted hover:text-themeText p-1.5 sm:px-2.5 sm:py-1.5 rounded text-xs font-medium bg-themeBtn border border-themeBorder/15 hover:bg-themeBtnHover transition-colors ml-0.5 sm:ml-1 cursor-pointer min-w-[31px] min-h-[31px]"
           >
             <Info className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 shrink-0" />
             <span className="hidden xl:inline">地图说明</span>
@@ -108,7 +108,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Center: Comparison Mode Switcher */}
-      <div className="flex items-center bg-zinc-100 dark:bg-surface border border-zinc-200 dark:border-border p-1 rounded-lg">
+      <div className="flex items-center bg-themeBtn border border-themeBorder/15 p-1 rounded-lg">
         <Tooltip
           content={
             mode === 'swipe'
@@ -130,8 +130,8 @@ export const Header: React.FC<HeaderProps> = ({
             }}
             className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:px-3 rounded-md text-xs font-medium transition-all ${
               mode === 'swipe'
-                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200/90 dark:border-zinc-700'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/40'
+                ? 'bg-themeCard text-themeText shadow-sm border border-themeBorder/20 font-semibold'
+                : 'text-themeMuted hover:text-themeText hover:bg-themeBtnHover/50'
             }`}
           >
             <RollingShutterIcon
@@ -166,8 +166,8 @@ export const Header: React.FC<HeaderProps> = ({
             }}
             className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:px-3 rounded-md text-xs font-medium transition-all ${
               mode === 'sync'
-                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200/90 dark:border-zinc-700'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/40'
+                ? 'bg-themeCard text-themeText shadow-sm border border-themeBorder/20 font-semibold'
+                : 'text-themeMuted hover:text-themeText hover:bg-themeBtnHover/50'
             }`}
           >
             <DualWindowIcon
@@ -186,8 +186,8 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => onModeChange('overlay')}
             className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:px-3 rounded-md text-xs font-medium transition-all ${
               mode === 'overlay'
-                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200/90 dark:border-zinc-700'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/40'
+                ? 'bg-themeCard text-themeText shadow-sm border border-themeBorder/20 font-semibold'
+                : 'text-themeMuted hover:text-themeText hover:bg-themeBtnHover/50'
             }`}
           >
             <LayerOverlayIcon className={`w-[18px] h-[18px] sm:w-4 sm:h-4 ${mode === 'overlay' ? 'text-amber-500 dark:text-amber-400' : 'text-zinc-500 dark:text-zinc-400'}`} />
@@ -221,7 +221,7 @@ export const Header: React.FC<HeaderProps> = ({
             className={`group flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded text-xs font-medium transition-all border ${
               isSwapped
                 ? 'bg-amber-500/15 text-amber-700 dark:text-[#fbbf24] border-amber-400/50 dark:border-amber-500/50 shadow-sm'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-750 hover:text-zinc-900 dark:hover:text-zinc-100'
+                : 'bg-themeBtn text-themeMuted border-themeBorder/15 hover:bg-themeBtnHover hover:text-themeText'
             }`}
           >
             <SwapLeftAndRightIcon
@@ -245,8 +245,8 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </Tooltip>
 
-        <div className="hidden lg:block text-[11px] font-mono text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-surface px-2.5 py-1 rounded border border-zinc-200 dark:border-border">
-          缩放: <span className="text-zinc-900 dark:text-zinc-100 font-semibold">{zoomPercent}%</span>
+        <div className="hidden lg:block text-[11px] font-mono text-themeMuted bg-themeBtn px-2.5 py-1 rounded border border-themeBorder/15">
+          缩放: <span className="text-themeText font-semibold">{zoomPercent}%</span>
         </div>
 
         {/* Toggle Floating Gallery Button */}
@@ -256,12 +256,12 @@ export const Header: React.FC<HeaderProps> = ({
             className={`group flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded text-xs font-medium transition-all border ${
               isGalleryOpen
                 ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-400/50 dark:border-amber-500/50 shadow-sm'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-750'
+                : 'bg-themeBtn text-themeMuted border-themeBorder/15 hover:text-themeText hover:bg-themeBtnHover'
             }`}
           >
             <GalleryIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400" />
             <span className="hidden lg:inline">地图画廊</span>
-            <span className="text-[10px] font-mono bg-zinc-200/80 dark:bg-surface text-zinc-700 dark:text-zinc-400 px-1 rounded border border-zinc-300/80 dark:border-border">{themesCount}</span>
+            <span className="text-[10px] font-mono bg-themeBtnHover/80 text-themeMuted px-1 rounded border border-themeBorder/20">{themesCount}</span>
           </button>
         </Tooltip>
 
@@ -278,7 +278,7 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <button
             onClick={onCycleTheme}
-            className="flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded text-xs font-medium transition-all border bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-750 cursor-pointer min-w-[31px] min-h-[31px]"
+            className="flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded text-xs font-medium transition-all border bg-themeBtn text-themeMuted border-themeBorder/15 hover:text-themeText hover:bg-themeBtnHover cursor-pointer min-w-[31px] min-h-[31px]"
             aria-label="切换主题风格"
           >
             {theme === 'system' && (
@@ -301,7 +301,7 @@ export const Header: React.FC<HeaderProps> = ({
           <Tooltip content="收起顶部工具栏进入全屏沉浸对比" position="bottom" shortcut="F">
             <button
               onClick={onToggleHeaderCollapse}
-              className="flex items-center gap-1.5 px-2 py-1.5 sm:px-2 rounded text-xs font-medium transition-all border bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-750"
+              className="flex items-center gap-1.5 px-2 py-1.5 sm:px-2 rounded text-xs font-medium transition-all border bg-themeBtn text-themeMuted border-themeBorder/15 hover:text-themeText hover:bg-themeBtnHover"
             >
               <ChevronUp className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200" />
               <span className="hidden xl:inline">收起顶栏</span>

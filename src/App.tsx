@@ -226,7 +226,7 @@ export function App() {
       {isHeaderCollapsed && (
         <button
           onClick={() => setIsHeaderCollapsed(false)}
-          className="absolute top-2 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 dark:bg-panelSub/90 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-white/15 hover:border-amber-400/50 shadow-xl backdrop-blur-md text-xs font-medium cursor-pointer transition-all duration-200 group hover:scale-105 animate-in fade-in slide-in-from-top-2"
+          className="absolute top-2 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 px-3 py-1 rounded-full bg-themeCard/90 hover:bg-themeCard text-themeMuted hover:text-themeText border border-themeBorder/15 hover:border-amber-400/50 shadow-xl backdrop-blur-md text-xs font-medium cursor-pointer transition-all duration-200 group hover:scale-105 animate-in fade-in slide-in-from-top-2"
           title="展开顶部工具栏 (快捷键 F 或 Esc)"
         >
           <ChevronDown className="w-3.5 h-3.5 text-amber-400 group-hover:translate-y-0.5 transition-transform" />
@@ -278,7 +278,7 @@ export function App() {
         </div>
 
         {/* Mobile zoom readout (desktop keeps the header pill; the bottom-left curtain gauge is desktop-only too) */}
-        <div className="lg:hidden absolute bottom-3 left-3 z-20 pointer-events-none select-none bg-white/90 dark:bg-panelSub/60 px-2 py-1 rounded-lg border border-zinc-200 dark:border-white/10 text-[10px] font-mono text-zinc-700 dark:text-zinc-300 shadow-md">
+        <div className="lg:hidden absolute bottom-3 left-3 z-20 pointer-events-none select-none bg-themeCard/70 px-2 py-1 rounded-lg border border-themeBorder/15 text-[10px] font-mono text-themeMuted shadow-md">
           缩放 <span className="text-zinc-100 font-semibold">{zoomPercent}%</span>
         </div>
       </main>

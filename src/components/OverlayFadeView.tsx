@@ -353,7 +353,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
       {/* Opacity & Blend Controls Panel */}
       <div
         onWheel={handlePanelWheel}
-        className="absolute top-2.5 sm:top-4 left-1/2 -translate-x-1/2 z-30 overlay-control-panel bg-white/90 dark:bg-panelSub/60 hover:bg-white dark:hover:bg-panelSub/80 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-zinc-700/80 flex flex-col gap-1.5 sm:gap-2 shadow-2xl w-auto max-w-[calc(100vw-16px)] sm:max-w-[270px] transition-colors overflow-hidden"
+        className="absolute top-2.5 sm:top-4 left-1/2 -translate-x-1/2 z-30 overlay-control-panel bg-themeCard/75 hover:bg-themeCard/95 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl border border-themeBorder/15 hover:border-themeBorder/30 flex flex-col gap-1.5 sm:gap-2 shadow-2xl w-auto max-w-[calc(100vw-16px)] sm:max-w-[270px] transition-colors overflow-hidden text-themeText"
       >
         {/* Row 1: Opacity Slider */}
         <div className="w-full flex items-center justify-between gap-1.5 sm:gap-2">
@@ -417,7 +417,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
       </div>
 
       {/* Floating Zoom Controls */}
-      <div className="absolute bottom-3 right-2.5 min-[500px]:bottom-4 min-[500px]:right-4 z-20 flex flex-col gap-1 min-[500px]:gap-1.5 bg-white/90 dark:bg-panelSub/60 hover:bg-white dark:hover:bg-panelSub/80 p-1 min-[500px]:p-1.5 rounded-lg border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-zinc-600 shadow-md hover:shadow-xl overlay-zoom-controls transition-all duration-200">
+      <div className="absolute bottom-3 right-2.5 min-[500px]:bottom-4 min-[500px]:right-4 z-20 flex flex-col gap-1 min-[500px]:gap-1.5 bg-themeCard/70 hover:bg-themeCard/95 p-1 min-[500px]:p-1.5 rounded-lg border border-themeBorder/15 hover:border-themeBorder/30 shadow-md hover:shadow-xl overlay-zoom-controls transition-all duration-200">
         <Tooltip
           content={`放大至 ${Math.round(nextZoomStep(viewport.scale, 1, zoomMax) * 100)}%`}
           position="top"

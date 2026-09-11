@@ -1,3 +1,4 @@
+@import './styles/theme-tokens.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,7 +12,7 @@
   --color-panel-sub: #ffffff;
   --color-surface: #f1f3f7;
   --color-surface-elevated: #ffffff;
-  --slider-track: #e4e4e7;
+  --slider-track: rgb(var(--token-track));
 }
 
 .dark {
@@ -21,7 +22,7 @@
   --color-panel-sub: #1a1c22;
   --color-surface: #0e1013;
   --color-surface-elevated: #1f2229;
-  --slider-track: #3f3f46;
+  --slider-track: rgb(var(--token-track));
 }
 
 @media (min-width: 640px) {
@@ -56,7 +57,7 @@ body, #root {
   background: #f1f3f6;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: rgb(var(--token-thumb));
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {

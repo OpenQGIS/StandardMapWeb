@@ -86,7 +86,7 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
         <div className="fixed bottom-3 min-[500px]:bottom-4 left-1/2 -translate-x-1/2 z-[35] pointer-events-auto flex items-center justify-center max-w-[calc(100vw-124px)] min-[500px]:max-w-[calc(100vw-160px)] md:max-w-none">
           <button
             onClick={onToggleOpen}
-            className="group flex items-center gap-1.5 min-[500px]:gap-2 sm:gap-2.5 px-2.5 min-[500px]:px-3.5 sm:px-4 py-1 min-[500px]:py-1.5 sm:py-2 rounded-full bg-white/90 dark:bg-panelSub/60 hover:bg-white dark:hover:bg-panelSub/80 text-zinc-800 dark:text-zinc-200 hover:text-amber-600 dark:hover:text-amber-400 border border-zinc-200 dark:border-zinc-700/50 hover:border-amber-500/60 shadow-lg transition-all duration-200 cursor-pointer hover:shadow-amber-500/10 hover:scale-[1.02] max-w-full"
+            className="group flex items-center gap-1.5 min-[500px]:gap-2 sm:gap-2.5 px-2.5 min-[500px]:px-3.5 sm:px-4 py-1 min-[500px]:py-1.5 sm:py-2 rounded-full bg-themeCard/75 hover:bg-themeCard/95 text-themeText hover:text-amber-600 dark:hover:text-amber-400 border border-themeBorder/15 hover:border-amber-500/60 shadow-lg transition-all duration-200 cursor-pointer hover:shadow-amber-500/10 hover:scale-[1.02] max-w-full"
             title="展开地图画廊 (快捷键 G)"
           >
             <GalleryIcon className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 text-amber-400 group-hover:scale-110 transition-transform shrink-0" />
@@ -111,12 +111,12 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
 
       {/* 3. Floating Drawer Panel (Completely hidden & overflow-clipped when closed) */}
       <section
-        className={`fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-[#12141a]/95 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-700/80 shadow-[0_-12px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_-12px_40px_rgba(0,0,0,0.7)] flex flex-col select-none transition-all duration-300 ease-out h-[155px] sm:h-[185px] overflow-hidden ${
+        className={`fixed bottom-0 inset-x-0 z-40 bg-themePanel/95 backdrop-blur-xl border-t border-themeBorder/15 shadow-[0_-12px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_-12px_40px_rgba(0,0,0,0.7)] flex flex-col select-none transition-all duration-300 ease-out h-[155px] sm:h-[185px] overflow-hidden ${
           isOpen ? 'translate-y-0 opacity-100 visible' : 'translate-y-full opacity-0 invisible pointer-events-none'
         }`}
       >
         {/* Gallery Header Bar (Strictly single row, non-wrapping) */}
-        <div className="h-8 sm:h-9 px-2.5 sm:px-4 border-b border-zinc-200 dark:border-border/60 flex items-center justify-between text-xs bg-zinc-50 dark:bg-panelSub/60 shrink-0 gap-2 overflow-hidden">
+        <div className="h-8 sm:h-9 px-2.5 sm:px-4 border-b border-themeBorder/10 flex items-center justify-between text-xs bg-themeCard/60 shrink-0 gap-2 overflow-hidden">
           <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 flex-1 overflow-x-auto scrollbar-none">
             <span className="font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1 shrink-0">
               <GalleryIcon className="w-3.5 h-3.5 text-amber-400" />
