@@ -16,6 +16,8 @@ interface OverlayFadeViewProps {
   viewport: ViewportState;
   setViewport: React.Dispatch<React.SetStateAction<ViewportState>>;
   isSwapped: boolean;
+  opacity?: number;
+  onOpacityChange?: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
@@ -26,6 +28,8 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
   viewport,
   setViewport,
   isSwapped,
+  opacity: controlledOpacity,
+  onOpacityChange,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const cardDimensions = useCardDimensions(containerRef, aspectRatio, orientation, 0.94);
@@ -50,7 +54,18 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
     () => ({ width: zoomedW, height: zoomedH }),
     [zoomedW, zoomedH]
   );
-  const [opacity, setOpacity] = useState<number>(0.65);
+  const [internalOpacity, setInternalOpacity] = useState<number>(0.65);
+  const opacity = controlledOpacity !== undefined ? controlledOpacity : internalOpacity;
+  const setOpacity = onOpacityChange || setInternalOpacity;
+
+  const handlePanelWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    if (e.cancelable) e.preventDefault();
+    const step = e.shiftKey ? 0.01 : 0.05;
+    const delta = e.deltaY < 0 ? step : -step;
+    setOpacity((prev: number) => Math.min(1, Math.max(0, Math.round((prev + delta) * 100) / 100)));
+  };
+
   const [mixBlendMode, setMixBlendMode] = useState<'normal' | 'multiply' | 'difference'>('normal');
   const [isPanning, setIsPanning] = useState(false);
   const panStartRef = useRef<{ x: number; y: number; startX: number; startY: number }>({
@@ -335,7 +350,10 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
       </div>
 
       {/* Opacity & Blend Controls Panel */}
-      <div className="absolute top-2.5 sm:top-4 left-1/2 -translate-x-1/2 z-30 overlay-control-panel bg-panelSub/60 hover:bg-panelSub/80 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl border border-white/10 hover:border-zinc-700/80 flex flex-col gap-1.5 sm:gap-2 shadow-2xl w-auto max-w-[calc(100vw-16px)] sm:max-w-[270px] transition-colors overflow-hidden">
+      <div
+        onWheel={handlePanelWheel}
+        className="absolute top-2.5 sm:top-4 left-1/2 -translate-x-1/2 z-30 overlay-control-panel bg-panelSub/60 hover:bg-panelSub/80 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl border border-white/10 hover:border-zinc-700/80 flex flex-col gap-1.5 sm:gap-2 shadow-2xl w-auto max-w-[calc(100vw-16px)] sm:max-w-[270px] transition-colors overflow-hidden"
+      >
         {/* Row 1: Opacity Slider */}
         <div className="w-full flex items-center justify-between gap-1.5 sm:gap-2">
           <div className="flex items-center gap-1.5 shrink-0" title="图层透明度">
@@ -356,9 +374,13 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
               style={{
                 background: `linear-gradient(to right, #fbbf24 0%, #fbbf24 ${opacity * 100}%, #3f3f46 ${opacity * 100}%, #3f3f46 100%)`,
               }}
-              title={`透明度: ${Math.round(opacity * 100)}%`}
+              title={`透明度: ${Math.round(opacity * 100)}% (悬停滚轮微调，快捷键 [ / ]，双击重置 50%)`}
             />
-            <span className="text-xs font-mono text-amber-400 w-8 sm:w-9 text-right font-semibold shrink-0 select-none">
+            <span
+              onDoubleClick={() => setOpacity(0.5)}
+              className="text-xs font-mono text-amber-400 w-8 sm:w-9 text-right font-semibold shrink-0 select-none cursor-pointer hover:underline"
+              title="双击重置为 50% (快捷键 [ 降低 / ] 提高)"
+            >
               {Math.round(opacity * 100)}%
             </span>
           </div>

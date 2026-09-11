@@ -8,6 +8,7 @@ import { OverlayFadeView } from './components/OverlayFadeView';
 import { GalleryCarousel } from './components/GalleryCarousel';
 import { DebugOverlay } from './components/DebugOverlay';
 import { ChevronDown } from 'lucide-react';
+import { nextZoomStep } from './utils/zoom';
 import './App.css';
 
 export function App() {
@@ -22,6 +23,7 @@ export function App() {
   // Sub-direction states: swipe curtain (vertical/horizontal), dual sync view (horizontal/vertical)
   const [swipeDirection, setSwipeDirection] = useState<SplitDirection>('vertical');
   const [dualDirection, setDualDirection] = useState<SplitDirection>('horizontal');
+  const [overlayOpacity, setOverlayOpacity] = useState<number>(0.65);
 
   // Immersive / Fullscreen mode: collapse header bar to maximize map viewport
   const [isHeaderCollapsed, setIsHeaderCollapsed] = useState<boolean>(false);
@@ -56,10 +58,15 @@ export function App() {
     return new URLSearchParams(window.location.search).has('debug');
   });
 
-  // Keyboard shortcut listener: 'G' toggles gallery, 'F' toggles header collapse, 'Esc' closes gallery / exits collapse
+  // Keyboard shortcut listener (Scheme 1: 1/2/3 mode switch, +/-/0 zoom, X/S swap, [/] opacity, F/G/Esc)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore when typing in input or textarea
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      // Ignore when system modifier keys (Ctrl, Alt, Meta/Cmd) are held
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
       if (e.key === 'Escape') {
         if (isGalleryOpen) {
           setIsGalleryOpen(false);
@@ -70,11 +77,64 @@ export function App() {
         setIsGalleryOpen((prev) => !prev);
       } else if (e.key === 'f' || e.key === 'F') {
         setIsHeaderCollapsed((prev) => !prev);
+      } else if (e.key === 'x' || e.key === 'X' || e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        handleSwapOrder();
+      } else if (e.key === '1') {
+        e.preventDefault();
+        if (mode === 'swipe') {
+          setSwipeDirection((prev) => (prev === 'vertical' ? 'horizontal' : 'vertical'));
+        } else {
+          setMode('swipe');
+        }
+      } else if (e.key === '2') {
+        e.preventDefault();
+        if (mode === 'sync') {
+          setDualDirection((prev) => (prev === 'horizontal' ? 'vertical' : 'horizontal'));
+        } else {
+          setMode('sync');
+        }
+      } else if (e.key === '3') {
+        e.preventDefault();
+        setMode('overlay');
+      } else if (e.key === '+' || e.key === '=') {
+        e.preventDefault();
+        handleModeViewportChange(mode, (prev) => {
+          const nextScale = nextZoomStep(prev.scale, 1, 10);
+          const ratio = nextScale / prev.scale;
+          return {
+            scale: nextScale,
+            x: prev.x * ratio,
+            y: prev.y * ratio,
+          };
+        });
+      } else if (e.key === '-' || e.key === '_') {
+        e.preventDefault();
+        handleModeViewportChange(mode, (prev) => {
+          const nextScale = nextZoomStep(prev.scale, -1, 10);
+          const ratio = nextScale / prev.scale;
+          return {
+            scale: nextScale,
+            x: prev.x * ratio,
+            y: prev.y * ratio,
+          };
+        });
+      } else if (e.key === '0') {
+        e.preventDefault();
+        handleModeViewportChange(mode, () => ({ scale: 1, x: 0, y: 0 }));
+      } else if (mode === 'overlay' && (e.key === '[' || e.key === '【')) {
+        e.preventDefault();
+        const step = e.shiftKey ? 0.1 : 0.05;
+        setOverlayOpacity((prev) => Math.max(0, Math.round((prev - step) * 100) / 100));
+      } else if (mode === 'overlay' && (e.key === ']' || e.key === '】')) {
+        e.preventDefault();
+        const step = e.shiftKey ? 0.1 : 0.05;
+        setOverlayOpacity((prev) => Math.min(1, Math.round((prev + step) * 100) / 100));
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isGalleryOpen, isHeaderCollapsed]);
+  }, [mode, swipeDirection, dualDirection, isGalleryOpen, isHeaderCollapsed]);
 
   // Preload other map images in background so switching between horizontal & vertical is instantaneous!
   useEffect(() => {
@@ -192,6 +252,8 @@ export function App() {
             viewport={viewports.overlay}
             setViewport={(v) => handleModeViewportChange('overlay', v)}
             isSwapped={isSwapped}
+            opacity={overlayOpacity}
+            onOpacityChange={setOverlayOpacity}
           />
         </div>
 
