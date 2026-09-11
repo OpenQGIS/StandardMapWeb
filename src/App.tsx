@@ -130,6 +130,22 @@ export function App() {
         e.preventDefault();
         const step = e.shiftKey ? 0.1 : 0.05;
         setOverlayOpacity((prev) => Math.min(1, Math.round((prev + step) * 100) / 100));
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const step = e.shiftKey ? 200 : 50;
+        handleModeViewportChange(mode, (prev) => ({ ...prev, x: prev.x + step }));
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        const step = e.shiftKey ? 200 : 50;
+        handleModeViewportChange(mode, (prev) => ({ ...prev, x: prev.x - step }));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const step = e.shiftKey ? 200 : 50;
+        handleModeViewportChange(mode, (prev) => ({ ...prev, y: prev.y + step }));
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const step = e.shiftKey ? 200 : 50;
+        handleModeViewportChange(mode, (prev) => ({ ...prev, y: prev.y - step }));
       }
     };
     window.addEventListener('keydown', handleKeyDown);
