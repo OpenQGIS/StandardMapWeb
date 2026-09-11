@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ComparisonMode, SplitDirection } from '../types/map';
 import type { ThemeMode } from '../hooks/useThemeMode';
-import { Info, ExternalLink, ChevronUp } from 'lucide-react';
-import { RollingShutterIcon, DualWindowIcon, LayerOverlayIcon, GalleryIcon, SwapLeftAndRightIcon, ThemeAutoIcon, ThemeLightIcon, ThemeDarkIcon } from './CustomIcons';
+import { Info, ExternalLink, ChevronUp, Monitor } from 'lucide-react';
+import { RollingShutterIcon, DualWindowIcon, LayerOverlayIcon, GalleryIcon, SwapLeftAndRightIcon, ThemeLightIcon, ThemeDarkIcon } from './CustomIcons';
 import { Tooltip } from './Tooltip';
 
 interface HeaderProps {
@@ -282,7 +282,7 @@ export const Header: React.FC<HeaderProps> = ({
             aria-label="切换主题风格"
           >
             {theme === 'system' && (
-              <ThemeAutoIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 shrink-0" />
+              <Monitor className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 shrink-0" />
             )}
             {theme === 'light' && (
               <ThemeLightIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 shrink-0" />
