@@ -31,7 +31,8 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const leftPaneRef = useRef<HTMLDivElement>(null);
   const rightPaneRef = useRef<HTMLDivElement>(null);
-  const cardDimensions = useCardDimensions(leftPaneRef, aspectRatio, orientation, 0.92);
+  // Base dimensions use the unified main container viewport (0.94) so scale % maps to identical physical size across all 3 modes!
+  const cardDimensions = useCardDimensions(containerRef, aspectRatio, orientation, 0.94);
 
   // Clamp gestures at the L2 native-pixel zoom: further zoom only upsamples
   const zoomMax = maxNativeScale(
