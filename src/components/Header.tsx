@@ -229,7 +229,7 @@ export const Header: React.FC<HeaderProps> = ({
                 ? dualDirection === 'vertical'
                   ? '互换上下图'
                   : '互换左右图'
-                : '对调图层顺序'}
+                : '对调图层'}
             </span>
             {isSwapped && <span className="text-[10px] text-[#fbbf24] font-mono hidden lg:inline">(已调换)</span>}
           </button>
