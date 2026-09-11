@@ -61,7 +61,7 @@ export const MapSvg: React.FC<MapSvgProps> = ({
 
   if (item.imageUrl) {
     return (
-      <div className={`w-full h-full relative overflow-hidden bg-[#1a1d26] select-none flex items-center justify-center ${className}`}>
+      <div className={`w-full h-full relative overflow-hidden bg-white dark:bg-[#1a1d26] select-none flex items-center justify-center ${className}`}>
         {/* Loading placeholder spinner so user never sees a stale previous map */}
         {!isLoaded && !hideLoader && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#161822]/90 z-10 select-none pointer-events-none">

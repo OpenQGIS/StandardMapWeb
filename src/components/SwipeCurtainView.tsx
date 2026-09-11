@@ -488,7 +488,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
-      className="relative w-full h-full bg-zinc-100 dark:bg-[#0d0e12] overflow-hidden cursor-grab active:cursor-grabbing select-none touch-none transition-colors duration-150"
+      className="relative w-full h-full bg-themeApp overflow-hidden cursor-grab active:cursor-grabbing select-none touch-none transition-colors duration-150"
     >
       {/* Background Canvas Grid Pattern */}
       <div
@@ -671,7 +671,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
             {/* Top/Right Layer Label: dark chip wraps LED + title only; the badge sits on its own row */}
             <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 pointer-events-none flex flex-col items-end gap-1 lg:flex-row lg:items-center lg:gap-2">
               <div
-                className={`bg-white/90 dark:bg-panelSub/90 backdrop-blur-md px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-lg border text-xs flex items-center gap-1.5 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
+                className={`bg-themeCard/90 backdrop-blur-md px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-lg border border-themeBorder/15 text-xs flex items-center gap-1.5 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
                   isTopBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
@@ -754,7 +754,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
 
       {/* Unified Initial Loading Overlay: completely unobstructed, no clip seam, perfectly centered */}
       {!isCurtainReady && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-zinc-100/60 dark:bg-[#0d0e12]/60 select-none pointer-events-none transition-opacity duration-300">
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-themeApp/60 select-none pointer-events-none transition-opacity duration-300">
           <LottieLoader size={60} text="载入高精度地图中..." />
         </div>
       )}

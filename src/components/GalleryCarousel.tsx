@@ -135,22 +135,20 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
 
               if (tabs.length <= 2) {
                 return (
-                  <span className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded bg-zinc-800 text-amber-400 font-medium border border-zinc-700/60">
+                  <span className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-medium border border-zinc-200 dark:border-zinc-700/60">
                     中国标准地图 ({themes.length}组)
                   </span>
                 );
               }
 
               return (
-                <div className="flex items-center bg-zinc-100 dark:bg-surface p-0.5 rounded-md border border-zinc-200 dark:border-border shrink-0">
+                <div className="flex items-center bg-themeBtn p-0.5 rounded-md border border-themeBorder/15 shrink-0">
                   {tabs.map((tab) => (
                     <button
                       key={tab.key}
                       onClick={() => setFilter(tab.key)}
                       className={`px-1.5 sm:px-2.5 py-0.5 rounded text-[10px] sm:text-[11px] font-medium transition-colors ${
-                        filter === tab.key
-                          ? 'bg-zinc-800 text-amber-400 shadow-sm border border-zinc-700/60 font-semibold'
-                          : 'text-zinc-400 hover:text-zinc-200'
+                        filter === tab.key ? 'bg-white dark:bg-zinc-800 text-amber-600 dark:text-amber-400 shadow-sm border border-zinc-200 dark:border-zinc-700/60 font-semibold' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                       }`}
                     >
                       {tab.label}
@@ -163,11 +161,11 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
 
           {/* Current Active Theme & Scroll Arrows & Collapse Button */}
           <div className="flex items-center gap-1.5 sm:gap-3 text-zinc-400 shrink-0">
-            <div className="hidden xl:flex items-center gap-1 text-[11px] font-mono">
+            <div className="hidden xl:flex items-center gap-1 text-[11px] font-mono text-zinc-600 dark:text-zinc-400">
               <span>当前:</span>
-              <span className="text-amber-400 font-semibold truncate max-w-[150px]">{selectedTheme.title}</span>
+              <span className="text-amber-600 dark:text-amber-400 font-semibold truncate max-w-[150px]">{selectedTheme.title}</span>
               {isSwapped && (
-                <span className="text-[9px] px-1 py-0.2 rounded bg-amber-950/80 text-amber-300 border border-amber-800/60">
+                <span className="text-[9px] px-1 py-0.2 rounded bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800/60">
                   (已调换)
                 </span>
               )}
@@ -176,7 +174,7 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
             <div className="hidden sm:flex items-center gap-1">
               <button
                 onClick={() => scroll('left')}
-                className="w-6 h-6 rounded flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 transition-colors"
+                className="w-6 h-6 rounded flex items-center justify-center bg-themeBtn hover:bg-themeBtnHover text-themeMuted hover:text-themeText border border-themeBorder/15 transition-colors"
                 title="向左滚动"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
@@ -193,7 +191,7 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
             {/* Collapse Gallery Button */}
             <button
               onClick={onClose}
-              className="flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 hover:text-amber-600 dark:hover:text-amber-400 border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors text-xs font-medium cursor-pointer shadow-sm"
+              className="flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-themeBtn hover:bg-themeBtnHover text-themeMuted hover:text-amber-600 dark:hover:text-amber-400 border border-themeBorder/15 hover:border-themeBorder/30 transition-colors text-xs font-medium cursor-pointer shadow-sm"
               title="收起画廊 (快捷键 Esc / G)"
             >
               <span className="hidden sm:inline">收起画廊</span>
@@ -226,9 +224,7 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
                   onClose();
                 }}
                 className={`flex-shrink-0 h-full rounded-xl p-1.5 sm:p-2 cursor-pointer transition-all duration-150 flex flex-col items-center justify-between group ${
-                  isSelected
-                    ? 'bg-zinc-800/95 ring-2 ring-amber-500/90 border-transparent shadow-2xl scale-[1.01]'
-                    : 'bg-surface hover:bg-zinc-800/60 border border-border hover:border-zinc-700 shadow-md'
+                  isSelected ? 'bg-amber-500/15 dark:bg-zinc-800/95 ring-2 ring-amber-500/90 border-transparent shadow-lg scale-[1.01]' : 'bg-white dark:bg-themeCard/80 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 border border-zinc-200/90 dark:border-white/10 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm hover:shadow-md'
                 }`}
                 style={{
                   width: `calc(var(--gallery-img-h) * ${ratio} + var(--gallery-card-pad))`,
@@ -237,7 +233,7 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
               >
                 {/* Card Picture Frame (100% snugly matches the image with zero empty borders!) */}
                 <div
-                  className="h-[76px] sm:h-[92px] w-full rounded-lg overflow-hidden flex items-center justify-center bg-zinc-950 relative border border-zinc-800/80 shadow-md group-hover:border-zinc-700 transition-colors pointer-events-none"
+                  className="h-[76px] sm:h-[92px] w-full rounded-lg overflow-hidden flex items-center justify-center bg-zinc-100 dark:bg-zinc-950 relative border border-zinc-200 dark:border-zinc-800/80 shadow-sm group-hover:border-zinc-300 dark:group-hover:border-zinc-700 transition-colors pointer-events-none"
                 >
                   {(theme.thumbnailUrl || theme.baseMap.imageUrl || theme.reproductionMap.imageUrl) ? (
                     <img
@@ -283,7 +279,11 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
 
                 {/* Card Title: simple, concise, snug to card width */}
                 <h4
-                  className="text-[10px] sm:text-[11px] font-medium text-zinc-800 dark:text-zinc-200 truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors text-center mt-1 px-0.5 w-full block"
+                  className={`text-[10px] sm:text-[11px] font-medium truncate transition-colors text-center mt-1 px-0.5 w-full block ${
+                    isSelected
+                      ? 'text-amber-700 dark:text-amber-400 font-semibold'
+                      : 'text-zinc-700 dark:text-zinc-200 group-hover:text-amber-600 dark:group-hover:text-amber-400'
+                  }`}
                   title={theme.title}
                 >
                   {getShortTitle(theme.title)}

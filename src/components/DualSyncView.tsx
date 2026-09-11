@@ -339,7 +339,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
-      className={`relative w-full h-full bg-zinc-100 dark:bg-[#0a0c10] gap-2 p-2 overflow-hidden select-none touch-none transition-colors duration-150 ${
+      className={`relative w-full h-full bg-themeApp gap-2 p-2 overflow-hidden select-none touch-none transition-colors duration-150 ${
         direction === 'vertical'
           ? 'grid grid-cols-1 grid-rows-2'
           : 'grid grid-cols-1 landscape:grid-cols-2 md:grid-cols-2'
@@ -467,7 +467,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
           return (
             <div className="absolute top-2 left-2 sm:top-3 sm:left-3 landscape:left-auto landscape:right-2 md:left-auto md:right-3 z-20 pointer-events-none flex flex-col items-start gap-1 landscape:items-end md:items-end lg:flex-row lg:items-center lg:gap-2">
               <div
-                className={`bg-white/90 dark:bg-panelSub/90 backdrop-blur-md px-2 py-1.5 sm:px-2.5 sm:py-1 rounded-lg border text-xs flex items-center gap-1.5 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
+                className={`bg-themeCard/90 backdrop-blur-md px-2 py-1.5 sm:px-2.5 sm:py-1 rounded-lg border border-themeBorder/15 text-xs flex items-center gap-1.5 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
                   isRightBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >

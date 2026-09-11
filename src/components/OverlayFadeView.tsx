@@ -304,7 +304,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
-      className="relative w-full h-full bg-zinc-100 dark:bg-[#0d0e12] overflow-hidden cursor-grab active:cursor-grabbing select-none touch-none transition-colors duration-150"
+      className="relative w-full h-full bg-themeApp overflow-hidden cursor-grab active:cursor-grabbing select-none touch-none transition-colors duration-150"
     >
       {/* Layer 1: Bottom Map */}
       <div

@@ -411,7 +411,7 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`w-full h-full relative overflow-hidden bg-[#1a1d26] select-none ${className}`}
+      className={`w-full h-full relative overflow-hidden bg-white dark:bg-[#1a1d26] select-none ${className}`}
     >
       {/* Loading placeholder spinner so user sees dynamic feedback while level 0 tiles arrive */}
       {!isLevel0Loaded && !hideLoader && (

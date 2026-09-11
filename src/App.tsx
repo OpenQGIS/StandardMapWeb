@@ -236,7 +236,7 @@ export function App() {
       )}
 
       {/* 2. Main Comparison Viewport (Takes up flexible height, keep-alive across mode toggles for zero flash) */}
-      <main className="flex-1 relative w-full h-full min-h-0 overflow-hidden bg-zinc-100 dark:bg-[#0c0d10] transition-colors duration-150">
+      <main className="flex-1 relative w-full h-full min-h-0 overflow-hidden bg-themeApp transition-colors duration-150">
         <div className={`absolute inset-0 ${mode === 'swipe' ? 'block' : 'hidden'}`}>
           <SwipeCurtainView
             baseMap={selectedTheme.baseMap}
