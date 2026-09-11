@@ -71,7 +71,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div
           onClick={handleBrandingClick}
           className="flex items-center gap-2 cursor-pointer group"
-          title="标准地图与复刻地图对比平台 (连续点击5次开启调试面板)"
+          title="标准地图与复刻地图对比平台"
         >
           <div className="relative flex items-center justify-center">
             <img
