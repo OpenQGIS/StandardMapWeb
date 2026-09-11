@@ -108,11 +108,11 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
     setBaseLoaded(bCached);
     setReproductionLoaded(rCached);
 
-    // Safety fallback: reveal curtain after 2000ms if any network hang occurs
+    // Safety fallback: reveal curtain after 8000ms if any network hang occurs (ample redundancy for slow networks)
     const timer = setTimeout(() => {
       setBaseLoaded(true);
       setReproductionLoaded(true);
-    }, 2000);
+    }, 8000);
 
     return () => clearTimeout(timer);
   }, [baseMap.id, reproductionMap.id]);

@@ -266,18 +266,27 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
   const [isLevel0Loaded, setIsLevel0Loaded] = useState(() => GLOBAL_LOADED_TILES.has(level0Url));
   const [isTilesLoading, setIsTilesLoading] = useState(false);
 
-  // Track the timestamp when tile loading initiated to ensure at least 1.5s of smooth breathing
+  // Track the timestamp when tile loading initiated to ensure smooth breathing with ample redundancy for slow networks (e.g. GitHub Pages)
   const loadStartTimeRef = useRef<number | null>(null);
   const finishTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // 呼吸灯配置：最小呼吸持续 3.5s，加载完成后的冗余缓冲等待 1.2s，避免慢速网络分批加载时呼吸灯频繁闪烁
+  const MIN_BREATHING_MS = 3500;
+  const REDUNDANCY_BUFFER_MS = 1200;
+
   // Reset loading timer on map change or unmount
   useEffect(() => {
-    loadStartTimeRef.current = null;
+    if (!GLOBAL_LOADED_TILES.has(level0Url)) {
+      loadStartTimeRef.current = Date.now();
+      setIsTilesLoading(true);
+    } else {
+      loadStartTimeRef.current = null;
+    }
     if (finishTimeoutRef.current) {
       clearTimeout(finishTimeoutRef.current);
       finishTimeoutRef.current = null;
     }
-  }, [tilePath]);
+  }, [tilePath, level0Url]);
 
   useEffect(() => {
     return () => {
@@ -287,13 +296,13 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     };
   }, []);
 
-  // Helper to gracefully transition breathing light to steady with a 1.5s minimum window
+  // Helper to gracefully transition breathing light to steady with sufficient redundancy window
   const scheduleFinishLoading = (isCancelledCheck: () => boolean) => {
     if (finishTimeoutRef.current) {
       clearTimeout(finishTimeoutRef.current);
     }
-    const elapsed = loadStartTimeRef.current ? Date.now() - loadStartTimeRef.current : 1500;
-    const minDelay = Math.max(0, 1500 - elapsed);
+    const elapsed = loadStartTimeRef.current ? Date.now() - loadStartTimeRef.current : MIN_BREATHING_MS;
+    const minDelay = Math.max(REDUNDANCY_BUFFER_MS, MIN_BREATHING_MS - elapsed);
 
     finishTimeoutRef.current = setTimeout(() => {
       if (!isCancelledCheck()) {
@@ -323,6 +332,9 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
       }
       setIsLevel0Loaded(true);
       onBaseLoaded?.();
+      if (pendingTiles.length === 0 && loadStartTimeRef.current !== null) {
+        scheduleFinishLoading(() => false);
+      }
     };
     img.onload = () => handleL0Done(true);
     img.onerror = () => handleL0Done(false);
@@ -388,13 +400,13 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
       }
     });
 
-    // 15-second safety fallback timeout
+    // 20-second safety fallback timeout for slow networks
     const timeoutId = setTimeout(() => {
       if (!isCancelled) {
         setIsTilesLoading(false);
         loadStartTimeRef.current = null;
       }
-    }, 15000);
+    }, 20000);
 
     return () => {
       isCancelled = true;
