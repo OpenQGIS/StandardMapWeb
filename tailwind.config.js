@@ -8,11 +8,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        border: 'var(--color-border)',
-        panel: 'var(--color-panel)',
-        panelSub: 'var(--color-panel-sub)',
-        surface: 'var(--color-surface)',
-        surfaceElevated: 'var(--color-surface-elevated)',
+        border: 'rgba(255, 255, 255, 0.08)',
+        panel: '#15171c',
+        panelSub: '#1a1c22',
+        surface: '#0e1013',
+        surfaceElevated: '#1f2229',
         accent: '#3b82f6',
       },
       fontFamily: {
