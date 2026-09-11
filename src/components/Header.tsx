@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ComparisonMode, SplitDirection } from '../types/map';
 import type { ThemeMode } from '../hooks/useThemeMode';
-import { Info, ExternalLink, ChevronUp, Sun, Moon, Monitor } from 'lucide-react';
-import { RollingShutterIcon, DualWindowIcon, LayerOverlayIcon, GalleryIcon, SwapLeftAndRightIcon } from './CustomIcons';
+import { Info, ExternalLink, ChevronUp } from 'lucide-react';
+import { RollingShutterIcon, DualWindowIcon, LayerOverlayIcon, GalleryIcon, SwapLeftAndRightIcon, ThemeAutoIcon, ThemeLightIcon, ThemeDarkIcon } from './CustomIcons';
 import { Tooltip } from './Tooltip';
 
 interface HeaderProps {
@@ -264,10 +264,10 @@ export const Header: React.FC<HeaderProps> = ({
         <Tooltip
           content={
             theme === 'system'
-              ? '主题: 跟随系统 (点击切换为浅色)'
+              ? '主题: 系统 (点击切换为浅色)'
               : theme === 'light'
-              ? '主题: 浅色模式 (点击切换为深色)'
-              : '主题: 深色模式 (点击切换为跟随系统)'
+              ? '主题: 浅色 (点击切换为深色)'
+              : '主题: 深色 (点击切换为系统)'
           }
           position="bottom"
         >
@@ -277,16 +277,16 @@ export const Header: React.FC<HeaderProps> = ({
             aria-label="切换主题风格"
           >
             {theme === 'system' && (
-              <Monitor className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 shrink-0" />
+              <ThemeAutoIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 shrink-0" />
             )}
             {theme === 'light' && (
-              <Sun className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 shrink-0" />
+              <ThemeLightIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 shrink-0" />
             )}
             {theme === 'dark' && (
-              <Moon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-300 shrink-0" />
+              <ThemeDarkIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-400 shrink-0" />
             )}
             <span className="hidden xl:inline">
-              {theme === 'system' ? '跟随系统' : theme === 'light' ? '浅色' : '深色'}
+              {theme === 'system' ? '系统' : theme === 'light' ? '浅色' : '深色'}
             </span>
           </button>
         </Tooltip>
