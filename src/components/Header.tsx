@@ -108,7 +108,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Center: Comparison Mode Switcher */}
-      <div className="flex items-center bg-themeBtn border border-themeBorder/15 p-1 rounded-lg">
+      <div className="flex items-center bg-themeBtn border border-themeBorder/15 p-1 rounded-lg md:absolute md:left-1/2 md:-translate-x-1/2">
         <Tooltip
           content={
             mode === 'swipe'
@@ -128,10 +128,10 @@ export const Header: React.FC<HeaderProps> = ({
                 onModeChange('swipe');
               }
             }}
-            className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:px-3 rounded-md text-xs font-medium transition-all ${
+            className={`flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:w-[94px] rounded-md text-xs font-medium transition-all border ${
               mode === 'swipe'
-                ? 'bg-themeCard text-themeText shadow-sm border border-themeBorder/20 font-semibold'
-                : 'text-themeMuted hover:text-themeText hover:bg-themeBtnHover/50'
+                ? 'bg-themeCard text-themeText shadow-sm border-themeBorder/20 font-semibold'
+                : 'border-transparent text-themeMuted hover:text-themeText hover:bg-themeBtnHover/50'
             }`}
           >
             <RollingShutterIcon
@@ -164,10 +164,10 @@ export const Header: React.FC<HeaderProps> = ({
                 onModeChange('sync');
               }
             }}
-            className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:px-3 rounded-md text-xs font-medium transition-all ${
+            className={`flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:w-[94px] rounded-md text-xs font-medium transition-all border ${
               mode === 'sync'
-                ? 'bg-themeCard text-themeText shadow-sm border border-themeBorder/20 font-semibold'
-                : 'text-themeMuted hover:text-themeText hover:bg-themeBtnHover/50'
+                ? 'bg-themeCard text-themeText shadow-sm border-themeBorder/20 font-semibold'
+                : 'border-transparent text-themeMuted hover:text-themeText hover:bg-themeBtnHover/50'
             }`}
           >
             <DualWindowIcon
@@ -184,10 +184,10 @@ export const Header: React.FC<HeaderProps> = ({
         <Tooltip content="透明叠置对比 (连续透明度滑动渐变)" position="bottom" shortcut="3">
           <button
             onClick={() => onModeChange('overlay')}
-            className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:px-3 rounded-md text-xs font-medium transition-all ${
+            className={`flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:w-[94px] rounded-md text-xs font-medium transition-all border ${
               mode === 'overlay'
-                ? 'bg-themeCard text-themeText shadow-sm border border-themeBorder/20 font-semibold'
-                : 'text-themeMuted hover:text-themeText hover:bg-themeBtnHover/50'
+                ? 'bg-themeCard text-themeText shadow-sm border-themeBorder/20 font-semibold'
+                : 'border-transparent text-themeMuted hover:text-themeText hover:bg-themeBtnHover/50'
             }`}
           >
             <LayerOverlayIcon className={`w-[18px] h-[18px] sm:w-4 sm:h-4 ${mode === 'overlay' ? 'text-amber-500 dark:text-amber-400' : 'text-zinc-500 dark:text-zinc-400'}`} />
@@ -218,7 +218,7 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <button
             onClick={onSwapOrder}
-            className={`group flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded text-xs font-medium transition-all border ${
+            className={`group flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded text-xs font-medium transition-all border lg:min-w-[96px] ${
               isSwapped
                 ? 'bg-amber-500/15 text-amber-700 dark:text-[#fbbf24] border-amber-400/50 dark:border-amber-500/50 shadow-sm'
                 : 'bg-themeBtn text-themeMuted border-themeBorder/15 hover:bg-themeBtnHover hover:text-themeText'
@@ -233,11 +233,11 @@ export const Header: React.FC<HeaderProps> = ({
               {mode === 'sync'
                 ? dualDirection === 'vertical'
                   ? isSwapped
-                    ? '已互换上下图'
-                    : '互换上下图'
+                    ? '已对调上下'
+                    : '对调上下'
                   : isSwapped
-                  ? '已互换左右图'
-                  : '互换左右图'
+                  ? '已对调左右'
+                  : '对调左右'
                 : isSwapped
                 ? '已对调图层'
                 : '对调图层'}
