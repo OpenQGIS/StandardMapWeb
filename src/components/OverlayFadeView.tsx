@@ -304,7 +304,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
-      className="relative w-full h-full bg-[#0d0e12] overflow-hidden cursor-grab active:cursor-grabbing select-none touch-none"
+      className="relative w-full h-full bg-zinc-100 dark:bg-[#0d0e12] overflow-hidden cursor-grab active:cursor-grabbing select-none touch-none transition-colors duration-150"
     >
       {/* Layer 1: Bottom Map */}
       <div
@@ -314,7 +314,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
         }}
       >
         <div
-          className={`shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0 transition-opacity duration-150 ${
+          className={`shadow-[0_12px_36px_rgba(0,0,0,0.12)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-white dark:bg-[#242834] ring-1 ring-black/10 dark:ring-white/15 shrink-0 transition-opacity duration-150 ${
             zoomedW ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
@@ -337,7 +337,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
         }}
       >
         <div
-          className={`shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0 transition-opacity duration-150 ${
+          className={`shadow-[0_12px_36px_rgba(0,0,0,0.12)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-white dark:bg-[#242834] ring-1 ring-black/10 dark:ring-white/15 shrink-0 transition-opacity duration-150 ${
             zoomedW ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
@@ -353,14 +353,14 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
       {/* Opacity & Blend Controls Panel */}
       <div
         onWheel={handlePanelWheel}
-        className="absolute top-2.5 sm:top-4 left-1/2 -translate-x-1/2 z-30 overlay-control-panel bg-panelSub/60 hover:bg-panelSub/80 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl border border-white/10 hover:border-zinc-700/80 flex flex-col gap-1.5 sm:gap-2 shadow-2xl w-auto max-w-[calc(100vw-16px)] sm:max-w-[270px] transition-colors overflow-hidden"
+        className="absolute top-2.5 sm:top-4 left-1/2 -translate-x-1/2 z-30 overlay-control-panel bg-white/90 dark:bg-panelSub/60 hover:bg-white dark:hover:bg-panelSub/80 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-zinc-700/80 flex flex-col gap-1.5 sm:gap-2 shadow-2xl w-auto max-w-[calc(100vw-16px)] sm:max-w-[270px] transition-colors overflow-hidden"
       >
         {/* Row 1: Opacity Slider */}
         <div className="w-full flex items-center justify-between gap-1.5 sm:gap-2">
           <Tooltip content="图层透明度" position="bottom">
             <div className="flex items-center gap-1.5 shrink-0 cursor-default">
               <LayerOverlayIcon className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span className="text-xs font-medium text-zinc-300 shrink-0 hidden min-[360px]:inline">
+              <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300 shrink-0 hidden min-[360px]:inline">
                 透明度
               </span>
             </div>
@@ -392,7 +392,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
         </div>
 
         {/* Row 2: Blend Modes (Using Glassmorphism Tooltip) */}
-        <div className="w-full grid grid-cols-3 gap-1 pt-1.5 border-t border-zinc-800/80">
+        <div className="w-full grid grid-cols-3 gap-1 pt-1.5 border-t border-zinc-200 dark:border-zinc-800/80">
           {(
             [
               { key: 'normal', label: '正常', desc: '正常模式 · 标准半透明叠置，直观对比图层吻合度' },
@@ -417,7 +417,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
       </div>
 
       {/* Floating Zoom Controls */}
-      <div className="absolute bottom-3 right-2.5 min-[500px]:bottom-4 min-[500px]:right-4 z-20 flex flex-col gap-1 min-[500px]:gap-1.5 bg-panelSub/60 hover:bg-panelSub/80 p-1 min-[500px]:p-1.5 rounded-lg border border-white/10 hover:border-zinc-600 shadow-md hover:shadow-xl overlay-zoom-controls transition-all duration-200">
+      <div className="absolute bottom-3 right-2.5 min-[500px]:bottom-4 min-[500px]:right-4 z-20 flex flex-col gap-1 min-[500px]:gap-1.5 bg-white/90 dark:bg-panelSub/60 hover:bg-white dark:hover:bg-panelSub/80 p-1 min-[500px]:p-1.5 rounded-lg border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-zinc-600 shadow-md hover:shadow-xl overlay-zoom-controls transition-all duration-200">
         <Tooltip
           content={`放大至 ${Math.round(nextZoomStep(viewport.scale, 1, zoomMax) * 100)}%`}
           position="top"
@@ -431,7 +431,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
                 return { scale: newScale, x: prev.x * ratio, y: prev.y * ratio };
               })
             }
-            className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
           >
             <ZoomIn className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
           </button>
@@ -449,7 +449,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
                 return { scale: newScale, x: prev.x * ratio, y: prev.y * ratio };
               })
             }
-            className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
           >
             <ZoomOut className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
           </button>
@@ -458,7 +458,7 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
         <Tooltip content="自适应居中 (100% 原始比例)" position="top" shortcut="0">
           <button
             onClick={() => setViewport({ scale: 1, x: 0, y: 0 })}
-            className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
           >
             <Zoom100Icon className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
           </button>

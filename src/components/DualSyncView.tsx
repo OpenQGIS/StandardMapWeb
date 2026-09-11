@@ -339,7 +339,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
-      className={`relative w-full h-full bg-[#0a0c10] gap-2 p-2 overflow-hidden select-none touch-none ${
+      className={`relative w-full h-full bg-zinc-100 dark:bg-[#0a0c10] gap-2 p-2 overflow-hidden select-none touch-none transition-colors duration-150 ${
         direction === 'vertical'
           ? 'grid grid-cols-1 grid-rows-2'
           : 'grid grid-cols-1 landscape:grid-cols-2 md:grid-cols-2'
@@ -352,7 +352,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMovePane}
         onMouseLeave={handleMouseLeavePane}
-        className="dual-pane relative w-full h-full bg-[#13151c] rounded-xl border border-zinc-700/60 overflow-hidden cursor-grab active:cursor-grabbing shadow-inner touch-none"
+        className="dual-pane relative w-full h-full bg-white dark:bg-[#13151c] rounded-xl border border-zinc-200 dark:border-zinc-700/60 overflow-hidden cursor-grab active:cursor-grabbing shadow-sm dark:shadow-inner touch-none transition-colors duration-150"
       >
         {/* Background Grid Pattern inside Pane */}
         <div
@@ -369,7 +369,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
           return (
             <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-20 pointer-events-none flex flex-col items-start gap-1 lg:flex-row lg:items-center lg:gap-2">
               <div
-                className={`bg-panelSub/90 backdrop-blur-md px-2 py-1.5 sm:px-2.5 sm:py-1 rounded-lg border text-xs flex items-center gap-1.5 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
+                className={`bg-white/90 dark:bg-panelSub/90 backdrop-blur-md px-2 py-1.5 sm:px-2.5 sm:py-1 rounded-lg border text-xs flex items-center gap-1.5 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
                   isLeftBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
@@ -382,7 +382,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
                   title={leftLoading ? '正在加载高清切片...' : '高清切片已就绪'}
                 />
                 <span
-                  className="text-[11px] sm:text-xs font-semibold text-zinc-100 truncate max-w-[30vw] lg:max-w-none"
+                  className="text-[11px] sm:text-xs font-semibold text-zinc-800 dark:text-zinc-100 truncate max-w-[30vw] lg:max-w-none"
                   title={leftMap.title}
                 >
                   {leftMap.title}
@@ -409,7 +409,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
           }}
         >
           <div
-            className={`shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0 transition-opacity duration-150 ${
+            className={`shadow-[0_12px_36px_rgba(0,0,0,0.12)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-white dark:bg-[#242834] ring-1 ring-black/10 dark:ring-white/15 shrink-0 transition-opacity duration-150 ${
               zoomedW ? 'opacity-100' : 'opacity-0'
             }`}
             style={{
@@ -450,7 +450,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMovePane}
         onMouseLeave={handleMouseLeavePane}
-        className="dual-pane relative w-full h-full bg-[#13151c] rounded-xl border border-zinc-700/60 overflow-hidden cursor-grab active:cursor-grabbing shadow-inner touch-none"
+        className="dual-pane relative w-full h-full bg-white dark:bg-[#13151c] rounded-xl border border-zinc-200 dark:border-zinc-700/60 overflow-hidden cursor-grab active:cursor-grabbing shadow-sm dark:shadow-inner touch-none transition-colors duration-150"
       >
         {/* Background Grid Pattern inside Pane */}
         <div
@@ -467,7 +467,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
           return (
             <div className="absolute top-2 left-2 sm:top-3 sm:left-3 landscape:left-auto landscape:right-2 md:left-auto md:right-3 z-20 pointer-events-none flex flex-col items-start gap-1 landscape:items-end md:items-end lg:flex-row lg:items-center lg:gap-2">
               <div
-                className={`bg-panelSub/90 backdrop-blur-md px-2 py-1.5 sm:px-2.5 sm:py-1 rounded-lg border text-xs flex items-center gap-1.5 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
+                className={`bg-white/90 dark:bg-panelSub/90 backdrop-blur-md px-2 py-1.5 sm:px-2.5 sm:py-1 rounded-lg border text-xs flex items-center gap-1.5 shadow-lg transition-colors max-w-[42vw] lg:max-w-none ${
                   isRightBase ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-amber-500/40 shadow-amber-950/20'
                 }`}
               >
@@ -480,7 +480,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
                   title={rightLoading ? '正在加载高清切片...' : '高清切片已就绪'}
                 />
                 <span
-                  className="text-[11px] sm:text-xs font-semibold text-zinc-100 truncate max-w-[30vw] lg:max-w-none"
+                  className="text-[11px] sm:text-xs font-semibold text-zinc-800 dark:text-zinc-100 truncate max-w-[30vw] lg:max-w-none"
                   title={rightMap.title}
                 >
                   {rightMap.title}
@@ -507,7 +507,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
           }}
         >
           <div
-            className={`shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-[#242834] ring-1 ring-white/15 shrink-0 transition-opacity duration-150 ${
+            className={`shadow-[0_12px_36px_rgba(0,0,0,0.12)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.7)] rounded-sm overflow-hidden flex items-center justify-center bg-white dark:bg-[#242834] ring-1 ring-black/10 dark:ring-white/15 shrink-0 transition-opacity duration-150 ${
               zoomedW ? 'opacity-100' : 'opacity-0'
             }`}
             style={{
@@ -542,17 +542,17 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
       </div>
 
       {/* Viewport Floating Controls */}
-      <div className="absolute bottom-3 right-2.5 min-[500px]:bottom-4 min-[500px]:right-4 z-20 flex flex-col gap-1 min-[500px]:gap-1.5 bg-panelSub/60 hover:bg-panelSub/80 p-1 min-[500px]:p-1.5 rounded-lg border border-white/10 hover:border-zinc-600 shadow-md hover:shadow-xl transition-all duration-200">
+      <div className="absolute bottom-3 right-2.5 min-[500px]:bottom-4 min-[500px]:right-4 z-20 flex flex-col gap-1 min-[500px]:gap-1.5 bg-white/90 dark:bg-panelSub/60 hover:bg-white dark:hover:bg-panelSub/80 p-1 min-[500px]:p-1.5 rounded-lg border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-zinc-600 shadow-md hover:shadow-xl transition-all duration-200">
         <button
           onClick={zoomIn}
-          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors"
+          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
           title={`同步放大至 ${Math.round(nextZoomStep(viewport.scale, 1, zoomMax) * 100)}%`}
         >
           <ZoomIn className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
         </button>
         <button
           onClick={zoomOut}
-          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors"
+          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
           title={`同步缩小至 ${Math.round(nextZoomStep(viewport.scale, -1, zoomMax) * 100)}%`}
         >
           <ZoomOut className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
@@ -560,7 +560,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
         <div className="h-[1px] bg-white/10 my-0.5" />
         <button
           onClick={fitScreen}
-          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-200 hover:text-white hover:bg-white/10 transition-colors"
+          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
           title="双屏自适应居中 (100% 原始比例)"
         >
           <Zoom100Icon className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />

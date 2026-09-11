@@ -86,13 +86,13 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
         <div className="fixed bottom-3 min-[500px]:bottom-4 left-1/2 -translate-x-1/2 z-[35] pointer-events-auto flex items-center justify-center max-w-[calc(100vw-124px)] min-[500px]:max-w-[calc(100vw-160px)] md:max-w-none">
           <button
             onClick={onToggleOpen}
-            className="group flex items-center gap-1.5 min-[500px]:gap-2 sm:gap-2.5 px-2.5 min-[500px]:px-3.5 sm:px-4 py-1 min-[500px]:py-1.5 sm:py-2 rounded-full bg-panelSub/60 hover:bg-panelSub/80 text-zinc-200 hover:text-amber-400 border border-zinc-700/50 hover:border-amber-500/60 shadow-lg transition-all duration-200 cursor-pointer hover:shadow-amber-500/10 hover:scale-[1.02] max-w-full"
+            className="group flex items-center gap-1.5 min-[500px]:gap-2 sm:gap-2.5 px-2.5 min-[500px]:px-3.5 sm:px-4 py-1 min-[500px]:py-1.5 sm:py-2 rounded-full bg-white/90 dark:bg-panelSub/60 hover:bg-white dark:hover:bg-panelSub/80 text-zinc-800 dark:text-zinc-200 hover:text-amber-600 dark:hover:text-amber-400 border border-zinc-200 dark:border-zinc-700/50 hover:border-amber-500/60 shadow-lg transition-all duration-200 cursor-pointer hover:shadow-amber-500/10 hover:scale-[1.02] max-w-full"
             title="展开地图画廊 (快捷键 G)"
           >
             <GalleryIcon className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 text-amber-400 group-hover:scale-110 transition-transform shrink-0" />
             <span className="text-xs font-semibold hidden md:inline">地图画廊</span>
             <span className="text-zinc-600 text-xs hidden md:inline">|</span>
-            <span className="text-[10px] min-[500px]:text-[11px] text-zinc-300 group-hover:text-zinc-100 transition-colors font-medium truncate max-w-[130px] min-[380px]:max-w-[170px] min-[500px]:max-w-[260px] md:max-w-none">
+            <span className="text-[10px] min-[500px]:text-[11px] text-zinc-600 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors font-medium truncate max-w-[130px] min-[380px]:max-w-[170px] min-[500px]:max-w-[260px] md:max-w-none">
               {selectedTheme.title}
             </span>
             <ChevronUp className="w-3 h-3 min-[500px]:w-3.5 min-[500px]:h-3.5 text-zinc-400 group-hover:text-amber-400 group-hover:-translate-y-0.5 transition-all shrink-0" />
@@ -111,14 +111,14 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
 
       {/* 3. Floating Drawer Panel (Completely hidden & overflow-clipped when closed) */}
       <section
-        className={`fixed bottom-0 inset-x-0 z-40 bg-[#12141a]/95 backdrop-blur-xl border-t border-zinc-700/80 shadow-[0_-12px_40px_rgba(0,0,0,0.7)] flex flex-col select-none transition-all duration-300 ease-out h-[155px] sm:h-[185px] overflow-hidden ${
+        className={`fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-[#12141a]/95 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-700/80 shadow-[0_-12px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_-12px_40px_rgba(0,0,0,0.7)] flex flex-col select-none transition-all duration-300 ease-out h-[155px] sm:h-[185px] overflow-hidden ${
           isOpen ? 'translate-y-0 opacity-100 visible' : 'translate-y-full opacity-0 invisible pointer-events-none'
         }`}
       >
         {/* Gallery Header Bar (Strictly single row, non-wrapping) */}
-        <div className="h-8 sm:h-9 px-2.5 sm:px-4 border-b border-border/60 flex items-center justify-between text-xs bg-panelSub/60 shrink-0 gap-2 overflow-hidden">
+        <div className="h-8 sm:h-9 px-2.5 sm:px-4 border-b border-zinc-200 dark:border-border/60 flex items-center justify-between text-xs bg-zinc-50 dark:bg-panelSub/60 shrink-0 gap-2 overflow-hidden">
           <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 flex-1 overflow-x-auto scrollbar-none">
-            <span className="font-semibold text-zinc-200 flex items-center gap-1 shrink-0">
+            <span className="font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1 shrink-0">
               <GalleryIcon className="w-3.5 h-3.5 text-amber-400" />
               <span className="hidden sm:inline">地图画廊</span>
             </span>
@@ -142,7 +142,7 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
               }
 
               return (
-                <div className="flex items-center bg-surface p-0.5 rounded-md border border-border shrink-0">
+                <div className="flex items-center bg-zinc-100 dark:bg-surface p-0.5 rounded-md border border-zinc-200 dark:border-border shrink-0">
                   {tabs.map((tab) => (
                     <button
                       key={tab.key}
@@ -176,14 +176,14 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
             <div className="hidden sm:flex items-center gap-1">
               <button
                 onClick={() => scroll('left')}
-                className="w-6 h-6 rounded flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition-colors"
+                className="w-6 h-6 rounded flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 transition-colors"
                 title="向左滚动"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => scroll('right')}
-                className="w-6 h-6 rounded flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition-colors"
+                className="w-6 h-6 rounded flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 transition-colors"
                 title="向右滚动"
               >
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -193,7 +193,7 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
             {/* Collapse Gallery Button */}
             <button
               onClick={onClose}
-              className="flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-amber-400 border border-zinc-700 hover:border-zinc-600 transition-colors text-xs font-medium cursor-pointer shadow-sm"
+              className="flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 hover:text-amber-600 dark:hover:text-amber-400 border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors text-xs font-medium cursor-pointer shadow-sm"
               title="收起画廊 (快捷键 Esc / G)"
             >
               <span className="hidden sm:inline">收起画廊</span>
@@ -283,7 +283,7 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
 
                 {/* Card Title: simple, concise, snug to card width */}
                 <h4
-                  className="text-[10px] sm:text-[11px] font-medium text-zinc-200 truncate group-hover:text-amber-400 transition-colors text-center mt-1 px-0.5 w-full block"
+                  className="text-[10px] sm:text-[11px] font-medium text-zinc-800 dark:text-zinc-200 truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors text-center mt-1 px-0.5 w-full block"
                   title={theme.title}
                 >
                   {getShortTitle(theme.title)}
