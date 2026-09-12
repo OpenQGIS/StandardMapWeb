@@ -27,6 +27,7 @@ dist-ssr
 public/maps/各大洲标准地图_*
 public/maps/世界_*
 public/maps/0-缩略图/continent-*
+!public/maps/0-缩略图/continent-asia.webp
 public/maps/0-缩略图/world-*
 
 # Slicing sources stay local: committed tiles are cut from these full-size webps

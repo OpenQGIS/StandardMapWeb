@@ -25,6 +25,7 @@ const getThemeRatio = (ratioStr: string): number => {
 const getShortTitle = (title: string): string => {
   if (title.includes('横版')) return '中国地图 · 横版';
   if (title.includes('竖版')) return '中国地图 · 竖版';
+  if (title.includes('亚洲')) return '亚洲地图 · 1∶2500万';
   if (title.includes('多圆锥')) return '世界 · 多圆锥';
   if (title.includes('墨卡托')) return '世界 · 墨卡托';
   const match = title.match(/^([^·\s]+)/);
@@ -129,7 +130,7 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
               const tabs = ([
                 { key: 'all', label: '全部' },
                 { key: 'china', label: '中国' },
-                { key: 'continents', label: '七大洲' },
+                { key: 'continents', label: '各大洲' },
                 { key: 'world', label: '全球' },
               ] as const).filter((tab) => tab.key === 'all' || availableScopes.has(tab.key));
 

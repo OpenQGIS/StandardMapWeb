@@ -37,6 +37,22 @@ SOURCE_MAPS = [
         'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\v-china-repro',
         'l1_grid': (2, 2),
         'l2_grid': (4, 5),
+    },
+    {
+        'id': 'c-as-base',
+        'orientation': 'horizontal',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\各大洲标准地图_亚洲\亚洲地图  1：2500万 4开 白色.webp',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-as-base',
+        'l1_grid': (3, 2),
+        'l2_grid': (6, 4),
+    },
+    {
+        'id': 'c-as-repro',
+        'orientation': 'horizontal',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\各大洲标准地图_亚洲\亚洲地图-完美复刻图.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-as-repro',
+        'l1_grid': (3, 2),
+        'l2_grid': (6, 4),
     }
 ]
 
@@ -114,6 +130,19 @@ def process_map(item):
         print(f"  Mirrored to {git_out_dir}")
 
 if __name__ == '__main__':
+    import sys
+    targets = sys.argv[1:] if len(sys.argv) > 1 else None
     for item in SOURCE_MAPS:
+        if targets and item['id'] not in targets:
+            continue
         process_map(item)
-    print("\nAll near-square tiles generated and synced successfully!")
+
+    # Sync Asia thumbnail to d:\GitHub\StandardMapWeb\public\maps\0-缩略图 if present
+    e_thumb = r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\0-缩略图\continent-asia.webp'
+    d_thumb = r'd:\GitHub\StandardMapWeb\public\maps\0-缩略图\continent-asia.webp'
+    if os.path.exists(e_thumb):
+        os.makedirs(os.path.dirname(d_thumb), exist_ok=True)
+        shutil.copy2(e_thumb, d_thumb)
+        print(f"Synced thumbnail: {e_thumb} -> {d_thumb}")
+
+    print("\nTiles generated and synced successfully!")
