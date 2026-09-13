@@ -53,6 +53,102 @@ SOURCE_MAPS = [
         'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-as-repro',
         'l1_grid': (3, 2),
         'l2_grid': (6, 4),
+    },
+    {
+        'id': 'c-eu-base',
+        'orientation': 'horizontal',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\各大洲标准地图_欧洲\欧洲地图  1：1150万 4开 白色.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-eu-base',
+        'l1_grid': (3, 2),
+        'l2_grid': (6, 4),
+    },
+    {
+        'id': 'c-eu-repro',
+        'orientation': 'horizontal',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\各大洲标准地图_欧洲\欧洲地图-完美复刻图.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-eu-repro',
+        'l1_grid': (3, 2),
+        'l2_grid': (6, 4),
+    },
+    {
+        'id': 'c-af-base',
+        'orientation': 'vertical',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\各大洲标准地图_非洲\非洲地图-GS(2023)2758号.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-af-base',
+        'l1_grid': (2, 2),
+        'l2_grid': (4, 5),
+    },
+    {
+        'id': 'c-af-repro',
+        'orientation': 'vertical',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\各大洲标准地图_非洲\非洲地图-完美复刻图.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-af-repro',
+        'l1_grid': (2, 2),
+        'l2_grid': (4, 5),
+    },
+    {
+        'id': 'c-na-base',
+        'orientation': 'vertical',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\各大洲标准地图_北美洲\北美洲地图  1：2100万 4开 白色.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-na-base',
+        'l1_grid': (2, 2),
+        'l2_grid': (4, 5),
+    },
+    {
+        'id': 'c-na-repro',
+        'orientation': 'vertical',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\各大洲标准地图_北美洲\北美洲地图-完美复刻图.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-na-repro',
+        'l1_grid': (2, 2),
+        'l2_grid': (4, 5),
+    },
+    {
+        'id': 'c-sa-base',
+        'orientation': 'vertical',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\各大洲标准地图_南美洲\南美洲地图  1：1750万 4开 白色.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-sa-base',
+        'l1_grid': (2, 2),
+        'l2_grid': (4, 5),
+    },
+    {
+        'id': 'c-sa-repro',
+        'orientation': 'vertical',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\各大洲标准地图_南美洲\南美洲地图-完美复刻图.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-sa-repro',
+        'l1_grid': (2, 2),
+        'l2_grid': (4, 5),
+    },
+    {
+        'id': 'c-oc-base',
+        'orientation': 'horizontal',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\各大洲标准地图_大洋洲\大洋洲地图  1：2300万 4开 白色.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-oc-base',
+        'l1_grid': (3, 2),
+        'l2_grid': (6, 4),
+    },
+    {
+        'id': 'c-oc-repro',
+        'orientation': 'horizontal',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\各大洲标准地图_大洋洲\大洋洲地图-完美复刻图.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-oc-repro',
+        'l1_grid': (3, 2),
+        'l2_grid': (6, 4),
+    },
+    {
+        'id': 'c-an-base',
+        'orientation': 'horizontal',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\各大洲标准地图_南极洲\南极洲地图  1：1250万 4开 白色.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-an-base',
+        'l1_grid': (3, 2),
+        'l2_grid': (6, 4),
+    },
+    {
+        'id': 'c-an-repro',
+        'orientation': 'horizontal',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\各大洲标准地图_南极洲\南极洲地图-完美复刻图.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-an-repro',
+        'l1_grid': (3, 2),
+        'l2_grid': (6, 4),
     }
 ]
 
@@ -137,12 +233,14 @@ if __name__ == '__main__':
             continue
         process_map(item)
 
-    # Sync Asia thumbnail to d:\GitHub\StandardMapWeb\public\maps\0-缩略图 if present
-    e_thumb = r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\0-缩略图\continent-asia.webp'
-    d_thumb = r'd:\GitHub\StandardMapWeb\public\maps\0-缩略图\continent-asia.webp'
-    if os.path.exists(e_thumb):
-        os.makedirs(os.path.dirname(d_thumb), exist_ok=True)
-        shutil.copy2(e_thumb, d_thumb)
-        print(f"Synced thumbnail: {e_thumb} -> {d_thumb}")
+    # Sync all continent thumbnails to d:\GitHub\StandardMapWeb\public\maps\0-缩略图 if present
+    e_thumb_dir = r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\0-缩略图'
+    d_thumb_dir = r'd:\GitHub\StandardMapWeb\public\maps\0-缩略图'
+    if os.path.exists(e_thumb_dir):
+        os.makedirs(d_thumb_dir, exist_ok=True)
+        for f in os.listdir(e_thumb_dir):
+            if f.startswith('continent-') and f.endswith('.webp'):
+                shutil.copy2(os.path.join(e_thumb_dir, f), os.path.join(d_thumb_dir, f))
+                print(f"Synced thumbnail: {f}")
 
     print("\nTiles generated and synced successfully!")

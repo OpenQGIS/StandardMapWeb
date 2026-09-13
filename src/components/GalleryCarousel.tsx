@@ -26,6 +26,12 @@ const getShortTitle = (title: string): string => {
   if (title.includes('横版')) return '中国地图 · 横版';
   if (title.includes('竖版')) return '中国地图 · 竖版';
   if (title.includes('亚洲')) return '亚洲地图 · 1∶2500万';
+  if (title.includes('欧洲')) return '欧洲地图 · 1∶1150万';
+  if (title.includes('非洲')) return '非洲地图 · GS(2023)2758号';
+  if (title.includes('北美洲')) return '北美洲地图 · 1∶2100万';
+  if (title.includes('南美洲')) return '南美洲地图 · 1∶1750万';
+  if (title.includes('大洋洲')) return '大洋洲地图 · 1∶2300万';
+  if (title.includes('南极洲')) return '南极洲地图 · 1∶1250万';
   if (title.includes('多圆锥')) return '世界 · 多圆锥';
   if (title.includes('墨卡托')) return '世界 · 墨卡托';
   const match = title.match(/^([^·\s]+)/);
