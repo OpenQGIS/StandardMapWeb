@@ -23,10 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
-# Excluded maps (World maps excluded, Continents enabled)
+# Excluded maps (Raw map sources stay local and private)
 public/maps/各大洲标准地图_*
 public/maps/世界_*
-public/maps/0-缩略图/world-*
 
 # Slicing sources stay local: committed tiles are cut from these full-size webps
 public/maps/中国标准地图_横版/

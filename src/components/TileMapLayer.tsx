@@ -140,7 +140,12 @@ export const TileMapLayer: React.FC<TileMapLayerProps> = ({
     const effectiveCardW = cardSize?.width || layout.cardW || window.innerWidth;
     const neededPx = effectiveCardW * devicePixelRatio * QUALITY_FACTOR;
     const isContinent = tilePath.includes('/c-') || tilePath.includes('c-');
-    const l1Width = isContinent ? (orientation === 'vertical' ? 2600 : 3650) : widths[1];
+    const isWorld = tilePath.includes('/w-') || tilePath.includes('w-');
+    const l1Width = isWorld
+      ? (tilePath.includes('mercator') ? 2327 : 3508)
+      : isContinent
+      ? (orientation === 'vertical' ? 2600 : 3650)
+      : widths[1];
     if (scale >= 1.8 || neededPx >= l1Width) return 2;
     return 1;
   }, [cardSize, layout.cardW, devicePixelRatio, scale, orientation, tilePath]);

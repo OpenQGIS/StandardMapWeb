@@ -33,7 +33,7 @@ const getShortTitle = (title: string): string => {
   if (title.includes('大洋洲')) return '大洋洲地图 · 1∶2300万';
   if (title.includes('南极洲')) return '南极洲地图 · 1∶1250万';
   if (title.includes('多圆锥')) return '世界 · 多圆锥';
-  if (title.includes('墨卡托')) return '世界 · 墨卡托';
+  if (title.includes('墨卡托') || title.includes('等间隔') || title.includes('直投')) return '世界 · 经纬度直投';
   const match = title.match(/^([^·\s]+)/);
   return match ? match[1] : title;
 };

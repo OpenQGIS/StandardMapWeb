@@ -149,6 +149,38 @@ SOURCE_MAPS = [
         'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\c-an-repro',
         'l1_grid': (3, 2),
         'l2_grid': (6, 4),
+    },
+    {
+        'id': 'w-polyconic-base',
+        'orientation': 'horizontal',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\世界_等差分纬线多圆锥投影\世界地图-1：5700万 4开-轮廓图（中文）.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\w-polyconic-base',
+        'l1_grid': (3, 2),
+        'l2_grid': (6, 4),
+    },
+    {
+        'id': 'w-polyconic-repro',
+        'orientation': 'horizontal',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\世界_等差分纬线多圆锥投影\世界_等差分纬线多圆锥投影_2.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\w-polyconic-repro',
+        'l1_grid': (3, 2),
+        'l2_grid': (6, 4),
+    },
+    {
+        'id': 'w-mercator-base',
+        'orientation': 'horizontal',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\世界_经纬度等间隔直投\世界地图_小8开_冷色.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\w-mercator-base',
+        'l1_grid': (3, 2),
+        'l2_grid': (6, 4),
+    },
+    {
+        'id': 'w-mercator-repro',
+        'orientation': 'horizontal',
+        'path': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\世界_经纬度等间隔直投\世界地图_经纬度等间隔直投.jpg',
+        'out_dir': r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\tiles\w-mercator-repro',
+        'l1_grid': (3, 2),
+        'l2_grid': (6, 4),
     }
 ]
 
@@ -233,13 +265,13 @@ if __name__ == '__main__':
             continue
         process_map(item)
 
-    # Sync all continent thumbnails to d:\GitHub\StandardMapWeb\public\maps\0-缩略图 if present
+    # Sync all continent and world thumbnails to d:\GitHub\StandardMapWeb\public\maps\0-缩略图 if present
     e_thumb_dir = r'E:\QGIS文章\QGIS文章\260710_标准地图工程\StandardMapWeb\public\maps\0-缩略图'
     d_thumb_dir = r'd:\GitHub\StandardMapWeb\public\maps\0-缩略图'
     if os.path.exists(e_thumb_dir):
         os.makedirs(d_thumb_dir, exist_ok=True)
         for f in os.listdir(e_thumb_dir):
-            if f.startswith('continent-') and f.endswith('.webp'):
+            if (f.startswith('continent-') or f.startswith('world-')) and f.endswith('.webp'):
                 shutil.copy2(os.path.join(e_thumb_dir, f), os.path.join(d_thumb_dir, f))
                 print(f"Synced thumbnail: {f}")
 
