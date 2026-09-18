@@ -67,6 +67,21 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
     setOpacity((prev: number) => Math.min(1, Math.max(0, Math.round((prev + delta) * 100) / 100)));
   };
 
+  const [sliderInteracted, setSliderInteracted] = useState(false);
+  const isSliderPointerDownRef = useRef(false);
+  const isMouseOverSliderRef = useRef(false);
+
+  useEffect(() => {
+    const handleGlobalPointerUp = () => {
+      isSliderPointerDownRef.current = false;
+      if (!isMouseOverSliderRef.current) {
+        setSliderInteracted(false);
+      }
+    };
+    window.addEventListener('pointerup', handleGlobalPointerUp);
+    return () => window.removeEventListener('pointerup', handleGlobalPointerUp);
+  }, []);
+
   const [mixBlendMode, setMixBlendMode] = useState<'normal' | 'multiply' | 'difference'>('normal');
   const [isPanning, setIsPanning] = useState(false);
   const panStartRef = useRef<{ x: number; y: number; startX: number; startY: number }>({
@@ -357,8 +372,8 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
       >
         {/* Row 1: Opacity Slider */}
         <div className="w-full flex items-center justify-between gap-1.5 sm:gap-2">
-          <Tooltip content="调节顶层透明度 (支持滚轮微调)" position="bottom" shortcut="[ / ]">
-            <div className="flex items-center gap-1.5 shrink-0 cursor-pointer">
+          <Tooltip content="图层透明度" position="bottom">
+            <div className="flex items-center gap-1.5 shrink-0 cursor-default">
               <LayerOverlayIcon className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
               <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300 shrink-0 hidden min-[360px]:inline">
                 透明度
@@ -366,21 +381,44 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
             </div>
           </Tooltip>
           <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0 justify-end">
-            <div className="flex-1 min-w-[36px] sm:min-w-[60px] max-w-[130px] flex items-center">
+            <Tooltip
+              content="调节顶层透明度 (支持滚轮微调)"
+              position="bottom"
+              shortcut="[ / ]"
+              delay={350}
+              disabled={sliderInteracted}
+              className="flex-1 min-w-[36px] sm:min-w-[60px] max-w-[130px] flex items-center"
+            >
               <input
                 type="range"
                 min="0"
                 max="1"
                 step="0.01"
                 value={opacity}
-                onChange={(e) => setOpacity(parseFloat(e.target.value))}
+                onMouseEnter={() => {
+                  isMouseOverSliderRef.current = true;
+                }}
+                onMouseLeave={() => {
+                  isMouseOverSliderRef.current = false;
+                  if (!isSliderPointerDownRef.current) {
+                    setSliderInteracted(false);
+                  }
+                }}
+                onPointerDown={() => {
+                  isSliderPointerDownRef.current = true;
+                  setSliderInteracted(true);
+                }}
+                onChange={(e) => {
+                  setOpacity(parseFloat(e.target.value));
+                  setSliderInteracted(true);
+                }}
                 className="opacity-slider w-full cursor-pointer"
                 aria-label="调节顶层透明度"
                 style={{
                   background: `linear-gradient(to right, #fbbf24 0%, #fbbf24 ${opacity * 100}%, #3f3f46 ${opacity * 100}%, #3f3f46 100%)`,
                 }}
               />
-            </div>
+            </Tooltip>
             <Tooltip content="双击重置为 50%" position="bottom" shortcut="双击">
               <span
                 onDoubleClick={() => setOpacity(0.5)}

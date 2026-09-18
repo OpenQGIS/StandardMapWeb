@@ -8,6 +8,7 @@ interface TooltipProps {
   delay?: number;
   children: React.ReactElement;
   className?: string;
+  disabled?: boolean;
 }
 
 export const Tooltip: React.FC<TooltipProps> = ({
@@ -17,14 +18,34 @@ export const Tooltip: React.FC<TooltipProps> = ({
   delay = 120,
   children,
   className = '',
+  disabled = false,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<number | null>(null);
 
+  const hideTooltip = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    setIsVisible(false);
+  };
+
+  useEffect(() => {
+    if (disabled) {
+      hideTooltip();
+    }
+  }, [disabled]);
+
   const showTooltip = () => {
+    if (disabled) return;
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
     timerRef.current = window.setTimeout(() => {
+      if (disabled) return;
       if (triggerRef.current) {
         const rect = triggerRef.current.getBoundingClientRect();
         if (position === 'bottom') {
@@ -41,14 +62,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
         setIsVisible(true);
       }
     }, delay);
-  };
-
-  const hideTooltip = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-    setIsVisible(false);
   };
 
   useEffect(() => {
