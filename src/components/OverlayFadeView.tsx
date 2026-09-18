@@ -444,8 +444,8 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
                 onClick={() => setMixBlendMode(m.key)}
                 className={`w-full py-0.5 sm:py-1 px-1 rounded text-[10px] sm:text-[11px] font-medium text-center transition-colors truncate cursor-pointer ${
                   mixBlendMode === m.key
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
-                    : 'text-zinc-400 hover:text-zinc-200 bg-zinc-800/90 border border-zinc-700/80 hover:bg-zinc-750'
+                    ? 'bg-amber-500/15 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-400/60 dark:border-amber-500/40 shadow-sm font-semibold'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 bg-zinc-100/90 dark:bg-zinc-800/90 border border-zinc-200/90 dark:border-zinc-700/80 hover:bg-zinc-200/70 dark:hover:bg-zinc-750'
                 }`}
               >
                 {m.label}
