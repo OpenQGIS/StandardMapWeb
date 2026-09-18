@@ -204,17 +204,17 @@ export const Header: React.FC<HeaderProps> = ({
             mode === 'sync'
               ? dualDirection === 'vertical'
                 ? isSwapped
-                  ? '上下地图位置已互换 (快捷键 X / S)'
+                  ? '已对调上下位置 (再次点击还原)'
                   : '对调上下双屏位置'
                 : isSwapped
-                ? '左右地图位置已互换 (快捷键 X / S)'
+                ? '已对调左右位置 (再次点击还原)'
                 : '对调左右双屏位置'
               : isSwapped
-              ? '图层已对调 (快捷键 X / S)'
-              : '对调图层'
+              ? '已对调图层顺序 (再次点击还原)'
+              : '对调图层顺序'
           }
           position="bottom"
-          shortcut="X"
+          shortcut="X / S"
         >
           <button
             onClick={onSwapOrder}
