@@ -380,7 +380,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
                       ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
                       : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
                   } ${leftLoading ? 'animate-pulse scale-110' : ''}`}
-                  title={leftLoading ? '正在加载高清切片...' : '高清切片已就绪'}
+                  title={leftLoading ? '正在加载瓦片切片...' : '切片已就绪'}
                 />
                 <span
                   className="text-[11px] sm:text-xs font-semibold text-zinc-800 dark:text-zinc-100 truncate max-w-[30vw] lg:max-w-none"
@@ -478,7 +478,7 @@ export const DualSyncView: React.FC<DualSyncViewProps> = ({
                       ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
                       : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
                   } ${rightLoading ? 'animate-pulse scale-110' : ''}`}
-                  title={rightLoading ? '正在加载高清切片...' : '高清切片已就绪'}
+                  title={rightLoading ? '正在加载瓦片切片...' : '切片已就绪'}
                 />
                 <span
                   className="text-[11px] sm:text-xs font-semibold text-zinc-800 dark:text-zinc-100 truncate max-w-[30vw] lg:max-w-none"

@@ -395,9 +395,9 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
         <div className="w-full grid grid-cols-3 gap-1 pt-1.5 border-t border-zinc-200 dark:border-zinc-800/80">
           {(
             [
-              { key: 'normal', label: '正常', desc: '正常模式 · 标准半透明叠置，直观对比图层吻合度' },
-              { key: 'multiply', label: '正片叠底', desc: '正片叠底 · 过滤底图白底，高亮线划与色块差异' },
-              { key: 'difference', label: '差值比对', desc: '差值比对 · 重合完全一致呈黑色，差异区域反色高亮' },
+              { key: 'normal', label: '正常', desc: '正常叠加：半透明叠置，核验图层吻合度' },
+              { key: 'multiply', label: '正片叠底', desc: '正片叠底：过滤底图白底，突出线划与色块差异' },
+              { key: 'difference', label: '差值比对', desc: '差值比对：重合一致呈黑色，差异区域反色凸显' },
             ] as const
           ).map((m) => (
             <Tooltip key={m.key} content={m.desc} position="bottom" className="w-full flex">

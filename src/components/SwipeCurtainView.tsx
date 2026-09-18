@@ -648,7 +648,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
                       ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
                       : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
                   } ${bottomLoading ? 'animate-pulse scale-110' : ''}`}
-                  title={bottomLoading ? '正在加载高清切片...' : '高清切片已就绪'}
+                  title={bottomLoading ? '正在加载瓦片切片...' : '切片已就绪'}
                 />
                 <span
                   className="text-zinc-800 dark:text-zinc-100 font-medium text-[11px] sm:text-xs truncate max-w-[30vw] lg:max-w-none"
@@ -681,7 +681,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
                       ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
                       : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
                   } ${topLoading ? 'animate-pulse scale-110' : ''}`}
-                  title={topLoading ? '正在加载高清切片...' : '高清切片已就绪'}
+                  title={topLoading ? '正在加载瓦片切片...' : '切片已就绪'}
                 />
                 <span
                   className="text-zinc-800 dark:text-zinc-100 font-medium text-[11px] sm:text-xs truncate max-w-[30vw] lg:max-w-none"
@@ -755,7 +755,7 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
       {/* Unified Initial Loading Overlay: completely unobstructed, no clip seam, perfectly centered */}
       {!isCurtainReady && (
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-themeApp/60 select-none pointer-events-none transition-opacity duration-300">
-          <LottieLoader size={60} text="载入高精度地图中..." />
+          <LottieLoader size={60} text="正在加载地图切片..." />
         </div>
       )}
     </div>

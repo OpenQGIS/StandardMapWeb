@@ -91,7 +91,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="inline md:hidden max-[420px]:hidden">标准/复刻</span>
             </h1>
             <p className="text-[11px] text-themeDim leading-tight hidden xl:block whitespace-nowrap">
-              左右顺序一键切换 视口联动缩放
+              标准底图与复刻地图在线校准比对
             </p>
           </div>
         </div>
@@ -181,7 +181,7 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </Tooltip>
 
-        <Tooltip content="透明叠置对比 (连续透明度滑动渐变)" position="bottom" shortcut="3">
+        <Tooltip content="透明叠置对比 (支持透明度调节与图层混合)" position="bottom" shortcut="3">
           <button
             onClick={() => onModeChange('overlay')}
             className={`flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:w-[94px] rounded-md text-xs font-medium transition-all border ${
@@ -298,7 +298,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Collapse Header Button (沉浸纯净模式 / 全屏) */}
         {onToggleHeaderCollapse && (
-          <Tooltip content="收起顶部工具栏进入全屏沉浸对比" position="bottom" shortcut="F">
+          <Tooltip content="收起顶部工具栏进入全屏模式" position="bottom" shortcut="F">
             <button
               onClick={onToggleHeaderCollapse}
               className="flex items-center gap-1.5 px-2 py-1.5 sm:px-2 rounded text-xs font-medium transition-all border bg-themeBtn text-themeMuted border-themeBorder/15 hover:text-themeText hover:bg-themeBtnHover"
@@ -345,10 +345,10 @@ export const Header: React.FC<HeaderProps> = ({
                   ，主要涵盖了中国标准地图（横版、竖版）、七大洲标准地图、世界标准地图。
                 </p>
                 <p>
-                  对比图由 <strong className="text-zinc-100 font-semibold">OpenQGIS / NOWZoom</strong> 针对标准地图进行1:1投影复刻，网站提供 <span className="text-amber-300 font-medium">卷帘对比</span>、<span className="text-amber-300 font-medium">双屏对比</span>、<span className="text-amber-300 font-medium">叠加对比</span> 三种对比方式，用户可以更直观的查看比较复制地图与标准地图的差距。
+                  对比图由 <strong className="text-zinc-100 font-semibold">OpenQGIS / NOWZoom</strong> 基于标准地图进行 1:1 制图复刻。提供 <span className="text-amber-300 font-medium">卷帘对比</span>、<span className="text-amber-300 font-medium">双屏对比</span>、<span className="text-amber-300 font-medium">透明叠置</span> 三种对比方式，用于核验复刻地图与标准底图的几何套合精度与制图要素差异。
                 </p>
                 <div className="pt-1.5 bg-zinc-50 dark:bg-zinc-900/60 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800/80">
-                  <p className="font-medium text-zinc-800 dark:text-zinc-200 mb-2">详细的标准地图投影坐标系可以查看文章：</p>
+                  <p className="font-medium text-zinc-800 dark:text-zinc-200 mb-2">详细的标准地图投影与制图说明见相关文章：</p>
                   <ul className="space-y-2 text-zinc-300">
                     <li className="flex items-center gap-2">
                       <a

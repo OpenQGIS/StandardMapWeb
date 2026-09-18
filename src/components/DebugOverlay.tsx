@@ -325,7 +325,7 @@ export const DebugOverlay: React.FC<DebugOverlayProps> = ({ onClose }) => {
       ) : (
         <>
           <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-1 mb-1">
-            <span className="text-amber-300 font-bold">调试黑匣子</span>
+            <span className="text-amber-300 font-bold">移动端诊断监控</span>
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
