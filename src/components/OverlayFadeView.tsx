@@ -357,16 +357,16 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
       >
         {/* Row 1: Opacity Slider */}
         <div className="w-full flex items-center justify-between gap-1.5 sm:gap-2">
-          <Tooltip content="图层透明度" position="bottom">
-            <div className="flex items-center gap-1.5 shrink-0 cursor-default">
-              <LayerOverlayIcon className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <Tooltip content="调节顶层透明度 (支持滚轮微调)" position="bottom" shortcut="[ / ]">
+            <div className="flex items-center gap-1.5 shrink-0 cursor-pointer">
+              <LayerOverlayIcon className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
               <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300 shrink-0 hidden min-[360px]:inline">
                 透明度
               </span>
             </div>
           </Tooltip>
           <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0 justify-end">
-            <Tooltip content="调节顶层透明度 (支持滚轮微调)" position="bottom" shortcut="[ / ]" className="flex-1 min-w-[36px] sm:min-w-[60px] max-w-[130px] flex">
+            <div className="flex-1 min-w-[36px] sm:min-w-[60px] max-w-[130px] flex items-center">
               <input
                 type="range"
                 min="0"
@@ -375,15 +375,16 @@ export const OverlayFadeView: React.FC<OverlayFadeViewProps> = ({
                 value={opacity}
                 onChange={(e) => setOpacity(parseFloat(e.target.value))}
                 className="opacity-slider w-full cursor-pointer"
+                aria-label="调节顶层透明度"
                 style={{
                   background: `linear-gradient(to right, #fbbf24 0%, #fbbf24 ${opacity * 100}%, #3f3f46 ${opacity * 100}%, #3f3f46 100%)`,
                 }}
               />
-            </Tooltip>
+            </div>
             <Tooltip content="双击重置为 50%" position="bottom" shortcut="双击">
               <span
                 onDoubleClick={() => setOpacity(0.5)}
-                className="text-xs font-mono text-amber-400 w-8 sm:w-9 text-right font-semibold shrink-0 select-none cursor-pointer hover:underline"
+                className="text-xs font-mono text-amber-600 dark:text-amber-400 w-8 sm:w-9 text-right font-semibold shrink-0 select-none cursor-pointer hover:underline"
               >
                 {Math.round(opacity * 100)}%
               </span>
