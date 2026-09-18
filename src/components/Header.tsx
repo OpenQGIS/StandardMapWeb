@@ -317,7 +317,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="bg-white dark:bg-[#18191e] border border-zinc-200 dark:border-zinc-700 rounded-xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative text-left text-zinc-800 dark:text-zinc-300">
               <div className="flex items-center justify-between gap-2 mb-3 pb-2.5 border-b border-zinc-200 dark:border-zinc-800">
                 <div className="flex items-center gap-2">
-                  <Info className="w-5 h-5 text-amber-400 shrink-0" />
+                  <Info className="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0" />
                   <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">标准地图与复刻地图对比说明</h3>
                 </div>
                 <button
@@ -329,14 +329,14 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               </div>
 
-              <div className="space-y-3.5 text-xs text-zinc-300 leading-relaxed">
+              <div className="space-y-3.5 text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
                 <p>
                   网站标准地图底图源自于{' '}
                   <a
                     href="http://bzdt.ch.mnr.gov.cn/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-amber-400 hover:text-amber-300 underline underline-offset-2 transition-colors inline-flex items-center gap-0.5 font-medium"
+                    className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 underline underline-offset-2 transition-colors inline-flex items-center gap-0.5 font-medium"
                     title="访问自然资源部标准地图服务系统"
                   >
                     <span>标准地图服务系统</span>
@@ -345,32 +345,32 @@ export const Header: React.FC<HeaderProps> = ({
                   ，主要涵盖了中国标准地图（横版、竖版）、七大洲标准地图、世界标准地图。
                 </p>
                 <p>
-                  对比图由 <strong className="text-zinc-100 font-semibold">OpenQGIS / NOWZoom</strong> 基于标准地图进行 1:1 制图复刻。提供 <span className="text-amber-300 font-medium">卷帘对比</span>、<span className="text-amber-300 font-medium">双屏对比</span>、<span className="text-amber-300 font-medium">透明叠置</span> 三种对比方式，用于核验复刻地图与标准底图的几何套合精度与制图要素差异。
+                  对比图由 <strong className="text-zinc-900 dark:text-zinc-100 font-semibold">OpenQGIS / NOWZoom</strong> 基于标准地图进行 1:1 制图复刻。提供 <span className="text-amber-600 dark:text-amber-400 font-medium">卷帘对比</span>、<span className="text-amber-600 dark:text-amber-400 font-medium">双屏对比</span>、<span className="text-amber-600 dark:text-amber-400 font-medium">透明叠置</span> 三种对比方式，用于核验复刻地图与标准底图的几何套合精度与制图要素差异。
                 </p>
                 <div className="pt-1.5 bg-zinc-50 dark:bg-zinc-900/60 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800/80">
                   <p className="font-medium text-zinc-800 dark:text-zinc-200 mb-2">详细的标准地图投影与制图说明见相关文章：</p>
-                  <ul className="space-y-2 text-zinc-300">
+                  <ul className="space-y-2 text-zinc-600 dark:text-zinc-300">
                     <li className="flex items-center gap-2">
                       <a
                         href="https://mp.weixin.qq.com/s/K7OZfybh-yHbXeRp26riEw"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-amber-400 hover:text-amber-300 underline underline-offset-4 inline-flex items-center gap-1 transition-colors group font-medium"
+                        className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 underline underline-offset-4 inline-flex items-center gap-1 transition-colors group font-medium"
                         title="点击在新标签页阅读文章：《标准地图教程——中国篇》"
                       >
                         <span>《标准地图教程——中国篇》</span>
                         <ExternalLink className="w-3.5 h-3.5 inline shrink-0 group-hover:translate-x-0.5 transition-transform" />
                       </a>
                     </li>
-                    <li className="flex items-center gap-2 text-zinc-400">
+                    <li className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
                       <span>《标准地图教程——各大洲篇》</span>
-                      <span className="text-[10px] text-zinc-400 bg-zinc-800/90 px-1.5 py-0.5 rounded border border-zinc-700/60">
+                      <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-200 dark:bg-zinc-800/90 px-1.5 py-0.5 rounded border border-zinc-300 dark:border-zinc-700/60">
                         待发布
                       </span>
                     </li>
-                    <li className="flex items-center gap-2 text-zinc-400">
+                    <li className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
                       <span>《标准地图教程——世界篇》</span>
-                      <span className="text-[10px] text-zinc-400 bg-zinc-800/90 px-1.5 py-0.5 rounded border border-zinc-700/60">
+                      <span className="text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-200 dark:bg-zinc-800/90 px-1.5 py-0.5 rounded border border-zinc-300 dark:border-zinc-700/60">
                         待发布
                       </span>
                     </li>
