@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ComparisonMode, SplitDirection } from '../types/map';
 import type { ThemeMode } from '../hooks/useThemeMode';
+import { THEME_PACKS, type ThemeTexts } from '../data/i18nTheme';
 import { Info, ExternalLink, ChevronUp, Monitor } from 'lucide-react';
 import { RollingShutterIcon, DualWindowIcon, LayerOverlayIcon, GalleryIcon, SwapLeftAndRightIcon, ThemeLightIcon, ThemeDarkIcon } from './CustomIcons';
 import { Tooltip } from './Tooltip';
@@ -23,6 +24,9 @@ interface HeaderProps {
   onToggleHeaderCollapse?: () => void;
   theme: ThemeMode;
   onCycleTheme: () => void;
+  texts?: ThemeTexts;
+  isWuxia?: boolean;
+  onToggleWuxia?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -42,6 +46,9 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleHeaderCollapse,
   theme,
   onCycleTheme,
+  texts = THEME_PACKS.modern,
+  isWuxia = false,
+  onToggleWuxia,
 }) => {
   const [showComplianceModal, setShowComplianceModal] = useState(false);
   const tapCountRef = React.useRef(0);
@@ -76,7 +83,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div
           onClick={handleBrandingClick}
           className="flex items-center gap-2 cursor-pointer group"
-          title="标准地图与复刻地图对比平台"
+          title={isWuxia ? "九域合符 · 山河对勘工坊" : `${texts.brandTitle} · ${texts.brandSub}`}
         >
           <div className="relative flex items-center justify-center">
             <img
@@ -85,24 +92,42 @@ export const Header: React.FC<HeaderProps> = ({
               className="w-8 h-8 rounded-lg shadow-sm group-hover:scale-105 transition-transform shrink-0"
             />
           </div>
-          <div>
-            <h1 className="text-xs sm:text-sm font-bold text-themeText leading-tight">
-              <span className="hidden md:inline">标准地图/复刻地图</span>
-              <span className="inline md:hidden max-[420px]:hidden">标准/复刻</span>
-            </h1>
-            <p className="text-[11px] text-themeDim leading-tight hidden xl:block whitespace-nowrap">
-              标准底图与复刻地图在线校准比对
-            </p>
+          <div className="flex items-center gap-1.5">
+            <div>
+              <h1 className="text-xs sm:text-sm font-bold text-themeText leading-tight flex items-center gap-1">
+                <span className="hidden md:inline">{texts.brandTitle}</span>
+                <span className="inline md:hidden max-[420px]:hidden">{texts.brandShort}</span>
+              </h1>
+              <p className="text-[11px] text-themeDim leading-tight hidden xl:block whitespace-nowrap">
+                {texts.brandSub}
+              </p>
+            </div>
+            {onToggleWuxia && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleWuxia();
+                }}
+                title={isWuxia ? "点击切回现世日常版" : "点击体验江湖合符"}
+                className={`wuxia-seal-badge ${isWuxia ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'} transition-opacity shrink-0`}
+              >
+                {isWuxia ? texts.toggleWuxiaBadge : texts.toggleModernBadge}
+              </button>
+            )}
           </div>
         </div>
 
-        <Tooltip content="标准地图与复刻地图对比说明" position="bottom">
+        <Tooltip content={texts.btnCompliance} position="bottom">
           <button
             onClick={() => setShowComplianceModal(true)}
             className="flex items-center justify-center gap-1 text-[11px] text-themeMuted hover:text-themeText p-1.5 sm:px-2.5 sm:py-1.5 rounded text-xs font-medium bg-themeBtn border border-themeBorder/15 hover:bg-themeBtnHover transition-colors ml-0.5 sm:ml-1 cursor-pointer min-w-[31px] min-h-[31px]"
           >
-            <Info className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 shrink-0" />
-            <span className="hidden xl:inline">地图说明</span>
+            <Info
+              fill="none"
+              className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 stroke-amber-500 dark:stroke-amber-400 fill-none [&_*]:fill-none shrink-0"
+            />
+            <span className="hidden xl:inline">{isWuxia ? '勘核规制' : '地图说明'}</span>
           </button>
         </Tooltip>
       </div>
@@ -130,17 +155,19 @@ export const Header: React.FC<HeaderProps> = ({
             }}
             className={`flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:w-[94px] rounded-md text-xs font-medium transition-all border ${
               mode === 'swipe'
-                ? 'bg-themeCard text-themeText shadow-sm border-themeBorder/20 font-semibold'
+                ? 'bg-themeCard dark:bg-zinc-800 text-themeText shadow-sm border-themeBorder/20 dark:border-zinc-700/80 font-semibold'
                 : 'border-transparent text-themeMuted hover:text-themeText hover:bg-themeBtnHover/50'
             }`}
           >
             <RollingShutterIcon
               className={`w-[18px] h-[18px] sm:w-4 sm:h-4 transition-transform duration-200 ${
-                mode === 'swipe' ? (swipeDirection === 'horizontal' ? 'rotate-90 text-amber-500 dark:text-amber-400' : 'text-amber-500 dark:text-amber-400') : 'text-zinc-500 dark:text-zinc-400'
+                mode === 'swipe'
+                  ? (swipeDirection === 'horizontal' ? 'rotate-90 text-amber-500 dark:text-amber-400' : 'text-amber-500 dark:text-amber-400')
+                  : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
               }`}
             />
             <span className="hidden lg:inline">
-              卷帘对比
+              {texts.modeSwipe}
             </span>
           </button>
         </Tooltip>
@@ -149,9 +176,9 @@ export const Header: React.FC<HeaderProps> = ({
           content={
             mode === 'sync'
               ? dualDirection === 'horizontal'
-                ? '双屏联动: 左右双屏 (再次点击切换为上下双屏)'
-                : '双屏联动: 上下双屏 (再次点击切换为左右双屏)'
-              : '双屏联动 (点击激活)'
+                ? `${texts.modeSync}: 左右双屏 (再次点击切换为上下双屏)`
+                : `${texts.modeSync}: 上下双屏 (再次点击切换为左右双屏)`
+              : `${texts.modeSync} (点击激活)`
           }
           position="bottom"
           shortcut="2"
@@ -166,32 +193,40 @@ export const Header: React.FC<HeaderProps> = ({
             }}
             className={`flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:w-[94px] rounded-md text-xs font-medium transition-all border ${
               mode === 'sync'
-                ? 'bg-themeCard text-themeText shadow-sm border-themeBorder/20 font-semibold'
+                ? 'bg-themeCard dark:bg-zinc-800 text-themeText shadow-sm border-themeBorder/20 dark:border-zinc-700/80 font-semibold'
                 : 'border-transparent text-themeMuted hover:text-themeText hover:bg-themeBtnHover/50'
             }`}
           >
             <DualWindowIcon
               className={`w-[18px] h-[18px] sm:w-4 sm:h-4 transition-transform duration-200 ${
-                mode === 'sync' ? (dualDirection === 'vertical' ? 'rotate-90 text-amber-500 dark:text-amber-400' : 'text-amber-500 dark:text-amber-400') : 'text-zinc-500 dark:text-zinc-400'
+                mode === 'sync'
+                  ? (dualDirection === 'vertical' ? 'rotate-90 text-amber-500 dark:text-amber-400' : 'text-amber-500 dark:text-amber-400')
+                  : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
               }`}
             />
             <span className="hidden lg:inline">
-              双屏联动
+              {texts.modeSync}
             </span>
           </button>
         </Tooltip>
 
-        <Tooltip content="透明叠置对比 (支持透明度调节与图层混合)" position="bottom" shortcut="3">
+        <Tooltip content={`${texts.modeOverlay} (支持透明度调节与图层混合)`} position="bottom" shortcut="3">
           <button
             onClick={() => onModeChange('overlay')}
             className={`flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:w-[94px] rounded-md text-xs font-medium transition-all border ${
               mode === 'overlay'
-                ? 'bg-themeCard text-themeText shadow-sm border-themeBorder/20 font-semibold'
+                ? 'bg-themeCard dark:bg-zinc-800 text-themeText shadow-sm border-themeBorder/20 dark:border-zinc-700/80 font-semibold'
                 : 'border-transparent text-themeMuted hover:text-themeText hover:bg-themeBtnHover/50'
             }`}
           >
-            <LayerOverlayIcon className={`w-[18px] h-[18px] sm:w-4 sm:h-4 ${mode === 'overlay' ? 'text-amber-500 dark:text-amber-400' : 'text-zinc-500 dark:text-zinc-400'}`} />
-            <span className="hidden lg:inline">透明叠置</span>
+            <LayerOverlayIcon
+              className={`w-[18px] h-[18px] sm:w-4 sm:h-4 ${
+                mode === 'overlay'
+                  ? 'text-amber-500 dark:text-amber-400'
+                  : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+              }`}
+            />
+            <span className="hidden lg:inline">{texts.modeOverlay}</span>
           </button>
         </Tooltip>
       </div>
@@ -201,7 +236,9 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Swap Map Order Button (互换左右/上下图/底表层顺序) */}
         <Tooltip
           content={
-            mode === 'sync'
+            isWuxia
+              ? `${texts.btnSwap} (互换两卷之位)`
+              : mode === 'sync'
               ? dualDirection === 'vertical'
                 ? isSwapped
                   ? '已对调上下位置 (再次点击还原)'
@@ -220,17 +257,21 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={onSwapOrder}
             className={`group flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded text-xs font-medium transition-all border lg:min-w-[96px] ${
               isSwapped
-                ? 'bg-amber-500/15 text-amber-700 dark:text-[#fbbf24] border-amber-400/50 dark:border-amber-500/50 shadow-sm'
+                ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40 dark:border-amber-400/50 shadow-sm'
                 : 'bg-themeBtn text-themeMuted border-themeBorder/15 hover:bg-themeBtnHover hover:text-themeText'
             }`}
           >
             <SwapLeftAndRightIcon
               className={`w-[18px] h-[18px] sm:w-4 sm:h-4 transition-colors ${
-                isSwapped ? 'text-amber-600 dark:text-[#fbbf24]' : 'text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200'
+                isSwapped
+                  ? 'text-amber-500 dark:text-amber-400'
+                  : 'text-zinc-500 dark:text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-zinc-200'
               }`}
             />
             <span className="hidden lg:inline">
-              {mode === 'sync'
+              {isWuxia
+                ? texts.btnSwap
+                : mode === 'sync'
                 ? dualDirection === 'vertical'
                   ? isSwapped
                     ? '已对调上下'
@@ -250,17 +291,17 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Toggle Floating Gallery Button */}
-        <Tooltip content="展开或收起底部浮动地图画廊" position="bottom" shortcut="G">
+        <Tooltip content={isWuxia ? "展阅山河百卷图录" : "展开或收起底部浮动地图画廊"} position="bottom" shortcut="G">
           <button
             onClick={onToggleGallery}
             className={`group flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded text-xs font-medium transition-all border ${
               isGalleryOpen
-                ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-400/50 dark:border-amber-500/50 shadow-sm'
+                ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40 dark:border-amber-400/50 shadow-sm'
                 : 'bg-themeBtn text-themeMuted border-themeBorder/15 hover:text-themeText hover:bg-themeBtnHover'
             }`}
           >
-            <GalleryIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400" />
-            <span className="hidden lg:inline">地图画廊</span>
+            <GalleryIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 transition-colors" />
+            <span className="hidden lg:inline">{texts.btnGallery}</span>
             <span className="text-[10px] font-mono bg-themeBtnHover/80 text-themeMuted px-1 rounded border border-themeBorder/20">{themesCount}</span>
           </button>
         </Tooltip>
@@ -285,10 +326,10 @@ export const Header: React.FC<HeaderProps> = ({
               <Monitor className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 shrink-0" />
             )}
             {theme === 'light' && (
-              <ThemeLightIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 shrink-0" />
+              <ThemeLightIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 shrink-0" />
             )}
             {theme === 'dark' && (
-              <ThemeDarkIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-400 shrink-0" />
+              <ThemeDarkIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 shrink-0" />
             )}
             <span className="hidden xl:inline">
               {theme === 'system' ? '系统' : theme === 'light' ? '浅色' : '深色'}
@@ -317,8 +358,11 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="bg-white dark:bg-[#18191e] border border-zinc-200 dark:border-zinc-700 rounded-xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative text-left text-zinc-800 dark:text-zinc-300">
               <div className="flex items-center justify-between gap-2 mb-3 pb-2.5 border-b border-zinc-200 dark:border-zinc-800">
                 <div className="flex items-center gap-2">
-                  <Info className="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0" />
-                  <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">标准地图与复刻地图对比说明</h3>
+                  <Info
+                    fill="none"
+                    className="w-5 h-5 text-amber-500 dark:text-amber-400 stroke-amber-500 dark:stroke-amber-400 fill-none [&_*]:fill-none shrink-0"
+                  />
+                  <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">{texts.btnCompliance}</h3>
                 </div>
                 <button
                   onClick={() => setShowComplianceModal(false)}
@@ -340,7 +384,10 @@ export const Header: React.FC<HeaderProps> = ({
                     title="访问自然资源部标准地图服务系统"
                   >
                     <span>标准地图服务系统</span>
-                    <ExternalLink className="w-3 h-3 inline shrink-0" />
+                    <ExternalLink
+                      fill="none"
+                      className="w-3 h-3 inline shrink-0 fill-none [&_*]:fill-none stroke-current"
+                    />
                   </a>
                   ，主要涵盖了中国标准地图（横版、竖版）、七大洲标准地图、世界标准地图。
                 </p>
@@ -359,7 +406,10 @@ export const Header: React.FC<HeaderProps> = ({
                         title="点击在新标签页阅读文章：《标准地图教程——中国篇》"
                       >
                         <span>《标准地图教程——中国篇》</span>
-                        <ExternalLink className="w-3.5 h-3.5 inline shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                        <ExternalLink
+                          fill="none"
+                          className="w-3.5 h-3.5 inline shrink-0 group-hover:translate-x-0.5 transition-transform fill-none [&_*]:fill-none stroke-current"
+                        />
                       </a>
                     </li>
                     <li className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">

@@ -3,3 +3,106 @@
   clip-path: inset(0 calc(100% - var(--swipe-pos, 50%)) 0 0);
 }
 
+/* ==========================================================================
+   Wuxia Easter Egg Aesthetics (九域合符 · 山河对勘)
+   ========================================================================== */
+
+.theme-wuxia {
+  --wuxia-font-title: 'STKaiti', 'Kaiti SC', 'KaiTi', 'Songti SC', SimSun, serif;
+  --wuxia-seal-red: #b92b27;
+  --wuxia-seal-bg: rgba(185, 43, 39, 0.12);
+  --wuxia-seal-border: rgba(185, 43, 39, 0.35);
+}
+
+.theme-wuxia h1,
+.theme-wuxia .wuxia-font {
+  font-family: var(--wuxia-font-title), sans-serif;
+  letter-spacing: 0.05em;
+}
+
+/* 金石朱砂小印章挂饰 */
+.wuxia-seal-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 600;
+  border-radius: 4px;
+  background: var(--wuxia-seal-bg, rgba(185, 43, 39, 0.12));
+  color: var(--wuxia-seal-red, #b92b27);
+  border: 1px solid var(--wuxia-seal-border, rgba(185, 43, 39, 0.35));
+  box-shadow: 0 1px 3px rgba(185, 43, 39, 0.12);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.wuxia-seal-badge:hover {
+  background: rgba(185, 43, 39, 0.2);
+  border-color: rgba(185, 43, 39, 0.6);
+  transform: scale(1.05);
+}
+
+/* 墨玉砚台机缘 Toast */
+.wuxia-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #f8fafc;
+  font-family: var(--wuxia-font-title, serif);
+  font-size: 13.5px;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(185, 43, 39, 0.5);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 12px rgba(185, 43, 39, 0.15);
+  backdrop-filter: blur(10px);
+  animation: wuxiaFadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes wuxiaFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 移动端适配 */
+@media (max-width: 640px) {
+  .wuxia-toast {
+    bottom: 80px;
+    right: 12px;
+    left: 12px;
+    font-size: 12.5px;
+    padding: 8px 12px;
+    justify-content: center;
+  }
+}
+
+/* 金色呼吸微光动效 */
+@keyframes goldBreath {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(216, 176, 84, 0.45);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(245, 215, 136, 0.75), 0 0 50px rgba(217, 119, 6, 0.3);
+    transform: scale(1.015);
+  }
+}
+
+.gold-breath-btn {
+  animation: goldBreath 2.6s ease-in-out infinite;
+}
+

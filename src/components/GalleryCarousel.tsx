@@ -3,6 +3,7 @@ import type { MapThemeGroup, RegionScope } from '../types/map';
 import { MapSvg } from './MapSvg';
 import { ChevronLeft, ChevronRight, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { GalleryIcon } from './CustomIcons';
+import type { ThemeTexts } from '../data/i18nTheme';
 
 interface GalleryCarouselProps {
   themes: MapThemeGroup[];
@@ -12,6 +13,7 @@ interface GalleryCarouselProps {
   isOpen: boolean;
   onToggleOpen: () => void;
   onClose: () => void;
+  texts?: ThemeTexts;
 }
 
 const getThemeRatio = (ratioStr: string): number => {
@@ -46,7 +48,9 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
   isOpen,
   onToggleOpen,
   onClose,
+  texts,
 }) => {
+  const galleryTitle = texts?.btnGallery ?? '地图画廊';
   const [filter, setFilter] = useState<'all' | RegionScope>('all');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -94,10 +98,10 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
           <button
             onClick={onToggleOpen}
             className="group flex items-center gap-1.5 min-[500px]:gap-2 sm:gap-2.5 px-2.5 min-[500px]:px-3.5 sm:px-4 py-1 min-[500px]:py-1.5 sm:py-2 rounded-full bg-themeCard/75 hover:bg-themeCard/95 text-themeText hover:text-amber-600 dark:hover:text-amber-400 border border-themeBorder/15 hover:border-amber-500/60 shadow-lg transition-all duration-200 cursor-pointer hover:shadow-amber-500/10 hover:scale-[1.02] max-w-full"
-            title="展开地图画廊 (快捷键 G)"
+            title={`${galleryTitle} (快捷键 G)`}
           >
-            <GalleryIcon className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 text-amber-400 group-hover:scale-110 transition-transform shrink-0" />
-            <span className="text-xs font-semibold hidden md:inline">地图画廊</span>
+            <GalleryIcon className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 text-amber-500 dark:text-amber-400 transition-colors group-hover:scale-110 shrink-0" />
+            <span className="text-xs font-semibold hidden md:inline">{galleryTitle}</span>
             <span className="text-zinc-600 text-xs hidden md:inline">|</span>
             <span className="text-[10px] min-[500px]:text-[11px] text-zinc-600 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors font-medium truncate max-w-[130px] min-[380px]:max-w-[170px] min-[500px]:max-w-[260px] md:max-w-none">
               {selectedTheme.title}
@@ -126,8 +130,8 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
         <div className="h-8 sm:h-9 px-2.5 sm:px-4 border-b border-themeBorder/10 flex items-center justify-between text-xs bg-themeCard/60 shrink-0 gap-2 overflow-hidden">
           <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 flex-1 overflow-x-auto scrollbar-none">
             <span className="font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1 shrink-0">
-              <GalleryIcon className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden sm:inline">地图画廊</span>
+              <GalleryIcon className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 transition-colors shrink-0" />
+              <span className="hidden sm:inline">{galleryTitle}</span>
             </span>
 
             {/* Region Scope Filter Pills */}

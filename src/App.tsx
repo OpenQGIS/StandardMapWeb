@@ -10,10 +10,14 @@ import { GalleryCarousel } from './components/GalleryCarousel';
 import { DebugOverlay } from './components/DebugOverlay';
 import { ChevronDown } from 'lucide-react';
 import { nextZoomStep } from './utils/zoom';
+import { useEasterEgg } from './hooks/useEasterEgg';
+import { AncientPaperOverlay } from './components/AncientPaperOverlay';
+import { RitualModal } from './components/RitualModal';
 import './App.css';
 
 export function App() {
   const { theme, cycleTheme } = useThemeMode();
+  const { isWuxia, texts, toggleWuxia, showRitualModal, closeRitualModal } = useEasterEgg();
   const [mode, setMode] = useState<ComparisonMode>('swipe');
 
   // Active theme group (selected from the 11 themes)
@@ -219,6 +223,9 @@ export function App() {
           onToggleHeaderCollapse={() => setIsHeaderCollapsed(true)}
           theme={theme}
           onCycleTheme={cycleTheme}
+          texts={texts}
+          isWuxia={isWuxia}
+          onToggleWuxia={toggleWuxia}
         />
       </div>
 
@@ -292,7 +299,14 @@ export function App() {
         isOpen={isGalleryOpen}
         onToggleOpen={() => setIsGalleryOpen((prev) => !prev)}
         onClose={() => setIsGalleryOpen(false)}
+        texts={texts}
       />
+
+      {/* Ancient Xuan Paper Texture Overlay (五维做旧能量守恒程序化宣纸底衬) */}
+      <AncientPaperOverlay active={isWuxia} />
+
+      {/* Full-screen Ritual Modal (全屏仪式感居中大弹窗) */}
+      <RitualModal isOpen={showRitualModal} onClose={closeRitualModal} />
 
       {showDebug && <DebugOverlay onClose={() => setShowDebug(false)} />}
     </div>

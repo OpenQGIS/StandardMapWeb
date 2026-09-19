@@ -619,12 +619,20 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
           } bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.9)] group-hover:bg-amber-300 transition-colors pointer-events-none`}
         />
 
-        {/* Center Grab Handle - Always fixed 32px on screen */}
-        <div className="absolute w-8 h-8 rounded-full bg-white dark:bg-[#16181f] border-2 border-amber-500 dark:border-amber-400 flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.2)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.7)] text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform pointer-events-none">
+        {/* Center Grab Handle - Compact 24px circular indicator */}
+        <div className="absolute w-6 h-6 rounded-full bg-white dark:bg-[#16181f] border-[1.5px] border-amber-500 dark:border-amber-400 flex items-center justify-center shadow-[0_2px_10px_rgba(0,0,0,0.2)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.7)] text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform pointer-events-none">
           {direction === 'horizontal' ? (
-            <MoveVertical className="w-4 h-4" />
+            <MoveVertical
+              fill="none"
+              strokeWidth={2.5}
+              className="w-3.5 h-3.5 fill-none [&_*]:fill-none stroke-current"
+            />
           ) : (
-            <MoveHorizontal className="w-4 h-4" />
+            <MoveHorizontal
+              fill="none"
+              strokeWidth={2.5}
+              className="w-3.5 h-3.5 fill-none [&_*]:fill-none stroke-current"
+            />
           )}
         </div>
       </div>
@@ -705,28 +713,28 @@ export const SwipeCurtainView: React.FC<SwipeCurtainViewProps> = ({
       })()}
 
       {/* Floating Zoom Controls */}
-      <div className="absolute bottom-3 right-2.5 min-[500px]:bottom-4 min-[500px]:right-4 z-20 flex flex-col gap-1 min-[500px]:gap-1.5 bg-themeCard/70 hover:bg-themeCard/95 p-1 min-[500px]:p-1.5 rounded-lg border border-themeBorder/15 hover:border-themeBorder/30 shadow-md hover:shadow-xl swipe-control-panel transition-all duration-200">
+      <div className="absolute bottom-3 right-2.5 min-[500px]:bottom-4 min-[500px]:right-4 z-20 flex flex-col gap-1 min-[500px]:gap-1.5 bg-white/90 dark:bg-[#12141a]/95 hover:bg-white dark:hover:bg-[#151720] p-1 min-[500px]:p-1.5 rounded-lg border border-zinc-200/80 dark:border-zinc-500/60 hover:border-zinc-300 dark:hover:border-zinc-300/80 shadow-md dark:shadow-[0_4px_20px_rgba(0,0,0,0.6)] swipe-control-panel transition-all duration-200">
         <button
           onClick={zoomIn}
-          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
+          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center border border-zinc-200/80 dark:border-zinc-500/70 bg-zinc-100/80 dark:bg-[#1c1f28] hover:bg-zinc-200/90 dark:hover:bg-[#282d3b] hover:border-zinc-300 dark:hover:border-zinc-300 text-zinc-700 dark:text-zinc-100 transition-colors shadow-sm"
           title={`放大至 ${Math.round(nextZoomStep(viewport.scale, 1, zoomMax) * 100)}%`}
         >
-          <ZoomIn className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+          <ZoomIn className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 [&>circle]:fill-white/80 dark:[&>circle]:fill-zinc-950/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
         </button>
         <button
           onClick={zoomOut}
-          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
+          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center border border-zinc-200/80 dark:border-zinc-500/70 bg-zinc-100/80 dark:bg-[#1c1f28] hover:bg-zinc-200/90 dark:hover:bg-[#282d3b] hover:border-zinc-300 dark:hover:border-zinc-300 text-zinc-700 dark:text-zinc-100 transition-colors shadow-sm"
           title={`缩小至 ${Math.round(nextZoomStep(viewport.scale, -1, zoomMax) * 100)}%`}
         >
-          <ZoomOut className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+          <ZoomOut className="w-3.5 h-3.5 min-[500px]:w-4 min-[500px]:h-4 [&>circle]:fill-white/80 dark:[&>circle]:fill-zinc-950/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
         </button>
-        <div className="h-[1px] bg-white/10 my-0.5" />
+        <div className="h-[1px] bg-zinc-200 dark:bg-zinc-700/80 my-0.5" />
         <button
           onClick={fitScreen}
-          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
+          className="w-7 h-7 min-[500px]:w-8 min-[500px]:h-8 rounded flex items-center justify-center border border-zinc-200/80 dark:border-zinc-500/70 bg-zinc-100/80 dark:bg-[#1c1f28] hover:bg-zinc-200/90 dark:hover:bg-[#282d3b] hover:border-zinc-300 dark:hover:border-zinc-300 text-zinc-700 dark:text-zinc-100 transition-colors shadow-sm"
           title="自适应居中 (100% 原始比例)"
         >
-          <Zoom100Icon className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+          <Zoom100Icon className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
         </button>
       </div>
 

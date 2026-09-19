@@ -22,6 +22,7 @@ export const Zoom100Icon: React.FC<Zoom100IconProps> = ({ className = 'w-4 h-4',
         r="7.5"
         strokeWidth="1.9"
         stroke="currentColor"
+        className="fill-white/80 dark:fill-zinc-950/90"
       />
       <path
         d="M16 16L21.5 21.5"
