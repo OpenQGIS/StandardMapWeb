@@ -20,7 +20,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    "paths": {
+      "morphicons": ["./src/lib/morphicons/index.ts"],
+      "morphicons/react": ["./src/lib/morphicons/react/index.tsx"]
+    }
   },
   "include": ["src"]
 }

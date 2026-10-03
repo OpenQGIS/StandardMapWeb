@@ -82,51 +82,52 @@ export const SwapLeftAndRightIcon: React.FC<IconProps> = ({ className = 'w-3.5 h
 );
 
 /**
- * 切换暗色模式图标 (Moon)
+ * 切换暗色模式图标 (Moon - 纯描边无填充)
  */
 export const ThemeDarkIcon: React.FC<IconProps> = ({ className = 'w-3.5 h-3.5', ...props }) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2.5"
-    strokeLinecap="butt"
+    strokeWidth="2"
+    strokeLinecap="round"
     strokeLinejoin="round"
-    className={`inline-block shrink-0 ${className}`}
+    className={`inline-block shrink-0 fill-none [&_*]:fill-none ${className}`}
     aria-hidden="true"
     {...props}
   >
     <path
-      d="M21 12C21 16.9706 16.9706 21 12 21C7.0294 21 3 16.9706 3 12C3 7.0294 7.0294 3 12 3C9.9618 5.5477 10.1652 9.2206 12.4723 11.5277C14.7794 13.8348 18.4523 14.0382 21 12Z"
+      d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
       fill="none"
     />
   </svg>
 );
 
 /**
- * 切换亮色模式图标 (Sun)
+ * 切换亮色模式图标 (Sun - 纯描边无填充)
  */
 export const ThemeLightIcon: React.FC<IconProps> = ({ className = 'w-3.5 h-3.5', ...props }) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2.5"
-    strokeLinecap="butt"
+    strokeWidth="2"
+    strokeLinecap="round"
     strokeLinejoin="round"
-    className={`inline-block shrink-0 ${className}`}
+    className={`inline-block shrink-0 fill-none [&_*]:fill-none ${className}`}
     aria-hidden="true"
     {...props}
   >
+    <circle cx="12" cy="12" r="4" fill="none" />
     <path
-      d="M16.5 12C16.5 14.4853 14.4853 16.5 12 16.5C9.5147 16.5 7.5 14.4853 7.5 12C7.5 9.5147 9.5147 7.5 12 7.5C14.4853 7.5 16.5 9.5147 16.5 12ZM19.5 12L22 12M17.3033 17.3033L19.0711 19.0711M12 19.5L12 22M6.6967 17.3033L4.9289 19.0711M4.5 12L2 12M6.6967 6.6967L4.9289 4.9289M12 4.5L12 2M17.3033 6.6967L19.0711 4.9289"
+      d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
       fill="none"
     />
   </svg>
 );
 
 /**
- * 系统/电脑主题图标 (Monitor)
+ * 系统/电脑主题图标 (Monitor - 纯描边无填充)
  */
 export const ThemeAutoIcon: React.FC<IconProps> = ({ className = 'w-3.5 h-3.5', ...props }) => (
   <svg
@@ -136,11 +137,11 @@ export const ThemeAutoIcon: React.FC<IconProps> = ({ className = 'w-3.5 h-3.5', 
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className={`inline-block shrink-0 ${className}`}
+    className={`inline-block shrink-0 fill-none [&_*]:fill-none ${className}`}
     aria-hidden="true"
     {...props}
   >
-    <rect width="20" height="14" x="2" y="3" rx="2" />
+    <rect width="20" height="14" x="2" y="3" rx="2" fill="none" />
     <line x1="8" x2="16" y1="21" y2="21" />
     <line x1="12" x2="12" y1="17" y2="21" />
   </svg>

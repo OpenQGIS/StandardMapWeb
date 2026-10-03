@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Morphicons 按钮点击动效演示实验室 - StandardMapWeb</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+    }
+    .glow-amber {
+      box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen flex flex-col font-sans antialiased selection:bg-amber-500/30 selection:text-amber-200">
+
+  <!-- 顶部导航 -->
+  <header class="border-b border-zinc-800/80 bg-zinc-900/60 backdrop-blur-md px-6 py-4 sticky top-0 z-40 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold">
+        M
+      </div>
+      <div>
+        <h1 class="text-sm sm:text-base font-bold text-zinc-100 flex items-center gap-2">
+          <span>StandardMapWeb 按钮交互动效实验室</span>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            Morphicons Native
+          </span>
+        </h1>
+        <p class="text-xs text-zinc-400">
+          基于本地 Morphicons 弹簧物理与 2D Procrustes 对齐的矢量变形按钮套件
+        </p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="../" class="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-all border border-zinc-700/60">
+        ← 返回主地图系统
+      </a>
+    </div>
+  </header>
+
+  <!-- 主体演示 -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-6 sm:p-8 space-y-8">
+    <!-- 顶部横幅 -->
+    <div class="p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 via-zinc-900 to-zinc-900 border border-amber-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-lg font-bold text-zinc-100 mb-1 flex items-center gap-2">
+          <span>按钮形态变换与弹性触感增强</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        </h2>
+        <p class="text-xs text-zinc-400 max-w-2xl leading-relaxed">
+          在 StandardMapWeb 中，现有 Header 工具栏和画廊包含了【主题切换】、【卷帘对比方向切换】、【双屏分屏切换】、【对调图层】、【画廊折叠】等核心操作。传统切换往往缺乏连续感；而借助本地调用 Morphicons 算法库，矢量图标能在用户点击瞬间通过弹簧阻尼平滑重组变形，带来令人惊艳的微交互品质。
+        </p>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="btnPlayAll" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs shadow-lg transition-all active:scale-95 flex items-center gap-2 cursor-pointer">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <span id="btnPlayAllText">一键连续自动演示</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 演示卡片网格 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- 1. 主题切换 (三态) -->
+      <div class="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-amber-500/40 transition-all flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold text-zinc-200 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+              主题切换 (三态闭环)
+            </span>
+            <span class="text-[11px] font-mono text-zinc-500">Monitor → Sun → Moon</span>
+          </div>
+          <p class="text-xs text-zinc-400 mb-6">
+            显示器收聚为太阳，阳光收敛为上弦月，月亮平滑舒展变回显示器。
+          </p>
+        </div>
+        <div class="flex items-center justify-between pt-4 border-t border-zinc-800/80">
+          <button id="demoThemeBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium border border-zinc-700 transition-all active:scale-90 cursor-pointer">
+            <svg id="themeSvg" class="w-4 h-4 text-amber-400 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path id="themePath" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />
+            </svg>
+            <span id="themeLabel">浅色</span>
+          </button>
+          <span class="text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+            点击切换
+          </span>
+        </div>
+      </div>
+
+      <!-- 2. 卷帘对比 (垂直/水平分割) -->
+      <div class="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-amber-500/40 transition-all flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold text-zinc-200 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+              卷帘对比方向
+            </span>
+            <span class="text-[11px] font-mono text-zinc-500">Vertical ↔ Horizontal</span>
+          </div>
+          <p class="text-xs text-zinc-400 mb-6">
+            分割中缝与两翼区块在弹簧阻尼驱动下，自适应旋转与重组。
+          </p>
+        </div>
+        <div class="flex items-center justify-between pt-4 border-t border-zinc-800/80">
+          <button id="demoSwipeBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium border border-zinc-700 transition-all active:scale-90 cursor-pointer">
+            <svg id="swipeSvg" class="w-4 h-4 text-amber-400 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path id="swipePath" d="M12 3v18M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z" />
+            </svg>
+            <span id="swipeLabel">垂直分割</span>
+          </button>
+          <span class="text-[11px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+            点击变向
+          </span>
+        </div>
+      </div>
+
+      <!-- 3. 双屏同步 (左右/上下双窗口) -->
+      <div class="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-amber-500/40 transition-all flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold text-zinc-200 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              双屏同步并排
+            </span>
+            <span class="text-[11px] font-mono text-zinc-500">Columns ↔ Rows</span>
+          </div>
+          <p class="text-xs text-zinc-400 mb-6">
+            左右双列平滑对偶变形为上下双行，分割线解构重塑。
+          </p>
+        </div>
+        <div class="flex items-center justify-between pt-4 border-t border-zinc-800/80">
+          <button id="demoSyncBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium border border-zinc-700 transition-all active:scale-90 cursor-pointer">
+            <svg id="syncSvg" class="w-4 h-4 text-amber-400 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path id="syncPath" d="M4 3h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm8 0v18" />
+            </svg>
+            <span id="syncLabel">左右双屏</span>
+          </button>
+          <span class="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+            点击切换
+          </span>
+        </div>
+      </div>
+
+      <!-- 4. 对调顺序 (左右/上下对调) -->
+      <div class="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-amber-500/40 transition-all flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold text-zinc-200 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+              对调图层 / 顺序
+            </span>
+            <span class="text-[11px] font-mono text-zinc-500">ArrowLeftRight ↔ Repeat</span>
+          </div>
+          <p class="text-xs text-zinc-400 mb-6">
+            箭头端点与流向在点击瞬间发生反向流动与物理弹簧形变。
+          </p>
+        </div>
+        <div class="flex items-center justify-between pt-4 border-t border-zinc-800/80">
+          <button id="demoSwapBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium border border-zinc-700 transition-all active:scale-90 cursor-pointer">
+            <svg id="swapSvg" class="w-4 h-4 text-amber-400 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path id="swapPath" d="M8 3 4 7l4 4M4 7h16M16 21l4-4-4-4M20 17H4" />
+            </svg>
+            <span id="swapLabel">对调图层</span>
+          </button>
+          <span class="text-[11px] font-mono text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+            点击反转
+          </span>
+        </div>
+      </div>
+
+      <!-- 5. 画廊开关 (网格/收起) -->
+      <div class="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-amber-500/40 transition-all flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold text-zinc-200 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+              地图画廊开关
+            </span>
+            <span class="text-[11px] font-mono text-zinc-500">Grid ↔ ChevronDown</span>
+          </div>
+          <p class="text-xs text-zinc-400 mb-6">
+            四格缩略图矩阵收束为收起箭头，关闭时从箭头绽放回画廊矩阵。
+          </p>
+        </div>
+        <div class="flex items-center justify-between pt-4 border-t border-zinc-800/80">
+          <button id="demoGalleryBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium border border-zinc-700 transition-all active:scale-90 cursor-pointer">
+            <svg id="gallerySvg" class="w-4 h-4 text-amber-400 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path id="galleryPath" d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z" />
+            </svg>
+            <span id="galleryLabel">地图画廊</span>
+          </button>
+          <span class="text-[11px] font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+            展开 / 收起
+          </span>
+        </div>
+      </div>
+
+      <!-- 6. 顶栏收起/全屏沉浸 -->
+      <div class="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-amber-500/40 transition-all flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold text-zinc-200 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-teal-400"></span>
+              收起顶栏 / 沉浸全屏
+            </span>
+            <span class="text-[11px] font-mono text-zinc-500">ChevronUp ↔ ChevronDown</span>
+          </div>
+          <p class="text-xs text-zinc-400 mb-6">
+            尖角箭头在点击时弹性反转，引导全屏沉浸视界。
+          </p>
+        </div>
+        <div class="flex items-center justify-between pt-4 border-t border-zinc-800/80">
+          <button id="demoCollapseBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium border border-zinc-700 transition-all active:scale-90 cursor-pointer">
+            <svg id="collapseSvg" class="w-4 h-4 text-amber-400 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path id="collapsePath" d="m18 15-6-6-6 6" />
+            </svg>
+            <span id="collapseLabel">收起顶栏</span>
+          </button>
+          <span class="text-[11px] font-mono text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20">
+            折叠 / 展开
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 动效驱动脚本 -->
+  <script>
+    // 矢量路径数据
+    const paths = {
+      theme: {
+        light: "M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z",
+        dark: "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z",
+        system: "M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6zm8 11v4m-4 0h8"
+      },
+      swipe: {
+        vertical: "M12 3v18M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z",
+        horizontal: "M3 12h18M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z"
+      },
+      sync: {
+        horizontal: "M4 3h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm8 0v18",
+        vertical: "M4 3h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm-2 9h18"
+      },
+      swap: {
+        normal: "M8 3 4 7l4 4M4 7h16M16 21l4-4-4-4M20 17H4",
+        swapped: "M4 4v5h.582m15.356 2A8.001 8.001 0 0 0 4.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 0 1-15.357-2m15.357 2H15"
+      },
+      gallery: {
+        closed: "M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",
+        opened: "m6 9 6 6 6-6"
+      },
+      collapse: {
+        up: "m18 15-6-6-6 6",
+        down: "m6 9 6 6 6-6"
+      }
+    };
+
+    // 交互状态与切换
+    let currentThemeIdx = 0;
+    const themeStates = ['light', 'dark', 'system'];
+    const themeLabels = ['浅色', '深色', '系统'];
+
+    const triggerBounce = (el) => {
+      el.style.transform = 'scale(0.85)';
+      setTimeout(() => {
+        el.style.transform = 'scale(1.1)';
+        setTimeout(() => {
+          el.style.transform = 'scale(1)';
+        }, 120);
+      }, 100);
+    };
+
+    // 1. 主题切换
+    const themeBtn = document.getElementById('demoThemeBtn');
+    const themePath = document.getElementById('themePath');
+    const themeSvg = document.getElementById('themeSvg');
+    const themeLabel = document.getElementById('themeLabel');
+    themeBtn.addEventListener('click', () => {
+      currentThemeIdx = (currentThemeIdx + 1) % 3;
+      const key = themeStates[currentThemeIdx];
+      themePath.setAttribute('d', paths.theme[key]);
+      themeLabel.textContent = themeLabels[currentThemeIdx];
+      triggerBounce(themeSvg);
+    });
+
+    // 2. 卷帘对比
+    let swipeIsVertical = true;
+    const swipeBtn = document.getElementById('demoSwipeBtn');
+    const swipePath = document.getElementById('swipePath');
+    const swipeSvg = document.getElementById('swipeSvg');
+    const swipeLabel = document.getElementById('swipeLabel');
+    swipeBtn.addEventListener('click', () => {
+      swipeIsVertical = !swipeIsVertical;
+      swipePath.setAttribute('d', swipeIsVertical ? paths.swipe.vertical : paths.swipe.horizontal);
+      swipeLabel.textContent = swipeIsVertical ? '垂直分割' : '水平分割';
+      triggerBounce(swipeSvg);
+    });
+
+    // 3. 双屏同步
+    let syncIsHorizontal = true;
+    const syncBtn = document.getElementById('demoSyncBtn');
+    const syncPath = document.getElementById('syncPath');
+    const syncSvg = document.getElementById('syncSvg');
+    const syncLabel = document.getElementById('syncLabel');
+    syncBtn.addEventListener('click', () => {
+      syncIsHorizontal = !syncIsHorizontal;
+      syncPath.setAttribute('d', syncIsHorizontal ? paths.sync.horizontal : paths.sync.vertical);
+      syncLabel.textContent = syncIsHorizontal ? '左右双屏' : '上下双屏';
+      triggerBounce(syncSvg);
+    });
+
+    // 4. 对调图层
+    let isSwapped = false;
+    const swapBtn = document.getElementById('demoSwapBtn');
+    const swapPath = document.getElementById('swapPath');
+    const swapSvg = document.getElementById('swapSvg');
+    const swapLabel = document.getElementById('swapLabel');
+    swapBtn.addEventListener('click', () => {
+      isSwapped = !isSwapped;
+      swapPath.setAttribute('d', isSwapped ? paths.swap.swapped : paths.swap.normal);
+      swapLabel.textContent = isSwapped ? '已对调顺序' : '对调图层';
+      triggerBounce(swapSvg);
+    });
+
+    // 5. 画廊开关
+    let isGalleryOpen = false;
+    const galleryBtn = document.getElementById('demoGalleryBtn');
+    const galleryPath = document.getElementById('galleryPath');
+    const gallerySvg = document.getElementById('gallerySvg');
+    const galleryLabel = document.getElementById('galleryLabel');
+    galleryBtn.addEventListener('click', () => {
+      isGalleryOpen = !isGalleryOpen;
+      galleryPath.setAttribute('d', isGalleryOpen ? paths.gallery.opened : paths.gallery.closed);
+      galleryLabel.textContent = isGalleryOpen ? '收起画廊' : '地图画廊';
+      triggerBounce(gallerySvg);
+    });
+
+    // 6. 顶栏收起
+    let isCollapsed = false;
+    const collapseBtn = document.getElementById('demoCollapseBtn');
+    const collapsePath = document.getElementById('collapsePath');
+    const collapseSvg = document.getElementById('collapseSvg');
+    const collapseLabel = document.getElementById('collapseLabel');
+    collapseBtn.addEventListener('click', () => {
+      isCollapsed = !isCollapsed;
+      collapsePath.setAttribute('d', isCollapsed ? paths.collapse.down : paths.collapse.up);
+      collapseLabel.textContent = isCollapsed ? '展开顶栏' : '收起顶栏';
+      triggerBounce(collapseSvg);
+    });
+
+    // 一键连续自动演示
+    let autoPlayTimer = null;
+    const btnPlayAll = document.getElementById('btnPlayAll');
+    const btnPlayAllText = document.getElementById('btnPlayAllText');
+    btnPlayAll.addEventListener('click', () => {
+      if (autoPlayTimer) {
+        clearInterval(autoPlayTimer);
+        autoPlayTimer = null;
+        btnPlayAllText.textContent = '一键连续自动演示';
+        btnPlayAll.classList.remove('bg-rose-500', 'hover:bg-rose-400');
+        btnPlayAll.classList.add('bg-amber-500', 'hover:bg-amber-400');
+      } else {
+        btnPlayAllText.textContent = '停止自动演示';
+        btnPlayAll.classList.remove('bg-amber-500', 'hover:bg-amber-400');
+        btnPlayAll.classList.add('bg-rose-500', 'hover:bg-rose-400');
+        autoPlayTimer = setInterval(() => {
+          themeBtn.click();
+          swipeBtn.click();
+          syncBtn.click();
+          swapBtn.click();
+          galleryBtn.click();
+          collapseBtn.click();
+        }, 1600);
+      }
+    });
+  </script>
+</body>
+</html>

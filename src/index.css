@@ -118,3 +118,14 @@ body, #root {
   background: #fbbf24;
   border-radius: 9999px;
 }
+
+/* Strict outline mode for morphicons & stroke-based SVGs */
+svg[fill="none"] path,
+svg[fill="none"] circle,
+svg[fill="none"] rect,
+svg[fill="none"] polyline,
+svg[fill="none"] polygon,
+svg[fill="none"] * {
+  fill: none !important;
+}
+

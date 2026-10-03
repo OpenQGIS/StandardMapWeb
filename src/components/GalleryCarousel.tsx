@@ -1,9 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
 import type { MapThemeGroup, RegionScope } from '../types/map';
 import { MapSvg } from './MapSvg';
-import { ChevronLeft, ChevronRight, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { GalleryIcon } from './CustomIcons';
 import type { ThemeTexts } from '../data/i18nTheme';
+import { MorphIconWrapper } from '../demo/MorphIconWrapper';
+import { morphIconData } from '../demo/iconData';
+
 
 interface GalleryCarouselProps {
   themes: MapThemeGroup[];
@@ -106,7 +109,12 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
             <span className="text-[10px] min-[500px]:text-[11px] text-zinc-600 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors font-medium truncate max-w-[130px] min-[380px]:max-w-[170px] min-[500px]:max-w-[260px] md:max-w-none">
               {selectedTheme.title}
             </span>
-            <ChevronUp className="w-3 h-3 min-[500px]:w-3.5 min-[500px]:h-3.5 text-zinc-400 group-hover:text-amber-400 group-hover:-translate-y-0.5 transition-all shrink-0" />
+            <MorphIconWrapper
+              icon={morphIconData.collapse.up}
+              size={14}
+              strokeWidth={2.4}
+              className="text-zinc-400 group-hover:text-amber-400 transition-colors shrink-0"
+            />
           </button>
         </div>
       )}
@@ -206,7 +214,11 @@ export const GalleryCarousel: React.FC<GalleryCarouselProps> = ({
               title="收起画廊 (快捷键 Esc / G)"
             >
               <span className="hidden sm:inline">收起画廊</span>
-              <ChevronDown className="w-3.5 h-3.5" />
+              <MorphIconWrapper
+                icon={morphIconData.collapse.down}
+                size={14}
+                strokeWidth={2.4}
+              />
             </button>
           </div>
         </div>

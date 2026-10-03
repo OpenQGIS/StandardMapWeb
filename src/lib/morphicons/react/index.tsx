@@ -1,0 +1,272 @@
+/* React binding: MorphIcon with the three modes — uncontrolled (change the
+   `icon` prop and morphicons animates), controlled (`from`/`to`/`progress`,
+   no spring) and imperative (ref → { morphTo, set }).
+
+   Clean SSR by construction: the initial `d` is computed ONCE with the pure
+   core (useState initializer) and React never rewrites that attribute — the
+   morph mutates it externally via createMorph. The server emits the exact
+   static SVG (zero flash, zero layout shift); the runtime is born on
+   hydration. Drop-in with lucide-react: same presentation props. */
+
+import {
+  forwardRef,
+  type SVGProps,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { allocOutputs, interpPolar } from "../core/interpolate";
+import { buildPlan } from "../core/plan";
+import { resampleIcon } from "../core/resample";
+import { serialize } from "../core/serialize";
+import type { SpringPreset } from "../core/spring";
+import type { IconInput } from "../core/types";
+import {
+  canonicalD,
+  createMorph,
+  type Morph,
+  type MorphOptions,
+  type ReducedMotionMode,
+} from "../dom/index";
+
+/** Imperative surface exposed via ref. */
+export interface MorphHandle {
+  morphTo(icon: IconInput, spring?: SpringPreset | MorphOptions): void;
+  set(icon: IconInput): void;
+}
+
+export interface MorphIconProps
+  extends Omit<SVGProps<SVGSVGElement>, "from" | "to" | "ref"> {
+  /** Uncontrolled mode: the current icon; changing the prop animates. */
+  icon?: IconInput;
+  /** Controlled mode: source endpoint of the pair. */
+  from?: IconInput;
+  /** Controlled mode: target endpoint of the pair. */
+  to?: IconInput;
+  /** Controlled mode: 0..1 progress of the frozen morph (no spring). */
+  progress?: number;
+  /** Physics for uncontrolled/imperative mode: preset or custom spring. */
+  spring?: SpringPreset | MorphOptions;
+  /** Reduced-motion policy: "never" (default) animates regardless of the OS
+   *  setting, "user" honors prefers-reduced-motion (morphs degrade to an
+   *  instant swap while it is on), "always" always jumps. */
+  reducedMotion?: ReducedMotionMode;
+  size?: number | string;
+  color?: string;
+  strokeWidth?: number | string;
+  /** Like lucide-react: stroke width does not scale with `size`. */
+  absoluteStrokeWidth?: boolean;
+  /** Accessibility: with label → role="img" + <title>; without → aria-hidden. */
+  label?: string;
+}
+
+// renderToString runs no effects; on the client we want layout (sync before
+// first paint). The shim avoids the useLayoutEffect warning in SSR.
+const useIsoLayoutEffect = typeof document === "undefined" ? useEffect : useLayoutEffect;
+
+/** Frozen shape of the from→to pair at t, using the pure core (SSR-safe).
+ *  At exact endpoints returns the canonical `d` (real curves, not polyline). */
+function frozenD(from: IconInput, to: IconInput, t: number): string {
+  if (t <= 0) return canonicalD(from);
+  if (t >= 1) return canonicalD(to);
+  const plan = buildPlan(resampleIcon(from), resampleIcon(to));
+  const out = allocOutputs(plan);
+  interpPolar(plan, t, out);
+  return serialize(
+    out,
+    plan.items.map((it) => it.closed),
+  );
+}
+
+export const MorphIcon = forwardRef<MorphHandle, MorphIconProps>(
+  function MorphIcon(props, ref) {
+    const {
+      icon,
+      from,
+      to,
+      progress,
+      spring,
+      reducedMotion,
+      size = 24,
+      color = "currentColor",
+      strokeWidth = 2,
+      absoluteStrokeWidth,
+      label,
+      ...rest
+    } = props;
+
+    const controlled = from !== undefined && to !== undefined;
+    const initialIcon = icon ?? from ?? to;
+
+    // The initial d is constant for React: computed once (server and client
+    // produce the same string → hydration without mismatch) and from then on
+    // only the driver mutates it outside the vdom.
+    const [initialD] = useState(() => {
+      if (controlled) return frozenD(from, to, progress ?? 0);
+      return initialIcon !== undefined ? canonicalD(initialIcon) : "";
+    });
+
+    const pathRef = useRef<SVGPathElement>(null);
+    const morphRef = useRef<Morph | null>(null);
+    const springRef = useRef(spring);
+    springRef.current = spring;
+    const rmRef = useRef(reducedMotion);
+    rmRef.current = reducedMotion;
+    // Watch baselines (mount doesn't fire the mode effect thanks to these).
+    const prevIcon = useRef(icon);
+    const prevControlled = useRef(controlled);
+    const dead = useRef(false);
+    // true when the instance has an active seek plan based on the current
+    // controlled pair (enables incremental seek without re-basing on `from`).
+    const based = useRef(false);
+    const pair = useRef<readonly [IconInput, IconInput] | null>(null);
+
+    /** Driver birth, lazy included (#1 of the lifecycle contract): an
+     *  iconless mount keeps the element and the FIRST icon to show up (prop
+     *  or imperative) creates the driver, already showing it — no flight.
+     *  Stable across renders: closes over refs only. */
+    const ensure = useCallback((birth: IconInput): Morph | null => {
+      if (morphRef.current) return morphRef.current;
+      const el = pathRef.current;
+      if (dead.current || !el) return null;
+      morphRef.current = createMorph(el, birth, { reducedMotion: rmRef.current });
+      return morphRef.current;
+    }, []);
+
+    useIsoLayoutEffect(() => {
+      dead.current = false;
+      const el = pathRef.current;
+      if (el && initialIcon !== undefined) {
+        const m = createMorph(el, controlled ? from : initialIcon, {
+          reducedMotion: rmRef.current,
+        });
+        morphRef.current = m;
+        if (controlled) {
+          pair.current = [from, to];
+          const t = progress ?? 0;
+          if (t <= 0) m.set(from);
+          else if (t >= 1) m.set(to);
+          else {
+            m.seek(to, t);
+            based.current = true;
+          }
+        }
+      }
+      return () => {
+        dead.current = true;
+        morphRef.current?.destroy();
+        morphRef.current = null;
+        based.current = false;
+        pair.current = null;
+      };
+      // Mount only: later changes are handled by the per-mode effects.
+    }, []);
+
+    // The reduced-motion policy is live. Declared BEFORE the mode effects so
+    // a commit that changes the policy and the icon together applies the new
+    // policy to that same morph.
+    useEffect(() => {
+      const m = morphRef.current;
+      if (m) m.reducedMotion = reducedMotion ?? "never";
+    }, [reducedMotion]);
+
+    // Uncontrolled mode: animate when `icon` changes. Controlled wins while
+    // a full pair is present; dropping the pair hands the path back to
+    // `icon` and invalidates the frozen pair (see the lifecycle contract in
+    // the README — shared verbatim by the three bindings).
+    useEffect(() => {
+      const left = prevControlled.current && !controlled;
+      prevControlled.current = controlled;
+      const changed = icon !== prevIcon.current;
+      prevIcon.current = icon;
+      if (controlled) return;
+      if (icon === undefined || (!changed && !left)) return;
+      pair.current = null;
+      based.current = false;
+      const m = morphRef.current;
+      if (m) m.morphTo(icon, springRef.current);
+      else ensure(icon); // late first icon: born already showing it
+    }, [icon, controlled, ensure]);
+
+    // Controlled mode: freeze the pair at `progress` via seek (no spring).
+    // The driver may be born here too (a pair arriving after an iconless
+    // mount seeks exactly like a clean mount).
+    useEffect(() => {
+      if (!controlled) return;
+      const m = morphRef.current ?? ensure(from);
+      if (!m) return;
+      const t = progress ?? 0;
+      const changed = !pair.current || pair.current[0] !== from || pair.current[1] !== to;
+      if (changed) {
+        pair.current = [from, to];
+        based.current = false;
+      }
+      if (t <= 0) {
+        m.set(from);
+        based.current = false;
+      } else if (t >= 1) {
+        m.set(to);
+        based.current = false;
+      } else {
+        if (!based.current) {
+          m.set(from); // re-base the plan on the pair's origin
+          based.current = true;
+        }
+        m.seek(to, t);
+      }
+    }, [controlled, from, to, progress, ensure]);
+
+    useImperativeHandle(
+      ref,
+      (): MorphHandle => ({
+        morphTo: (i, s) => {
+          pair.current = null; // imperative exit from controlled mode
+          based.current = false;
+          const m = morphRef.current;
+          if (m) m.morphTo(i, s ?? springRef.current);
+          else ensure(i); // no driver yet: nothing to fly from — same as set
+        },
+        set: (i) => {
+          pair.current = null;
+          based.current = false;
+          const m = morphRef.current;
+          if (m) m.set(i);
+          else ensure(i);
+        },
+      }),
+      [ensure],
+    );
+
+    const sw = absoluteStrokeWidth
+      ? (Number(strokeWidth) * 24) / Number(size)
+      : strokeWidth;
+
+    return (
+      // biome-ignore lint/a11y/noSvgWithoutTitle: alt text is conditional — label → role="img" + <title>, no label → aria-hidden
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={color}
+        strokeWidth={sw}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        role={label ? "img" : undefined}
+        aria-hidden={label ? undefined : true}
+        {...rest}
+      >
+        {label ? <title>{label}</title> : null}
+        <path ref={pathRef} d={initialD} fill="none" style={{ fill: "none" }} />
+      </svg>
+    );
+  },
+);
+
+export type { IconInput, IconNode, Sampled } from "../core/types";
+export type { Morph, MorphOptions, PathEl, ReducedMotionMode } from "../dom/index";
+export type { SpringPreset };

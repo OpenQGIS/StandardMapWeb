@@ -3,9 +3,19 @@ import { createPortal } from 'react-dom';
 import type { ComparisonMode, SplitDirection } from '../types/map';
 import type { ThemeMode } from '../hooks/useThemeMode';
 import { THEME_PACKS, type ThemeTexts } from '../data/i18nTheme';
-import { Info, ExternalLink, ChevronUp, Monitor } from 'lucide-react';
-import { RollingShutterIcon, DualWindowIcon, LayerOverlayIcon, GalleryIcon, SwapLeftAndRightIcon, ThemeLightIcon, ThemeDarkIcon } from './CustomIcons';
+import { Info, ExternalLink } from 'lucide-react';
 import { Tooltip } from './Tooltip';
+import {
+  MorphThemeButton,
+  MorphModeSwipeButton,
+  MorphModeSyncButton,
+  MorphModeOverlayButton,
+  MorphSwapButton,
+  MorphGalleryButton,
+  MorphCollapseButton,
+  MorphComplianceButton,
+} from '../demo/MorphButtons';
+
 
 interface HeaderProps {
   mode: ComparisonMode;
@@ -98,7 +108,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="hidden md:inline">{texts.brandTitle}</span>
                 <span className="inline md:hidden max-[420px]:hidden">{texts.brandShort}</span>
               </h1>
-              <p className="text-[11px] text-themeDim leading-tight hidden xl:block whitespace-nowrap">
+              <p className="text-[11px] text-themeDim leading-tight hidden lg:block whitespace-nowrap">
                 {texts.brandSub}
               </p>
             </div>
@@ -119,21 +129,16 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         <Tooltip content={texts.btnCompliance} position="bottom">
-          <button
+          <MorphComplianceButton
+            isOpen={showComplianceModal}
             onClick={() => setShowComplianceModal(true)}
-            className="flex items-center justify-center gap-1 text-[11px] text-themeMuted hover:text-themeText p-1.5 sm:px-2.5 sm:py-1.5 rounded text-xs font-medium bg-themeBtn border border-themeBorder/15 hover:bg-themeBtnHover transition-colors ml-0.5 sm:ml-1 cursor-pointer min-w-[31px] min-h-[31px]"
-          >
-            <Info
-              fill="none"
-              className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 stroke-amber-500 dark:stroke-amber-400 fill-none [&_*]:fill-none shrink-0"
-            />
-            <span className="hidden xl:inline">{isWuxia ? '勘核规制' : '地图说明'}</span>
-          </button>
+            label={isWuxia ? '勘核规制' : '地图说明'}
+          />
         </Tooltip>
       </div>
 
       {/* Center: Comparison Mode Switcher */}
-      <div className="flex items-center bg-themeBtn border border-themeBorder/15 p-1 rounded-lg md:absolute md:left-1/2 md:-translate-x-1/2">
+      <div className="flex items-center h-8 p-0.5 bg-themeBtn border border-themeBorder/15 rounded-lg md:absolute md:left-1/2 md:-translate-x-1/2 shadow-xs">
         <Tooltip
           content={
             mode === 'swipe'
@@ -145,31 +150,13 @@ export const Header: React.FC<HeaderProps> = ({
           position="bottom"
           shortcut="1"
         >
-          <button
-            onClick={() => {
-              if (mode === 'swipe') {
-                onToggleSwipeDirection();
-              } else {
-                onModeChange('swipe');
-              }
-            }}
-            className={`flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:w-[94px] rounded-md text-xs font-medium transition-all border ${
-              mode === 'swipe'
-                ? 'bg-themeCard dark:bg-zinc-800 text-themeText shadow-sm border-themeBorder/20 dark:border-zinc-700/80 font-semibold'
-                : 'border-transparent text-themeMuted hover:text-themeText hover:bg-themeBtnHover/50'
-            }`}
-          >
-            <RollingShutterIcon
-              className={`w-[18px] h-[18px] sm:w-4 sm:h-4 transition-transform duration-200 ${
-                mode === 'swipe'
-                  ? (swipeDirection === 'horizontal' ? 'rotate-90 text-amber-500 dark:text-amber-400' : 'text-amber-500 dark:text-amber-400')
-                  : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
-              }`}
-            />
-            <span className="hidden lg:inline">
-              {texts.modeSwipe}
-            </span>
-          </button>
+          <MorphModeSwipeButton
+            isActive={mode === 'swipe'}
+            swipeDirection={swipeDirection}
+            onSelect={() => onModeChange('swipe')}
+            onToggleDirection={onToggleSwipeDirection}
+            label={texts.modeSwipe}
+          />
         </Tooltip>
 
         <Tooltip
@@ -183,51 +170,21 @@ export const Header: React.FC<HeaderProps> = ({
           position="bottom"
           shortcut="2"
         >
-          <button
-            onClick={() => {
-              if (mode === 'sync') {
-                onToggleDualDirection();
-              } else {
-                onModeChange('sync');
-              }
-            }}
-            className={`flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:w-[94px] rounded-md text-xs font-medium transition-all border ${
-              mode === 'sync'
-                ? 'bg-themeCard dark:bg-zinc-800 text-themeText shadow-sm border-themeBorder/20 dark:border-zinc-700/80 font-semibold'
-                : 'border-transparent text-themeMuted hover:text-themeText hover:bg-themeBtnHover/50'
-            }`}
-          >
-            <DualWindowIcon
-              className={`w-[18px] h-[18px] sm:w-4 sm:h-4 transition-transform duration-200 ${
-                mode === 'sync'
-                  ? (dualDirection === 'vertical' ? 'rotate-90 text-amber-500 dark:text-amber-400' : 'text-amber-500 dark:text-amber-400')
-                  : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
-              }`}
-            />
-            <span className="hidden lg:inline">
-              {texts.modeSync}
-            </span>
-          </button>
+          <MorphModeSyncButton
+            isActive={mode === 'sync'}
+            dualDirection={dualDirection}
+            onSelect={() => onModeChange('sync')}
+            onToggleDirection={onToggleDualDirection}
+            label={texts.modeSync}
+          />
         </Tooltip>
 
         <Tooltip content={`${texts.modeOverlay} (支持透明度调节与图层混合)`} position="bottom" shortcut="3">
-          <button
-            onClick={() => onModeChange('overlay')}
-            className={`flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-2.5 lg:w-[94px] rounded-md text-xs font-medium transition-all border ${
-              mode === 'overlay'
-                ? 'bg-themeCard dark:bg-zinc-800 text-themeText shadow-sm border-themeBorder/20 dark:border-zinc-700/80 font-semibold'
-                : 'border-transparent text-themeMuted hover:text-themeText hover:bg-themeBtnHover/50'
-            }`}
-          >
-            <LayerOverlayIcon
-              className={`w-[18px] h-[18px] sm:w-4 sm:h-4 ${
-                mode === 'overlay'
-                  ? 'text-amber-500 dark:text-amber-400'
-                  : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
-              }`}
-            />
-            <span className="hidden lg:inline">{texts.modeOverlay}</span>
-          </button>
+          <MorphModeOverlayButton
+            isActive={mode === 'overlay'}
+            onSelect={() => onModeChange('overlay')}
+            label={texts.modeOverlay}
+          />
         </Tooltip>
       </div>
 
@@ -253,58 +210,37 @@ export const Header: React.FC<HeaderProps> = ({
           position="bottom"
           shortcut="X / S"
         >
-          <button
-            onClick={onSwapOrder}
-            className={`group flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded text-xs font-medium transition-all border lg:min-w-[96px] ${
-              isSwapped
-                ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40 dark:border-amber-400/50 shadow-sm'
-                : 'bg-themeBtn text-themeMuted border-themeBorder/15 hover:bg-themeBtnHover hover:text-themeText'
-            }`}
-          >
-            <SwapLeftAndRightIcon
-              className={`w-[18px] h-[18px] sm:w-4 sm:h-4 transition-colors ${
-                isSwapped
-                  ? 'text-amber-500 dark:text-amber-400'
-                  : 'text-zinc-500 dark:text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-zinc-200'
-              }`}
-            />
-            <span className="hidden lg:inline">
-              {isWuxia
-                ? texts.btnSwap
-                : mode === 'sync'
-                ? dualDirection === 'vertical'
-                  ? isSwapped
-                    ? '已对调上下'
-                    : '对调上下'
-                  : isSwapped
-                  ? '已对调左右'
-                  : '对调左右'
-                : isSwapped
-                ? '已对调图层'
-                : '对调图层'}
-            </span>
-          </button>
+          <MorphSwapButton
+            isSwapped={isSwapped}
+            onSwap={onSwapOrder}
+            mode={mode}
+            dualDirection={dualDirection}
+            label={isWuxia ? texts.btnSwap : undefined}
+          />
         </Tooltip>
 
-        <div className="hidden lg:block text-[11px] font-mono text-themeMuted bg-themeBtn px-2.5 py-1 rounded border border-themeBorder/15">
-          缩放: <span className="text-themeText font-semibold">{zoomPercent}%</span>
+        <div
+          className="hidden lg:flex items-center h-8 px-2.5 rounded-lg border border-themeBorder/15 bg-themeBtn text-xs font-mono text-themeMuted shadow-xs select-none"
+          title="当前视口缩放比例"
+        >
+          缩放: <span className="text-themeText font-semibold ml-1">{zoomPercent}%</span>
         </div>
+
+        {/* Subtle Visual Divider */}
+        <div className="hidden lg:block h-3.5 w-px bg-themeBorder/20 mx-0.5 shrink-0" />
 
         {/* Toggle Floating Gallery Button */}
         <Tooltip content={isWuxia ? "展阅山河百卷图录" : "展开或收起底部浮动地图画廊"} position="bottom" shortcut="G">
-          <button
-            onClick={onToggleGallery}
-            className={`group flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded text-xs font-medium transition-all border ${
-              isGalleryOpen
-                ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40 dark:border-amber-400/50 shadow-sm'
-                : 'bg-themeBtn text-themeMuted border-themeBorder/15 hover:text-themeText hover:bg-themeBtnHover'
-            }`}
-          >
-            <GalleryIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 transition-colors" />
-            <span className="hidden lg:inline">{texts.btnGallery}</span>
-            <span className="text-[10px] font-mono bg-themeBtnHover/80 text-themeMuted px-1 rounded border border-themeBorder/20">{themesCount}</span>
-          </button>
+          <MorphGalleryButton
+            isOpen={isGalleryOpen}
+            onToggle={onToggleGallery}
+            themesCount={themesCount}
+            label={texts.btnGallery}
+          />
         </Tooltip>
+
+        {/* Subtle Visual Divider */}
+        <div className="hidden lg:block h-3.5 w-px bg-themeBorder/20 mx-0.5 shrink-0" />
 
         {/* Three-State Theme Mode Switcher */}
         <Tooltip
@@ -317,36 +253,19 @@ export const Header: React.FC<HeaderProps> = ({
           }
           position="bottom"
         >
-          <button
-            onClick={onCycleTheme}
-            className="flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded text-xs font-medium transition-all border bg-themeBtn text-themeMuted border-themeBorder/15 hover:text-themeText hover:bg-themeBtnHover cursor-pointer min-w-[31px] min-h-[31px]"
-            aria-label="切换主题风格"
-          >
-            {theme === 'system' && (
-              <Monitor className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 shrink-0" />
-            )}
-            {theme === 'light' && (
-              <ThemeLightIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 shrink-0" />
-            )}
-            {theme === 'dark' && (
-              <ThemeDarkIcon className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 shrink-0" />
-            )}
-            <span className="hidden xl:inline">
-              {theme === 'system' ? '系统' : theme === 'light' ? '浅色' : '深色'}
-            </span>
-          </button>
+          <MorphThemeButton
+            theme={theme}
+            onCycleTheme={onCycleTheme}
+          />
         </Tooltip>
 
         {/* Collapse Header Button (沉浸纯净模式 / 全屏) */}
         {onToggleHeaderCollapse && (
           <Tooltip content="收起顶部工具栏进入全屏模式" position="bottom" shortcut="F">
-            <button
-              onClick={onToggleHeaderCollapse}
-              className="flex items-center gap-1.5 px-2 py-1.5 sm:px-2 rounded text-xs font-medium transition-all border bg-themeBtn text-themeMuted border-themeBorder/15 hover:text-themeText hover:bg-themeBtnHover"
-            >
-              <ChevronUp className="w-[18px] h-[18px] sm:w-4 sm:h-4 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200" />
-              <span className="hidden xl:inline">收起顶栏</span>
-            </button>
+            <MorphCollapseButton
+              isCollapsed={false}
+              onToggle={onToggleHeaderCollapse}
+            />
           </Tooltip>
         )}
       </div>
@@ -443,3 +362,4 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
+
